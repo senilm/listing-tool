@@ -19,6 +19,7 @@ Feature-based. `app/` is routing only — pages/layouts are thin and delegate to
 - Arrow functions for components; named exports only.
   - Exception: Next.js framework files (`page`, `layout`, `route`, etc.) require a default export — use `const X = () => {}` + `export default X`.
 - One component per file.
+- `components/ui/**` are vendored shadcn primitives — exempt from our style rules; leave them as the CLI generates them.
 - Never use barrel imports.
 - Use enums instead of magic strings where an enum fits.
 - Comments only when they add clarity — not everywhere.
