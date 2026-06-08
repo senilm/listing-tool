@@ -32,6 +32,7 @@ type FormFieldProps<
   name: TName;
   label?: React.ReactNode;
   description?: React.ReactNode;
+  required?: boolean;
   className?: string;
   orientation?: "vertical" | "horizontal" | "responsive";
   render: (field: FormFieldRenderProps<TFieldValues, TName>) => React.ReactNode;
@@ -47,6 +48,7 @@ export const FormField = <
   name,
   label,
   description,
+  required,
   className,
   orientation,
   render,
@@ -63,7 +65,19 @@ export const FormField = <
           orientation={orientation}
           className={className}
         >
-          {label ? <FieldLabel htmlFor={id}>{label}</FieldLabel> : null}
+          {label ? (
+            <FieldLabel htmlFor={id}>
+              {label}
+              {required ? (
+                <>
+                  <span className="text-destructive" aria-hidden>
+                    *
+                  </span>
+                  <span className="sr-only">(required)</span>
+                </>
+              ) : null}
+            </FieldLabel>
+          ) : null}
           {render({
             ...field,
             id,

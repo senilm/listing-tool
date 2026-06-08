@@ -10,18 +10,10 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import { PublicationStatus } from "@/lib/enums/publication";
 import { user } from "@/lib/db/schema/auth";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
 import { product } from "@/lib/db/schema/product";
-
-export enum PublicationStatus {
-  Draft = "draft",
-  Scheduled = "scheduled",
-  Publishing = "publishing",
-  Published = "published",
-  Failed = "failed",
-  Ended = "ended",
-}
 
 export const publicationStatusEnum = pgEnum(
   "publication_status",
