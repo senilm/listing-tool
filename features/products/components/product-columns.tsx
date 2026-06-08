@@ -2,7 +2,7 @@
 
 import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Archive, Pencil } from "lucide-react";
+import { Archive, Pencil, Upload } from "lucide-react";
 
 import { ProductStatus } from "@/lib/enums/product";
 import { type ProductSummary } from "@/features/products/services/product-service";
@@ -24,11 +24,13 @@ const formatPrice = (amount: string, currency: string): string => {
 type ProductColumnHandlers = {
   onEdit: (product: ProductSummary) => void;
   onArchive: (product: ProductSummary) => void;
+  onPublish: (product: ProductSummary) => void;
 };
 
 export const createProductColumns = ({
   onEdit,
   onArchive,
+  onPublish,
 }: ProductColumnHandlers): ColumnDef<ProductSummary>[] => [
   {
     accessorKey: "title",
@@ -102,10 +104,17 @@ export const createProductColumns = ({
         actions={[
           { label: "Edit", icon: Pencil, onSelect: onEdit },
           {
+            label: "Publish",
+            icon: Upload,
+            onSelect: onPublish,
+            disabled: (product) => product.status === ProductStatus.Archived,
+          },
+          {
             label: "Archive",
             icon: Archive,
             variant: "destructive",
             onSelect: onArchive,
+            separatorBefore: true,
             disabled: (product) => product.status === ProductStatus.Archived,
           },
         ]}

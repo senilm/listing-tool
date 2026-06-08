@@ -77,7 +77,8 @@ the data model.
   global env-token publish endpoints (`/api/listings`, `/api/ebay/setup`), the `EBAY_REFRESH_TOKEN`
   env var, and the single-account `getAccessToken` cache. `lib/ebay/oauth.ts` keeps the
   `buildConsentUrl` / `exchangeCodeForTokens` / `refreshAccessToken(refreshToken)` primitives;
-  step 5 rebuilds publishing on per-account decrypted tokens.
+  manual publish (step 5, ✅ done) rebuilt publishing on per-account decrypted tokens — see
+  **Manual publish** below.
 
 ## Product CRUD (✅ done)
 
@@ -107,6 +108,33 @@ The master listings, under `features/products/`. Create / list / edit / soft-del
   product list is its first real use). Provider in `providers/query-provider.tsx`, keys in
   `lib/query-keys.ts`.
 
+## Manual publish (✅ done)
+
+Publish a master product to one or more linked accounts, under `features/publications/`. Each publish
+is recorded as a `publication` row, scoped by `user_id`.
+
+- **Per-account tokens**: the encrypted refresh token is decrypted and exchanged for a short-lived
+  access token per publish (`getAccountAccessToken` in `ebay-account-service.ts` — the only code that
+  reads the token). The global env-token POC publish path is gone; publishing is rebuilt on the
+  Inventory API under `lib/ebay/{client,account-setup,listing}.ts`, where `ebayRequest` now takes an
+  explicit access token instead of a global cache.
+- **Publish flow**: a "Publish" row action on the products table opens a dialog with a checklist of
+  active accounts → `POST /api/publications`. The service (`publication-service.ts`) snapshots the
+  product onto a `publication` row (status `publishing`), then per account runs the 3-call sequence
+  (`PUT inventory_item` → `POST offer` → `POST offer/{id}/publish`) and flips the row to `published`
+  (with `ebay_offer_id` / `ebay_listing_id` / `published_at`) or `failed` (+ `error_message`).
+  Accounts are processed sequentially and independently — one failure doesn't abort the rest.
+- **Snapshot only (for now)**: the publication copies the product verbatim; `overridden_fields` stays
+  empty. Per-publish field editing comes later.
+- **Business policies / category auto-resolved**: on first publish per account, `resolveSellerSetup`
+  fetch-or-creates the payment/return/fulfillment policies + inventory location and caches their IDs
+  onto the `ebay_account` row (reused on later publishes). Category is `product.category_id`, falling
+  back to `DEFAULT_CATEGORY_ID` (Fashion Jewelry > Rings) when unset. Listings are always **NEW / USD**.
+- **List**: `/publications` is the same URL-driven data-table on TanStack Query as products/accounts
+  (`usePublicationsQuery` over `GET /api/publications`), with a status filter and "View on eBay" links.
+- **Trigger-agnostic**: `publishListing()` is pure (no DB); `publishProductToAccounts` only
+  orchestrates + persists, so step 6's queue/cron is a swap of the caller, not the publish logic.
+
 ## Deferred: scheduling & multi-account fan-out
 
 Publishing one product to many accounts (and scheduled publishes) must respect eBay
@@ -128,7 +156,8 @@ Candidates to revisit when we get there:
    connect/rename/disconnect management. See **Account linking** above.
 4. ✅ Product CRUD — create / list / edit / soft-delete master listings, URL-driven data-table on
    TanStack Query. See **Product CRUD** above.
-5. Manual publish — single account, then to selected accounts
+5. ✅ Manual publish — product → one or more selected accounts, on per-account decrypted tokens,
+   recorded as `publication` rows. See **Manual publish** above.
 6. *Later:* scheduling + rate-limited fan-out
 
 ## Scaling path

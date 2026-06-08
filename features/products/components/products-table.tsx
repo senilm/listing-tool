@@ -20,6 +20,7 @@ import { createProductColumns } from "@/features/products/components/product-col
 import { useProductsQuery } from "@/features/products/hooks/use-products-query";
 import { useArchiveProduct } from "@/features/products/hooks/use-product-mutations";
 import { type ProductSummary } from "@/features/products/services/product-service";
+import { PublishProductDialog } from "@/features/publications/components/publish-product-dialog";
 
 const FILTER_KEYS = ["status"];
 
@@ -42,12 +43,14 @@ export const ProductsTable = () => {
   const archiveProduct = useArchiveProduct();
 
   const [archiveTarget, setArchiveTarget] = useState<ProductSummary | null>(null);
+  const [publishTarget, setPublishTarget] = useState<ProductSummary | null>(null);
 
   const columns = useMemo(
     () =>
       createProductColumns({
         onEdit: (product) => router.push(productDetailRoute(product.id)),
         onArchive: (product) => setArchiveTarget(product),
+        onPublish: (product) => setPublishTarget(product),
       }),
     [router],
   );
@@ -110,6 +113,15 @@ export const ProductsTable = () => {
         variant="destructive"
         isLoading={archiveProduct.isPending}
         onConfirm={handleArchive}
+      />
+
+      <PublishProductDialog
+        productId={publishTarget?.id ?? ""}
+        productTitle={publishTarget?.title ?? ""}
+        open={publishTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setPublishTarget(null);
+        }}
       />
     </>
   );

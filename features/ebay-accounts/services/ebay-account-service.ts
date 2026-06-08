@@ -3,7 +3,9 @@ import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
 import { EbayAccountStatus } from "@/lib/enums/ebay-account";
-import { encryptToken } from "@/lib/crypto/token-cipher";
+import { decryptToken, encryptToken } from "@/lib/crypto/token-cipher";
+import { refreshAccessToken } from "@/lib/ebay/oauth";
+import { resolveSellerSetup, type SellerSetup } from "@/lib/ebay/account-setup";
 
 type EbayAccountRow = typeof ebayAccount.$inferSelect;
 
@@ -169,4 +171,73 @@ export const renameEbayAccount = async ({
     .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)))
     .returning({ id: ebayAccount.id });
   return result.length > 0;
+};
+
+// Mints a fresh, short-lived access token for one owned account. This is the
+// only path that reads the encrypted refresh token; it's decrypted in memory
+// and exchanged immediately. Throws if the account is missing, disabled, or has
+// no stored token (e.g. after a disconnect).
+export const getAccountAccessToken = async ({
+  id,
+  userId,
+}: OwnedAccount): Promise<string> => {
+  const [row] = await db
+    .select({
+      refreshToken: ebayAccount.refreshToken,
+      status: ebayAccount.status,
+    })
+    .from(ebayAccount)
+    .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)))
+    .limit(1);
+
+  if (!row) throw new Error("eBay account not found");
+  if (row.status === EbayAccountStatus.Disabled || !row.refreshToken) {
+    throw new Error("eBay account is disconnected — reconnect it to publish");
+  }
+
+  const tokens = await refreshAccessToken(decryptToken(row.refreshToken));
+  return tokens.access_token;
+};
+
+// Returns the account's business-policy + location IDs an offer needs. Cached
+// onto the row on first publish, then reused — eBay's policy/location IDs are
+// stable per seller.
+export const ensureSellerSetup = async ({
+  id,
+  userId,
+  accessToken,
+}: OwnedAccount & { accessToken: string }): Promise<SellerSetup> => {
+  const [row] = await db
+    .select({
+      paymentPolicyId: ebayAccount.paymentPolicyId,
+      returnPolicyId: ebayAccount.returnPolicyId,
+      fulfillmentPolicyId: ebayAccount.fulfillmentPolicyId,
+      merchantLocationKey: ebayAccount.merchantLocationKey,
+    })
+    .from(ebayAccount)
+    .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)))
+    .limit(1);
+
+  if (!row) throw new Error("eBay account not found");
+
+  if (
+    row.paymentPolicyId &&
+    row.returnPolicyId &&
+    row.fulfillmentPolicyId &&
+    row.merchantLocationKey
+  ) {
+    return {
+      paymentPolicyId: row.paymentPolicyId,
+      returnPolicyId: row.returnPolicyId,
+      fulfillmentPolicyId: row.fulfillmentPolicyId,
+      merchantLocationKey: row.merchantLocationKey,
+    };
+  }
+
+  const setup = await resolveSellerSetup(accessToken);
+  await db
+    .update(ebayAccount)
+    .set(setup)
+    .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)));
+  return setup;
 };

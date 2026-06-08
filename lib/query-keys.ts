@@ -8,4 +8,8 @@ export const QUERY_KEYS = {
   // Prefix for all eBay-account queries.
   ebayAccountsRoot: ["ebay-accounts"] as const,
   ebayAccounts: (params: string) => ["ebay-accounts", "list", params] as const,
+
+  // Prefix for all publication queries.
+  publicationsRoot: ["publications"] as const,
+  publications: (params: string) => ["publications", "list", params] as const,
 };
