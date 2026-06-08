@@ -7,7 +7,7 @@ const AuthGroupLayout = ({
     <div className="grid min-h-svh lg:grid-cols-3">
       <AuthLeftPanel />
       <div className="flex col-span-2 items-center justify-center p-6">
-        <div className="w-full max-w-sm rounded-2xl border bg-card p-8 shadow-sm">
+        <div className="w-full max-w-sm rounded-2xl border bg-card p-8 shadow-sm space-y-6">
           {children}
         </div>
       </div>

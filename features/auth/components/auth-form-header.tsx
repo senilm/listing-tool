@@ -9,7 +9,7 @@ type AuthFormHeaderProps = {
 
 export const AuthFormHeader = ({ title, description }: AuthFormHeaderProps) => {
   return (
-    <div className="mb-8 flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5">
       <Typography variant="h3" as="h1">
         {title}
       </Typography>

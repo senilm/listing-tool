@@ -140,7 +140,7 @@ export const SignUpForm = () => {
         </Button>
       </form>
 
-      <Typography variant="muted" className="mt-6 text-center">
+      <Typography variant="muted" className="text-center">
         Already have an account?{" "}
         <Link
           href={withRedirectParam(loginRoute(), redirectTo)}

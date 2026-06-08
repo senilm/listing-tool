@@ -3,7 +3,7 @@ import { AuthFieldSkeleton } from "@/features/auth/components/auth-field-skeleto
 
 export const SignUpFormSkeleton = () => (
   <>
-    <div className="mb-8 flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5">
       <div className="flex h-8 items-center">
         <Skeleton className="h-5 w-48" />
       </div>
@@ -25,7 +25,7 @@ export const SignUpFormSkeleton = () => (
       <Skeleton className="h-10 w-full rounded-lg" />
     </div>
 
-    <div className="mt-6 flex h-5 items-center justify-center">
+    <div className="flex h-5 items-center justify-center">
       <Skeleton className="h-3.5 w-52" />
     </div>
   </>
