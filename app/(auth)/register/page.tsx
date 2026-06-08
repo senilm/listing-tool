@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 
-import { CenteredSpinner } from "@/components/spinner";
 import { SignUpForm } from "@/features/auth/components/sign-up-form";
+import { SignUpFormSkeleton } from "@/features/auth/components/sign-up-form-skeleton";
 
 const RegisterPage = () => {
   return (
-    <Suspense fallback={<CenteredSpinner />}>
+    <Suspense fallback={<SignUpFormSkeleton />}>
       <SignUpForm />
     </Suspense>
   );
