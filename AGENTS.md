@@ -19,6 +19,7 @@ Feature-based. `app/` is routing only — pages/layouts are thin and delegate to
 - Arrow functions for components; named exports only.
   - Exception: Next.js framework files (`page`, `layout`, `route`, etc.) require a default export — use `const X = () => {}` + `export default X`.
 - One component per file.
+- Never write a plain helper function that returns JSX and then call/map it (e.g. `renderRow()`). Always extract a proper, named React component and use it as `<Component … />`. Library render-prop contracts (e.g. TanStack Table `cell`/`header`) are the only exception, and even those should be named components where practical.
 - `components/ui/**` are vendored shadcn primitives — exempt from our style rules; leave them as the CLI generates them.
 - Never use barrel imports.
 - Use enums instead of magic strings where an enum fits.
