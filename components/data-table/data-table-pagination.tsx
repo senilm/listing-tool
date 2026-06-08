@@ -82,7 +82,7 @@ export const DataTablePagination = <TData,>({
             value={String(limit)}
             onValueChange={(value) => onLimitChange(Number(value))}
           >
-            <SelectTrigger size="sm" className="w-[4.5rem]">
+            <SelectTrigger size="sm" className="w-18">
               <SelectValue />
             </SelectTrigger>
             <SelectContent side="top">
