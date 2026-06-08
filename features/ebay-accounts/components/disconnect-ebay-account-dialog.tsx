@@ -1,11 +1,8 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
-
-import { ebayAccountApiRoute } from "@/lib/api-routes";
 import { toast } from "@/lib/toast";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { useDisconnectEbayAccount } from "@/features/ebay-accounts/hooks/use-ebay-account-mutations";
 
 type DisconnectEbayAccountDialogProps = {
   id: string;
@@ -20,23 +17,18 @@ export const DisconnectEbayAccountDialog = ({
   open,
   onOpenChange,
 }: DisconnectEbayAccountDialogProps) => {
-  const router = useRouter();
-  const [isDisconnecting, setIsDisconnecting] = React.useState(false);
+  const disconnectAccount = useDisconnectEbayAccount();
 
   const handleDisconnect = async () => {
-    setIsDisconnecting(true);
-
-    const res = await fetch(ebayAccountApiRoute(id), { method: "DELETE" });
-    if (!res.ok) {
+    try {
+      await disconnectAccount.mutateAsync(id);
+    } catch {
       toast.error("Could not disconnect the account");
-      setIsDisconnecting(false);
       return;
     }
 
     toast.success("Account disconnected");
-    setIsDisconnecting(false);
     onOpenChange(false);
-    router.refresh();
   };
 
   return (
@@ -47,7 +39,7 @@ export const DisconnectEbayAccountDialog = ({
       description="This wipes the stored token and marks the account disabled. You can reconnect it later by linking the same eBay account again."
       confirmLabel="Disconnect"
       variant="destructive"
-      isLoading={isDisconnecting}
+      isLoading={disconnectAccount.isPending}
       onConfirm={handleDisconnect}
     />
   );

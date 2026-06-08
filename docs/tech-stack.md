@@ -69,7 +69,8 @@ the data model.
   `/api/ebay/accounts/callback`.**
 - **Management**: list / rename (`PATCH`) / disconnect (`DELETE`, soft — `status = Disabled`
   + token wiped) under `features/ebay-accounts/`. Reconnecting the same eBay username revives
-  the existing row instead of duplicating it.
+  the existing row instead of duplicating it. The list is a URL-driven data-table on TanStack
+  Query (`GET /api/ebay/accounts`), the same pattern as products — see **Product CRUD**.
 - **Scopes**: consent requests `EBAY_CONSENT_SCOPES` (sell.inventory + sell.account +
   commerce.identity.readonly); the refresh path keeps the narrower `EBAY_SCOPES`.
 - **Replaced**: all POC scaffolding is gone — the `/api/ebay/auth/{login,callback}` routes, the
@@ -100,9 +101,8 @@ The master listings, under `features/products/`. Create / list / edit / soft-del
   all table state (page / limit / sort / filters / search) **in the URL** (shareable, back-button
   works). React Query owns request cancellation and cache invalidation, so there's no hand-rolled
   AbortController and no `router.refresh()`. Service (`product-service.ts`) is the only DB-touching
-  code; `product-client.ts` is the client-side HTTP layer. The `DataTable` + paginated API earn
-  their keep here (vs the cards used for eBay accounts) because products are a large, homogeneous,
-  growing set.
+  code; `product-client.ts` is the client-side HTTP layer. The same data-table + paginated-API
+  pattern now backs the eBay-accounts list too, so every list page in the app behaves identically.
 - **Re-added**: `@tanstack/react-query` (removed during account-linking when it had no consumer; the
   product list is its first real use). Provider in `providers/query-provider.tsx`, keys in
   `lib/query-keys.ts`.

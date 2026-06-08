@@ -1,15 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 
-import { ebayAccountApiRoute } from "@/lib/api-routes";
 import { toast } from "@/lib/toast";
 import {
   renameEbayAccountSchema,
   type RenameEbayAccountValues,
 } from "@/validations/ebay-account";
+import { useRenameEbayAccount } from "@/features/ebay-accounts/hooks/use-ebay-account-mutations";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,27 +35,22 @@ export const RenameEbayAccountDialog = ({
   open,
   onOpenChange,
 }: RenameEbayAccountDialogProps) => {
-  const router = useRouter();
+  const renameAccount = useRenameEbayAccount();
   const form = useForm<RenameEbayAccountValues>({
     resolver: standardSchemaResolver(renameEbayAccountSchema),
     values: { label: currentLabel },
   });
 
   const onSubmit = async (data: RenameEbayAccountValues) => {
-    const res = await fetch(ebayAccountApiRoute(id), {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
+    try {
+      await renameAccount.mutateAsync({ id, label: data.label });
+    } catch {
       toast.error("Could not rename the account");
       return;
     }
 
     toast.success("Account renamed");
     onOpenChange(false);
-    router.refresh();
   };
 
   return (
@@ -90,7 +84,7 @@ export const RenameEbayAccountDialog = ({
             >
               Cancel
             </Button>
-            <Button type="submit" loading={form.formState.isSubmitting}>
+            <Button type="submit" loading={renameAccount.isPending}>
               Save
             </Button>
           </DialogFooter>

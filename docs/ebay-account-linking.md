@@ -33,36 +33,37 @@ components/auth-guard.tsx     → await requireSession() → redirect to /login 
 
 ## 1. Viewing linked accounts (read path)
 
-A server component — fetches on the server, no client loading state.
+A URL-driven `DataTable` on TanStack Query — the same pattern as products (see
+`docs/tech-stack.md`). The page is a thin server component; the table fetches client-side.
 
 ```
-app/(app)/ebay-accounts/page.tsx              (server component)
-   │  const accounts = await listEbayAccounts()
+app/(app)/ebay-accounts/page.tsx              (server component — no data fetch)
+   │  <Suspense><EbayAccountsTable/></Suspense>   + invisible <EbayConnectFeedback/>
    ↓
-features/ebay-accounts/services/ebay-account-service.ts
-   listEbayAccounts()
-        • requireSession() → user.id          (self-scopes; no userId argument)
-        • SELECT … WHERE userId = …            (never selects the token column)
-   ↓ EbayAccountSummary[]
+features/ebay-accounts/components/ebay-accounts-table.tsx   (client)
+   │  useTableParams({ filterKeys:["status"] })  → URL holds page/limit/sort/filter/search
+   │  useEbayAccountsQuery(apiParams)            → React Query
    ↓
-features/ebay-accounts/components/ebay-accounts-list.tsx
-        • empty? → <EbayAccountsEmpty>
-        • else   → map → <EbayAccountCard> per account
-                          ├─ <EbayAccountStatusBadge>   (active / disabled)
-                          └─ <EbayAccountActions>        (⋯ menu, client)
+features/ebay-accounts/services/ebay-account-client.ts
+   fetchEbayAccounts(params) → GET /api/ebay/accounts?…
+   ↓
+app/api/ebay/accounts/route.ts (GET)
+        • getSession → 401 if none
+        • listEbayAccounts({ userId, page, limit, q, statuses, sort })
+              SELECT … WHERE userId = …          (never selects the token column)
+   ↓ { items: EbayAccountSummary[], total }
+   ↓
+   DataTable renders rows (label / username / <EbayAccountStatusBadge> / connected date)
+   + a ⋯ row-actions column (Rename / Disconnect). The toolbar holds "Connect account".
 ```
 
-The page header also renders `<ConnectEbayAccountButton>` and an invisible
-`<EbayConnectFeedback>` (see flow 2).
+### Why a data-table here too?
 
-### Why cards, not a data-table?
-
-Linked accounts are a **tiny, heterogeneous** set (realistically 1–12 per user). The
-`DataTable` (sorting, filters, column customizer, pagination) and a paginated API
-exist to make **large, homogeneous** datasets scannable — that cost buys nothing at
-N≈3, and a card grid is more glanceable. The data-table + pagination belong on
-**products** and especially **publications** (a row per product × account × publish —
-the high-growth table). Match the UI to the data shape.
+Originally this was a card grid — accounts were a tiny set and cards were more glanceable.
+We moved it onto the same data-table + paginated API as products for **consistency** (one
+list pattern across the app) and because a seller can accumulate many accounts over time;
+status filter + search + sorting earn their keep, and React Query gives free caching and
+cache invalidation on rename/disconnect.
 
 ---
 
@@ -105,27 +106,23 @@ it at all — only metadata.
 
 ## 3. Managing an account (rename / disconnect — write path)
 
-Triggered from client components, but mutations go through API routes that re-check
-auth (they sit **outside** the `(app)` layout guard).
+The table's ⋯ row-actions open dialogs; the dialogs call React Query mutations, which
+hit the API routes and invalidate the accounts cache on success (no `router.refresh()`).
 
 ```
-ebay-account-actions.tsx  (⋯ dropdown, client)
+ebay-account-columns.tsx  (⋯ row actions, in the table)
    ├─ "Rename"     → rename-ebay-account-dialog.tsx
    │       form (zod + standardSchemaResolver)
-   │       PATCH ebayAccountApiRoute(id)
-   │           → app/api/ebay/accounts/[id]/route.ts  (PATCH)
-   │               • getSession → 401 if none
-   │               • validate body
-   │               • renameEbayAccount({ id, userId, label })
-   │           → router.refresh()  (re-runs flow 1)
+   │       useRenameEbayAccount()  → PATCH /api/ebay/accounts/[id]
+   │           • getSession → 401 if none
+   │           • validate body → renameEbayAccount({ id, userId, label })
+   │       onSuccess → invalidate QUERY_KEYS.ebayAccountsRoot  (table refetches)
    │
-   └─ "Disconnect" → disconnect-ebay-account-dialog.tsx
-           wraps shared <ConfirmDialog>
-           DELETE ebayAccountApiRoute(id)
-               → app/api/ebay/accounts/[id]/route.ts  (DELETE)
-                   • getSession → 401 if none
-                   • disableEbayAccount({ id, userId })  ← soft: status=Disabled, token=null
-               → router.refresh()
+   └─ "Disconnect" → disconnect-ebay-account-dialog.tsx  (wraps <ConfirmDialog>)
+           useDisconnectEbayAccount()  → DELETE /api/ebay/accounts/[id]
+               • getSession → 401 if none
+               • disableEbayAccount({ id, userId })  ← soft: status=Disabled, token=null
+           onSuccess → invalidate QUERY_KEYS.ebayAccountsRoot
 ```
 
 ---
@@ -135,14 +132,16 @@ ebay-account-actions.tsx  (⋯ dropdown, client)
 | Layer | Files | Job |
 |---|---|---|
 | **Pages / components** | `app/(app)/ebay-accounts/`, `features/ebay-accounts/components/` | Render UI, trigger actions |
-| **API routes** | `app/api/ebay/accounts/{connect,callback,[id]}` | HTTP edges — auth check + call the service |
+| **Data hooks** | `features/ebay-accounts/hooks/` | React Query read (`use-ebay-accounts-query`) + mutations (`use-ebay-account-mutations`) |
+| **Client HTTP** | `features/ebay-accounts/services/ebay-account-client.ts` | `fetch` wrappers the hooks call |
+| **API routes** | `app/api/ebay/accounts/{route,connect,callback,[id]}` | HTTP edges — auth check + call the service |
 | **Service (DAL)** | `features/ebay-accounts/services/ebay-account-service.ts` | All DB access; the only code that touches the token |
 | **Helpers** | `lib/ebay/{oauth,identity,config}`, `lib/crypto/token-cipher`, `lib/auth/session` | Pure building blocks |
 
-**The rule behind the read/write split:** reads happen *inside* the `(app)` layout
-(the guard already ran, so the service self-scopes via `requireSession`); writes
-happen in `/api/*` routes *outside* the layout, so each one re-checks the session
-itself and returns **401 JSON** rather than redirecting.
+**Auth:** every `/api/ebay/accounts/*` handler sits *outside* the `(app)` layout guard,
+so each re-checks the session itself (`getSession`) and returns **401 JSON** rather than
+redirecting. The list `GET` is no exception — reads and writes both authenticate at the
+route.
 
 **Route builders:** page/navigation paths live in `lib/routes.ts`; API endpoint
 paths live in `lib/api-routes.ts`. Keep the two separate.
