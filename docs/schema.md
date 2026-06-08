@@ -5,8 +5,10 @@ many linked eBay accounts with per-publish overrides. Single-SKU products,
 per-publish full snapshots, normal email+password auth, scope = publishing +
 scheduling only.
 
-> Column types below are indicative (DB-agnostic). Final types get pinned once the
-> stack/DB is chosen.
+> **Stack is now pinned: Postgres (Neon) via Drizzle.** Types below reflect the
+> implemented schema in `lib/db/schema/`. The `user` table (and `session`,
+> `account`, `verification`, not diagrammed) are owned by Better Auth — see the
+> Auth note below.
 
 ## ER diagram
 
@@ -19,20 +21,20 @@ erDiagram
     EBAY_ACCOUNT ||--o{ PUBLICATION : receives
 
     USER {
-        uuid id PK
-        string email UK
-        string password_hash
+        text id PK "Better Auth (text, not uuid)"
         string name
+        string email UK
+        boolean email_verified
+        string image "nullable"
         timestamp created_at
         timestamp updated_at
     }
 
     EBAY_ACCOUNT {
         uuid id PK
-        uuid user_id FK
+        text user_id FK
         string label "nickname, e.g. Store A"
         string ebay_username "from identity, optional"
-        enum environment "sandbox | production"
         text refresh_token "ENCRYPTED at rest"
         timestamp refresh_token_expires_at "drives re-consent"
         json scopes "granted OAuth scopes"
@@ -47,7 +49,7 @@ erDiagram
 
     PRODUCT {
         uuid id PK
-        uuid user_id FK
+        text user_id FK
         string sku "internal reference, optional"
         string title
         text description
@@ -64,7 +66,7 @@ erDiagram
 
     PUBLICATION {
         uuid id PK
-        uuid user_id FK "scoping"
+        text user_id FK "scoping"
         uuid product_id FK
         uuid ebay_account_id FK
         enum status "draft | scheduled | publishing | published | failed | ended"
@@ -90,9 +92,15 @@ erDiagram
 
 ## Notes
 
+- **Auth tables (Better Auth)**: `user` plus `session`, `account`, `verification`
+  (not diagrammed) are managed by Better Auth and generated via `pnpm auth:generate`.
+  Passwords are stored hashed in `account.password`, **not** on `user`. `user.id` is
+  `text`, so every `user_id` FK is `text` (domain PKs remain `uuid`).
 - **Ownership / scoping**: every `ebay_account`, `product`, and `publication` belongs
   to a `user`. `publication.user_id` is denormalized so we can query "everything for
-  this user" directly.
+  this user" directly. All FKs are `ON DELETE CASCADE`.
+- **No per-account `environment`**: dropped — sandbox vs production is app-wide
+  (driven by `EBAY_ENV`), not stored per account.
 - **Publication = full snapshot**: the listing content (title, price, images, aspects,
   …) is copied onto the publication, seeded from the product and individually
   overridable. Past publications are immune to later product edits; clear audit of
@@ -101,7 +109,8 @@ erDiagram
   product can have many publication rows per account over time.
 - **Key queries**: publications by account, by user, by status (e.g. all `scheduled`,
   all `published`), by product.
-- **Security**: `ebay_account.refresh_token` is encrypted at rest.
+- **Security**: `ebay_account.refresh_token` is to be encrypted at rest (planned in
+  the service layer when account linking is built — not yet implemented).
 - **Out of scope (for now)**: inventory/quantity sync, orders/sales, multi-variation
   listings, fan-out batch grouping. A category/required-aspects cache table may be
   added when wiring up the Taxonomy API.

@@ -16,6 +16,17 @@ the data model.
 | **Frontend data** | TanStack Query | Server-state fetching over route handlers. |
 | **UI** | shadcn/ui + Tailwind v4 | Already installed. |
 
+> **Implementation notes**
+> - **DB driver**: `drizzle-orm/neon-http` + `@neondatabase/serverless`. Provider-portable
+>   — switching Postgres hosts is a one-file driver swap in `lib/db/client.ts`.
+> - **Neon region**: **Singapore (`ap-southeast-1`)** — chosen to match the Vercel
+>   function region (not the developer's location); Neon has no Mumbai region.
+> - **Schema workflow**: `pnpm db:push` (push-only) while the schema churns; switch to
+>   `db:generate` + `db:migrate` (versioned SQL) for a shared/prod DB.
+> - **Turbopack**: Better Auth's CJS deps require `serverExternalPackages`
+>   (`better-auth`, `@better-auth/kysely-adapter`, `kysely`) in `next.config.ts` to load
+>   under Next 16's default bundler, otherwise the auth route 500s.
+
 ## Auth model
 
 - Multi-user with normal email + password (no team/multi-tenant).
@@ -36,8 +47,8 @@ Candidates to revisit when we get there:
 
 ## Build order (jobs deferred)
 
-1. DB + Drizzle schema (user, ebay_account, product, publication)
-2. Better Auth (email + password)
+1. ✅ DB + Drizzle schema (Better Auth tables + ebay_account, product, publication) — pushed to Neon
+2. 🚧 Better Auth (email + password) — server/client/route wired and verified end-to-end; sign-up/sign-in UI still pending
 3. Account linking — move the POC OAuth flow into per-account encrypted token storage
 4. Product CRUD (the master listings)
 5. Manual publish — single account, then to selected accounts
