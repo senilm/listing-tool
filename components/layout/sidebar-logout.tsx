@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 
 import { authClient } from "@/lib/auth/client";
-import { homeRoute } from "@/lib/routes";
+import { loginRoute } from "@/lib/routes";
 import { toErrorMessage, toast } from "@/lib/toast";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 
@@ -17,7 +17,7 @@ export const SidebarLogout = () => {
     setIsLoggingOut(true);
     try {
       await authClient.signOut();
-      router.push(homeRoute());
+      router.push(loginRoute());
       router.refresh();
     } catch (error) {
       toast.error(toErrorMessage(error));

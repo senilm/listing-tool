@@ -2,6 +2,10 @@
 // header search all agree on the canonical URL for each module.
 
 export const homeRoute = () => "/";
+
+export const loginRoute = () => "/login";
+export const registerRoute = () => "/register";
+
 export const dashboardRoute = () => "/dashboard";
 
 export const productsRoute = () => "/products";
