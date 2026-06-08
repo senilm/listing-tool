@@ -1,9 +1,9 @@
+import { redirect } from "next/navigation";
+
+import { dashboardRoute } from "@/lib/routes";
+
 const Home = () => {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center">
-      <h1 className="text-2xl font-semibold">Listing Tool</h1>
-    </main>
-  );
+  redirect(dashboardRoute());
 };
 
 export default Home;
