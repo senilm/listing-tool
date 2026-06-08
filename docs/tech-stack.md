@@ -23,14 +23,38 @@ the data model.
 >   function region (not the developer's location); Neon has no Mumbai region.
 > - **Schema workflow**: `pnpm db:push` (push-only) while the schema churns; switch to
 >   `db:generate` + `db:migrate` (versioned SQL) for a shared/prod DB.
-> - **Turbopack**: Better Auth's CJS deps require `serverExternalPackages`
->   (`better-auth`, `@better-auth/kysely-adapter`, `kysely`) in `next.config.ts` to load
->   under Next 16's default bundler, otherwise the auth route 500s.
+> - **Turbopack / Better Auth — two separate fixes, both required:**
+>   1. `serverExternalPackages` (`better-auth`, `@better-auth/kysely-adapter`, `kysely`)
+>      in `next.config.ts` so Node `require`s the CJS at runtime — otherwise the auth
+>      route 500s.
+>   2. A `pnpm.overrides` pin of `kysely` to `^0.28.17` in `package.json`. The bundled
+>      `@better-auth/kysely-adapter@1.6.14` imports `DEFAULT_MIGRATION_TABLE` /
+>      `DEFAULT_MIGRATION_LOCK_TABLE` from kysely's **main** entry, which **0.29 moved
+>      out** (→ `kysely/migration`). pnpm auto-installs 0.29, so the production build's
+>      externals-tracing fails until kysely is pinned back to 0.28. We use the Drizzle
+>      adapter, not kysely — it's only an optional transitive peer.
 
 ## Auth model
 
 - Multi-user with normal email + password (no team/multi-tenant).
 - Every `ebay_account`, `product`, and `publication` is scoped by `user_id`.
+
+## Auth implementation (✅ done)
+
+- **Screens**: `/login` + `/register` under the `app/(auth)` route group — split-screen
+  layout with a branded left panel (`features/auth/components/auth-left-panel.tsx`, placeholder
+  content). Forms: `sign-in-form.tsx`, `sign-up-form.tsx`.
+- **Forms**: react-hook-form + `standardSchemaResolver` (from `@hookform/resolvers/standard-schema`).
+  Zod 4 implements Standard Schema, and `zodResolver` has a type clash with zod 4.4 + resolvers 5,
+  so **use `standardSchemaResolver` for all forms**. Schemas live in `validations/auth.ts`.
+- **Route protection**: `proxy.ts` at the repo root — Next 16 renamed `middleware` → `proxy`
+  (runs on `nodejs`, not edge). Optimistic session-cookie check via Better Auth's
+  `getSessionCookie`; no session → `/login?redirect=<path>`, session-on-auth-route → dashboard.
+- **Post-auth redirect**: open-redirect-safe `?redirect=` handling in `lib/redirect.ts`
+  (`getSafeRedirectPath`, `withRedirectParam`); falls back to `/dashboard`.
+- **Not yet wired**: password reset, email verification, 2FA, OAuth (none enabled on the
+  server). The gate is optimistic only — add a DAL `auth.api.getSession` check if hard
+  per-route enforcement is ever needed.
 
 ## Deferred: scheduling & multi-account fan-out
 
@@ -48,7 +72,7 @@ Candidates to revisit when we get there:
 ## Build order (jobs deferred)
 
 1. ✅ DB + Drizzle schema (Better Auth tables + ebay_account, product, publication) — pushed to Neon
-2. 🚧 Better Auth (email + password) — server/client/route wired and verified end-to-end; sign-up/sign-in UI still pending
+2. ✅ Better Auth (email + password) — server/client/route wired and verified; sign-in/sign-up UI, split-screen `(auth)` layout, and route protection (`proxy.ts` gate + safe post-login redirect) all done. See **Auth implementation** above.
 3. Account linking — move the POC OAuth flow into per-account encrypted token storage
 4. Product CRUD (the master listings)
 5. Manual publish — single account, then to selected accounts
