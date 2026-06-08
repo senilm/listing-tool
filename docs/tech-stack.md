@@ -78,6 +78,35 @@ the data model.
   `buildConsentUrl` / `exchangeCodeForTokens` / `refreshAccessToken(refreshToken)` primitives;
   step 5 rebuilds publishing on per-account decrypted tokens.
 
+## Product CRUD (✅ done)
+
+The master listings, under `features/products/`. Create / list / edit / soft-delete, scoped by
+`user_id`.
+
+- **Soft delete**: a `product_status` enum (`active` / `archived`, `lib/enums/product.ts`) drives a
+  reversible archive. Archived products drop out of the default list (publications cascade on a
+  *hard* delete, so we never hard-delete from the UI). The list shows archived only when the status
+  filter asks for it.
+- **Fixed fields**: every listing is **USD** and condition **new** — no pickers (`DEFAULT_CURRENCY`,
+  `DEFAULT_CONDITION` in `validations/product.ts`). The columns stay in the schema for future
+  flexibility; the service writes the fixed values.
+- **Form**: react-hook-form + `standardSchemaResolver`. Two zod schemas bridged by mappers —
+  `productFormSchema` (form shape: images as `{url}[]`, item specifics as `{name, values}[]` with
+  comma-separated values) and `productInputSchema` (persistence shape: `string[]` / `Record`). The
+  API validates `productInputSchema` independently of the form. Images are URL inputs only (no
+  upload yet); item specifics (aspects) are a free-form name → comma-values editor, no eBay taxonomy.
+- **List data layer** — mirrors the GPMS admin pattern: **TanStack Query** (`useProductsQuery` /
+  `use-product-mutations`) over the `/api/products` route, with `hooks/use-table-params.ts` holding
+  all table state (page / limit / sort / filters / search) **in the URL** (shareable, back-button
+  works). React Query owns request cancellation and cache invalidation, so there's no hand-rolled
+  AbortController and no `router.refresh()`. Service (`product-service.ts`) is the only DB-touching
+  code; `product-client.ts` is the client-side HTTP layer. The `DataTable` + paginated API earn
+  their keep here (vs the cards used for eBay accounts) because products are a large, homogeneous,
+  growing set.
+- **Re-added**: `@tanstack/react-query` (removed during account-linking when it had no consumer; the
+  product list is its first real use). Provider in `providers/query-provider.tsx`, keys in
+  `lib/query-keys.ts`.
+
 ## Deferred: scheduling & multi-account fan-out
 
 Publishing one product to many accounts (and scheduled publishes) must respect eBay
@@ -97,7 +126,8 @@ Candidates to revisit when we get there:
 2. ✅ Better Auth (email + password) — server/client/route wired and verified; sign-in/sign-up UI, split-screen `(auth)` layout, and route protection (`proxy.ts` gate + safe post-login redirect) all done. See **Auth implementation** above.
 3. ✅ Account linking — per-account encrypted token storage, real consent flow, and
    connect/rename/disconnect management. See **Account linking** above.
-4. Product CRUD (the master listings)
+4. ✅ Product CRUD — create / list / edit / soft-delete master listings, URL-driven data-table on
+   TanStack Query. See **Product CRUD** above.
 5. Manual publish — single account, then to selected accounts
 6. *Later:* scheduling + rate-limited fan-out
 

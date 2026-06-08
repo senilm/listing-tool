@@ -3,13 +3,20 @@ import {
   integer,
   jsonb,
   numeric,
+  pgEnum,
   pgTable,
   text,
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
 
+import { ProductStatus } from "@/lib/enums/product";
 import { user } from "@/lib/db/schema/auth";
+
+export const productStatusEnum = pgEnum(
+  "product_status",
+  Object.values(ProductStatus) as [string, ...string[]],
+);
 
 // The master listing. Stored once, then fanned out to many eBay accounts as
 // publications (each a full snapshot of these fields at publish time).
@@ -30,6 +37,10 @@ export const product = pgTable(
     quantity: integer("quantity").notNull().default(1),
     images: jsonb("images").$type<string[]>(),
     aspects: jsonb("aspects").$type<Record<string, string[]>>(),
+    status: productStatusEnum("status")
+      .$type<ProductStatus>()
+      .notNull()
+      .default(ProductStatus.Active),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
