@@ -28,7 +28,7 @@ export const PasswordInput = ({
         type="button"
         variant="ghost"
         size="icon-xs"
-        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        className="absolute inset-y-0 right-2 my-auto text-muted-foreground transition-colors hover:text-foreground active:not-aria-[haspopup]:translate-y-0"
         onClick={() => setShowPassword((prev) => !prev)}
         tabIndex={-1}
       >

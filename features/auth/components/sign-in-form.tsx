@@ -50,7 +50,7 @@ export const SignInForm = () => {
   };
 
   return (
-    <div>
+    <>
       <AuthFormHeader
         title={`Sign in to ${APP_NAME}`}
         description="Enter your credentials to continue."
@@ -106,6 +106,6 @@ export const SignInForm = () => {
           Sign up
         </Link>
       </Typography>
-    </div>
+    </>
   );
 };

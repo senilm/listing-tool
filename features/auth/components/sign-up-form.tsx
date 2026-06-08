@@ -59,9 +59,9 @@ export const SignUpForm = () => {
   };
 
   return (
-    <div>
+    <>
       <AuthFormHeader
-        title={`Create your ${APP_NAME} account`}
+        title={`Create your account`}
         description="Get started in a few seconds."
       />
 
@@ -149,6 +149,6 @@ export const SignUpForm = () => {
           Sign in
         </Link>
       </Typography>
-    </div>
+    </>
   );
 };

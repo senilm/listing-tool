@@ -4,10 +4,12 @@ const AuthGroupLayout = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
   return (
-    <div className="flex min-h-screen">
+    <div className="grid min-h-svh lg:grid-cols-3">
       <AuthLeftPanel />
-      <div className="flex flex-1 items-center justify-center p-6">
-        <div className="w-full max-w-sm">{children}</div>
+      <div className="flex col-span-2 items-center justify-center p-6">
+        <div className="w-full max-w-sm rounded-2xl border bg-card p-8 shadow-sm">
+          {children}
+        </div>
       </div>
     </div>
   );

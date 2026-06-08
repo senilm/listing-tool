@@ -31,9 +31,9 @@ const RootLayout = ({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
