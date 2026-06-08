@@ -1,4 +1,4 @@
-import { ebayConfig, EBAY_SCOPES } from "@/lib/ebay/config";
+import { ebayConfig, EBAY_CONSENT_SCOPES, EBAY_SCOPES } from "@/lib/ebay/config";
 
 type TokenResponse = {
   access_token: string;
@@ -36,7 +36,7 @@ export const buildConsentUrl = (state: string) => {
     client_id: ebayConfig.clientId,
     redirect_uri: ebayConfig.ruName,
     response_type: "code",
-    scope: EBAY_SCOPES.join(" "),
+    scope: EBAY_CONSENT_SCOPES.join(" "),
     state,
     prompt: "login",
   });
@@ -53,9 +53,9 @@ export const exchangeCodeForTokens = (code: string) =>
     }),
   );
 
-// Mint a fresh short-lived access token from a stored refresh token.
+// Mint a fresh short-lived access token from a stored (per-account) refresh token.
 export const refreshAccessToken = async (
-  refreshToken = ebayConfig.refreshToken,
+  refreshToken: string,
 ): Promise<TokenResponse> =>
   postToken(
     new URLSearchParams({
@@ -64,18 +64,3 @@ export const refreshAccessToken = async (
       scope: EBAY_SCOPES.join(" "),
     }),
   );
-
-let cachedToken: { value: string; expiresAt: number } | null = null;
-
-// Returns a valid access token, refreshing (and caching) only when needed.
-export const getAccessToken = async (): Promise<string> => {
-  if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) {
-    return cachedToken.value;
-  }
-  const data = await refreshAccessToken();
-  cachedToken = {
-    value: data.access_token,
-    expiresAt: Date.now() + data.expires_in * 1000,
-  };
-  return data.access_token;
-};

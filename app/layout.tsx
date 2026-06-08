@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
@@ -40,9 +39,7 @@ const RootLayout = ({
           enableSystem
           disableTransitionOnChange
         >
-          <QueryProvider>
-            <TooltipProvider>{children}</TooltipProvider>
-          </QueryProvider>
+          <TooltipProvider>{children}</TooltipProvider>
           <Toaster richColors />
         </ThemeProvider>
       </body>

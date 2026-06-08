@@ -13,7 +13,6 @@ the data model.
 | **ORM** | Drizzle | SQL-first, strong TS inference, serverless-friendly, pairs with Neon's HTTP driver and Better Auth. |
 | **Auth** | Better Auth | Email + password, sessions in Postgres. Full control, minimal lock-in. |
 | **Validation** | Zod | Shared schemas across API input and forms. |
-| **Frontend data** | TanStack Query | Server-state fetching over route handlers. |
 | **UI** | shadcn/ui + Tailwind v4 | Already installed. |
 
 > **Implementation notes**
@@ -56,6 +55,29 @@ the data model.
   server). The gate is optimistic only — add a DAL `auth.api.getSession` check if hard
   per-route enforcement is ever needed.
 
+## Account linking (✅ done)
+
+- **Storage**: one `ebay_account` row per linked seller, scoped by `user_id`. The eBay
+  **refresh token is encrypted at rest** (AES-256-GCM) via `lib/crypto/token-cipher.ts`,
+  keyed by `EBAY_TOKEN_ENCRYPTION_KEY` (`openssl rand -hex 32`). The token column is
+  nullable and is wiped on disconnect.
+- **Connect flow**: `/ebay-accounts` → `GET /api/ebay/accounts/connect` mints a CSRF
+  `state`, stores it in an httpOnly cookie, and redirects to eBay consent. eBay returns to
+  `GET /api/ebay/accounts/callback`, which verifies the state, exchanges the code, reads the
+  seller's username (Identity API, best-effort — seeds the default label), and stores the
+  encrypted token against the session user. **The RuName "Auth accepted URL" must point at
+  `/api/ebay/accounts/callback`.**
+- **Management**: list / rename (`PATCH`) / disconnect (`DELETE`, soft — `status = Disabled`
+  + token wiped) under `features/ebay-accounts/`. Reconnecting the same eBay username revives
+  the existing row instead of duplicating it.
+- **Scopes**: consent requests `EBAY_CONSENT_SCOPES` (sell.inventory + sell.account +
+  commerce.identity.readonly); the refresh path keeps the narrower `EBAY_SCOPES`.
+- **Replaced**: all POC scaffolding is gone — the `/api/ebay/auth/{login,callback}` routes, the
+  global env-token publish endpoints (`/api/listings`, `/api/ebay/setup`), the `EBAY_REFRESH_TOKEN`
+  env var, and the single-account `getAccessToken` cache. `lib/ebay/oauth.ts` keeps the
+  `buildConsentUrl` / `exchangeCodeForTokens` / `refreshAccessToken(refreshToken)` primitives;
+  step 5 rebuilds publishing on per-account decrypted tokens.
+
 ## Deferred: scheduling & multi-account fan-out
 
 Publishing one product to many accounts (and scheduled publishes) must respect eBay
@@ -73,7 +95,8 @@ Candidates to revisit when we get there:
 
 1. ✅ DB + Drizzle schema (Better Auth tables + ebay_account, product, publication) — pushed to Neon
 2. ✅ Better Auth (email + password) — server/client/route wired and verified; sign-in/sign-up UI, split-screen `(auth)` layout, and route protection (`proxy.ts` gate + safe post-login redirect) all done. See **Auth implementation** above.
-3. Account linking — move the POC OAuth flow into per-account encrypted token storage
+3. ✅ Account linking — per-account encrypted token storage, real consent flow, and
+   connect/rename/disconnect management. See **Account linking** above.
 4. Product CRUD (the master listings)
 5. Manual publish — single account, then to selected accounts
 6. *Later:* scheduling + rate-limited fan-out
@@ -90,9 +113,8 @@ eBay's API quota, not our servers. What breaks first and what replaces it:
    - Replace inline publishing with a **durable queue + worker** (per-account
      concurrency, retries, backoff). Start managed (Inngest / QStash); move to
      self-managed SQS + workers only at large scale.
-   - Bake in now (free): keep `publishListing()` pure and trigger-agnostic, and drive
-     it off the `publication.status` state machine — so cron → queue is a zero-logic
-     swap.
+   - Build it (step 5) trigger-agnostic: keep `publishListing()` pure and drive it off the
+     `publication.status` state machine — so cron → queue is a zero-logic swap.
 
 2. **eBay rate limit (external ceiling money can't instantly fix).** eBay caps calls
    per app per day, shared across all users, plus per-account.

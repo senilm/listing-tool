@@ -23,7 +23,6 @@ export const ebayConfig = {
   clientId: process.env.EBAY_CLIENT_ID ?? "",
   clientSecret: process.env.EBAY_CLIENT_SECRET ?? "",
   ruName: process.env.EBAY_RU_NAME ?? "",
-  refreshToken: process.env.EBAY_REFRESH_TOKEN ?? "",
 };
 
 // Scope identifiers always use the api.ebay.com literal, even in sandbox.
@@ -31,3 +30,12 @@ export const EBAY_SCOPES = [
   "https://api.ebay.com/oauth/api_scope/sell.inventory",
   "https://api.ebay.com/oauth/api_scope/sell.account",
 ];
+
+// Lets us read the seller's username right after linking.
+export const EBAY_IDENTITY_SCOPE =
+  "https://api.ebay.com/oauth/api_scope/commerce.identity.readonly";
+
+// Scopes requested at consent time. Broader than EBAY_SCOPES (adds identity) so
+// the access token returned by the code exchange can read the username. The
+// refresh path keeps the narrower EBAY_SCOPES.
+export const EBAY_CONSENT_SCOPES = [...EBAY_SCOPES, EBAY_IDENTITY_SCOPE];
