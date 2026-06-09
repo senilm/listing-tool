@@ -104,7 +104,7 @@ export const DataTablePagination = <TData,>({
                   goTo(page - 1);
                 }}
                 aria-disabled={page <= 1}
-                className={cn(page <= 1 && "pointer-events-none opacity-50")}
+                className={cn("h-8", page <= 1 && "pointer-events-none opacity-50")}
               />
             </PaginationItem>
             {getPageItems(page, pageCount).map((item, index) =>
@@ -116,6 +116,7 @@ export const DataTablePagination = <TData,>({
                 <PaginationItem key={item}>
                   <PaginationLink
                     href="#"
+                    className="size-8"
                     isActive={item === page}
                     onClick={(event) => {
                       event.preventDefault();
@@ -135,7 +136,10 @@ export const DataTablePagination = <TData,>({
                   goTo(page + 1);
                 }}
                 aria-disabled={page >= pageCount}
-                className={cn(page >= pageCount && "pointer-events-none opacity-50")}
+                className={cn(
+                  "h-8",
+                  page >= pageCount && "pointer-events-none opacity-50",
+                )}
               />
             </PaginationItem>
           </PaginationContent>

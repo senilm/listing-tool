@@ -64,7 +64,7 @@ export const DataTableToolbar = <TData,>({
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder={searchPlaceholder}
-                className="pl-8"
+                className="h-8 pl-8"
               />
             </div>
           )}
