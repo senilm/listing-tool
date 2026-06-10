@@ -8,11 +8,11 @@ const AppGroupLayout = async ({
 }: Readonly<{ children: React.ReactNode }>) => {
   return (
     <AuthGuard>
-      <SidebarProvider className="h-svh">
+      <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="min-w-0">
           <AppHeader />
-          <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-4 md:p-6">
+          <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-4 md:p-6">
             {children}
           </div>
         </SidebarInset>
