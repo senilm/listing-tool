@@ -7,7 +7,10 @@ import { ProductsTable } from "@/features/products/components/products-table";
 const ProductsPage = () => {
   return (
     <div>
-      <PageHeader title="Products" description="Your master jewellery listings." />
+      <PageHeader
+        title="Products"
+        description="Your master jewellery listings."
+      />
       <Suspense fallback={<Skeleton className="h-96 w-full" />}>
         <ProductsTable />
       </Suspense>

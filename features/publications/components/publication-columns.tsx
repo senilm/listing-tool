@@ -80,7 +80,11 @@ export const createPublicationColumns = (): ColumnDef<PublicationSummary>[] => [
             icon: ExternalLink,
             onSelect: (publication) => {
               if (publication.viewUrl) {
-                window.open(publication.viewUrl, "_blank", "noopener,noreferrer");
+                window.open(
+                  publication.viewUrl,
+                  "_blank",
+                  "noopener,noreferrer",
+                );
               }
             },
             disabled: (publication) => !publication.viewUrl,

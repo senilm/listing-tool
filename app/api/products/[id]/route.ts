@@ -34,7 +34,10 @@ export const PATCH = async (request: NextRequest, { params }: RouteContext) => {
 };
 
 // Soft delete — archives the product (keeps the row and its publications).
-export const DELETE = async (request: NextRequest, { params }: RouteContext) => {
+export const DELETE = async (
+  request: NextRequest,
+  { params }: RouteContext,
+) => {
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

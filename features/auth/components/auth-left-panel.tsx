@@ -31,7 +31,7 @@ export const AuthLeftPanel = () => {
   return (
     <div className="relative isolate hidden flex-col justify-between overflow-hidden bg-neutral-950 p-10 text-neutral-50 lg:flex">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(120%_80%_at_0%_0%,rgba(255,255,255,0.10),transparent_55%)]" />
-      <div className="absolute inset-0 -z-10 opacity-[0.05] bg-[radial-gradient(rgba(255,255,255,0.8)_1px,transparent_1px)] bg-size-[22px_22px]" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(rgba(255,255,255,0.8)_1px,transparent_1px)] bg-size-[22px_22px] opacity-[0.05]" />
       <Gem className="absolute -right-12 -bottom-12 -z-10 size-72 rotate-12 text-white/5" />
       <div className="absolute inset-0 -z-10 bg-linear-to-b from-transparent to-black/50" />
 
@@ -43,7 +43,7 @@ export const AuthLeftPanel = () => {
       </div>
 
       <div className="flex flex-col gap-6">
-        <span className="font-mono text-xs uppercase tracking-[0.25em] text-white/50">
+        <span className="font-mono text-xs tracking-[0.25em] text-white/50 uppercase">
           Multi-account eBay listing
         </span>
         <Typography variant="h2" as="p" className="text-balance">
@@ -69,7 +69,7 @@ export const AuthLeftPanel = () => {
         </ul>
       </div>
 
-      <div className="flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.18em] text-white/45">
+      <div className="flex items-center gap-2.5 font-mono text-xs tracking-[0.18em] text-white/45 uppercase">
         <span className="size-1.5 rounded-full bg-white/50" />
         Built for jewellery sellers
       </div>

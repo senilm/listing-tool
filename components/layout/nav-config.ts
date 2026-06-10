@@ -11,7 +11,9 @@ import { type NavGroup } from "@/types/navigation";
 export const navConfig: NavGroup[] = [
   {
     label: "Overview",
-    items: [{ label: "Dashboard", path: dashboardRoute(), icon: LayoutDashboard }],
+    items: [
+      { label: "Dashboard", path: dashboardRoute(), icon: LayoutDashboard },
+    ],
   },
   {
     label: "Catalog",

@@ -32,7 +32,10 @@ export const GET = async (request: NextRequest) => {
 
   const params = request.nextUrl.searchParams;
   const page = parsePositiveInt(params.get("page"), 1);
-  const limit = Math.min(parsePositiveInt(params.get("limit"), DEFAULT_LIMIT), MAX_LIMIT);
+  const limit = Math.min(
+    parsePositiveInt(params.get("limit"), DEFAULT_LIMIT),
+    MAX_LIMIT,
+  );
   const q = params.get("q") ?? undefined;
   const statuses = parseStatuses(params.getAll("status"));
 
@@ -66,6 +69,9 @@ export const POST = async (request: NextRequest) => {
     return NextResponse.json({ error: "Invalid product" }, { status: 400 });
   }
 
-  const id = await createProduct({ userId: session.user.id, input: parsed.data });
+  const id = await createProduct({
+    userId: session.user.id,
+    input: parsed.data,
+  });
   return NextResponse.json({ id }, { status: 201 });
 };

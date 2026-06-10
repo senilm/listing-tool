@@ -45,7 +45,9 @@ export const ConfirmDialog = ({
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel disabled={isLoading}>{cancelLabel}</AlertDialogCancel>
+        <AlertDialogCancel disabled={isLoading}>
+          {cancelLabel}
+        </AlertDialogCancel>
         <Button variant={variant} loading={isLoading} onClick={onConfirm}>
           {confirmLabel}
         </Button>

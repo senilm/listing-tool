@@ -171,8 +171,15 @@ export const publishProductToAccounts = async ({
       .returning({ id: publication.id });
 
     try {
-      const accessToken = await getAccountAccessToken({ id: accountId, userId });
-      const setup = await ensureSellerSetup({ id: accountId, userId, accessToken });
+      const accessToken = await getAccountAccessToken({
+        id: accountId,
+        userId,
+      });
+      const setup = await ensureSellerSetup({
+        id: accountId,
+        userId,
+        accessToken,
+      });
       const result = await publishListing({
         accessToken,
         setup,
@@ -205,8 +212,7 @@ export const publishProductToAccounts = async ({
         status: PublicationStatus.Published,
       });
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Publish failed";
+      const message = error instanceof Error ? error.message : "Publish failed";
       await db
         .update(publication)
         .set({ status: PublicationStatus.Failed, errorMessage: message })

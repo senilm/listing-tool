@@ -32,7 +32,9 @@ const FILTER_FIELDS: DataTableFilterField[] = [
 
 export const PublicationsTable = () => {
   const params = useTableParams({ filterKeys: FILTER_KEYS });
-  const { data, isLoading, isFetching } = usePublicationsQuery(params.apiParams);
+  const { data, isLoading, isFetching } = usePublicationsQuery(
+    params.apiParams,
+  );
 
   const columns = useMemo(() => createPublicationColumns(), []);
 

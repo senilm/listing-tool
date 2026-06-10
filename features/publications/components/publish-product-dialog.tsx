@@ -78,9 +78,13 @@ export const PublishProductDialog = ({
       const failed = results.length - published;
 
       if (failed === 0) {
-        toast.success(`Published to ${published} account${published === 1 ? "" : "s"}`);
+        toast.success(
+          `Published to ${published} account${published === 1 ? "" : "s"}`,
+        );
       } else if (published === 0) {
-        toast.error(`Failed to publish to ${failed} account${failed === 1 ? "" : "s"}`);
+        toast.error(
+          `Failed to publish to ${failed} account${failed === 1 ? "" : "s"}`,
+        );
       } else {
         toast.warning(`Published to ${published}, ${failed} failed`);
       }
@@ -124,7 +128,9 @@ export const PublishProductDialog = ({
                 <Checkbox
                   id={`publish-account-${account.id}`}
                   checked={selectedIds.includes(account.id)}
-                  onCheckedChange={(checked) => toggle(account.id, checked === true)}
+                  onCheckedChange={(checked) =>
+                    toggle(account.id, checked === true)
+                  }
                 />
                 <div className="flex flex-col">
                   <span className="font-medium">{account.label}</span>

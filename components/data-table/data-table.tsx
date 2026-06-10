@@ -98,7 +98,9 @@ export const DataTable = <TData,>({
   searchPlaceholder,
   pageSizeOptions,
 }: DataTableProps<TData>) => {
-  const [internalSorting, setInternalSorting] = React.useState<SortingState>([]);
+  const [internalSorting, setInternalSorting] = React.useState<SortingState>(
+    [],
+  );
   const [internalColumnFilters, setInternalColumnFilters] =
     React.useState<ColumnFiltersState>([]);
   const [internalGlobalFilter, setInternalGlobalFilter] = React.useState("");
@@ -126,7 +128,9 @@ export const DataTable = <TData,>({
     onSortingChange?.(next);
   };
 
-  const handleColumnFiltersChange: OnChangeFn<ColumnFiltersState> = (updater) => {
+  const handleColumnFiltersChange: OnChangeFn<ColumnFiltersState> = (
+    updater,
+  ) => {
     const next = functionalUpdate(updater, columnFilters);
     setInternalColumnFilters(next);
     onColumnFiltersChange?.(next);
@@ -173,7 +177,9 @@ export const DataTable = <TData,>({
   });
 
   const rows = table.getRowModel().rows;
-  const selectedRows = table.getSelectedRowModel().rows.map((row) => row.original);
+  const selectedRows = table
+    .getSelectedRowModel()
+    .rows.map((row) => row.original);
   const visibleColumnCount = table.getVisibleLeafColumns().length;
 
   return (
@@ -225,7 +231,9 @@ export const DataTable = <TData,>({
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
-                    {!!enableColumnResizing && header.column.getCanResize() && <DataTableResizeHandle header={header} />}
+                    {!!enableColumnResizing && header.column.getCanResize() && (
+                      <DataTableResizeHandle header={header} />
+                    )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -254,7 +262,10 @@ export const DataTable = <TData,>({
                           : undefined
                       }
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>

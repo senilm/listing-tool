@@ -49,12 +49,17 @@ export const DataTableDateFilter = <TData, TValue>({
         <Button variant="outline" size="sm" className="border-dashed">
           <CalendarIcon />
           {title}
-          {!!label && <>
+          {!!label && (
+            <>
               <Separator orientation="vertical" className="mx-0.5 h-4" />
-              <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+              <Badge
+                variant="secondary"
+                className="rounded-sm px-1 font-normal"
+              >
                 {label}
               </Badge>
-            </>}
+            </>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

@@ -1,4 +1,7 @@
-import { StatusBadge, type StatusBadgeVariant } from "@/components/status-badge";
+import {
+  StatusBadge,
+  type StatusBadgeVariant,
+} from "@/components/status-badge";
 import { ProductStatus } from "@/lib/enums/product";
 
 const STATUS_META: Record<

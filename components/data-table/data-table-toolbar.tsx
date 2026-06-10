@@ -69,12 +69,18 @@ export const DataTableToolbar = <TData,>({
             </div>
           )}
           {filterFields.map((field) => (
-            <DataTableFilterControl key={field.id} table={table} field={field} />
+            <DataTableFilterControl
+              key={field.id}
+              table={table}
+              field={field}
+            />
           ))}
         </div>
         <div className="flex items-center gap-2">
           {toolbarActions}
-          {!!enableColumnCustomizer && <DataTableColumnCustomizer table={table} />}
+          {!!enableColumnCustomizer && (
+            <DataTableColumnCustomizer table={table} />
+          )}
           {!!exportHandlers && <DataTableExport handlers={exportHandlers} />}
         </div>
       </div>

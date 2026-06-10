@@ -27,7 +27,9 @@ export const createEbayAccountColumns = ({
       <DataTableColumnHeader column={column} title="Label" />
     ),
     cell: ({ row }) => (
-      <TruncatedText className="font-medium">{row.original.label}</TruncatedText>
+      <TruncatedText className="font-medium">
+        {row.original.label}
+      </TruncatedText>
     ),
   },
   {

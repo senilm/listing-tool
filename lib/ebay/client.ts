@@ -46,7 +46,9 @@ export const ebayRequest = async <T = unknown>(
     }
     lastText = text;
     if (res.status < 500 || attempt === maxAttempts) {
-      throw new Error(`eBay ${init.method} ${path} failed: ${res.status} ${text}`);
+      throw new Error(
+        `eBay ${init.method} ${path} failed: ${res.status} ${text}`,
+      );
     }
     await new Promise((resolve) => setTimeout(resolve, attempt * 500));
   }

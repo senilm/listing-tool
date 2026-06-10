@@ -32,7 +32,10 @@ export const GET = async (request: NextRequest) => {
 
   const params = request.nextUrl.searchParams;
   const page = parsePositiveInt(params.get("page"), 1);
-  const limit = Math.min(parsePositiveInt(params.get("limit"), DEFAULT_LIMIT), MAX_LIMIT);
+  const limit = Math.min(
+    parsePositiveInt(params.get("limit"), DEFAULT_LIMIT),
+    MAX_LIMIT,
+  );
   const q = params.get("q") ?? undefined;
   const statuses = parseStatuses(params.getAll("status"));
 
@@ -63,7 +66,10 @@ export const POST = async (request: NextRequest) => {
   const body = await request.json().catch(() => null);
   const parsed = publishRequestSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid publish request" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid publish request" },
+      { status: 400 },
+    );
   }
 
   const outcome = await publishProductToAccounts({

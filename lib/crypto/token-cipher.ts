@@ -27,7 +27,10 @@ const getKey = (): Buffer => {
 export const encryptToken = (plaintext: string): string => {
   const iv = randomBytes(IV_BYTES);
   const cipher = createCipheriv(ALGORITHM, getKey(), iv);
-  const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+  const encrypted = Buffer.concat([
+    cipher.update(plaintext, "utf8"),
+    cipher.final(),
+  ]);
   const authTag = cipher.getAuthTag();
   return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted.toString("hex")}`;
 };
@@ -37,7 +40,11 @@ export const decryptToken = (payload: string): string => {
   if (!ivHex || !authTagHex || !cipherHex) {
     throw new Error("Malformed encrypted token payload.");
   }
-  const decipher = createDecipheriv(ALGORITHM, getKey(), Buffer.from(ivHex, "hex"));
+  const decipher = createDecipheriv(
+    ALGORITHM,
+    getKey(),
+    Buffer.from(ivHex, "hex"),
+  );
   decipher.setAuthTag(Buffer.from(authTagHex, "hex"));
   const decrypted = Buffer.concat([
     decipher.update(Buffer.from(cipherHex, "hex")),

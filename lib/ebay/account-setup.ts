@@ -20,12 +20,13 @@ const ensureOptedIn = async (accessToken: string) => {
 };
 
 const resolvePaymentPolicy = async (accessToken: string): Promise<string> => {
-  const { data } = await ebayRequest<{ paymentPolicies?: { paymentPolicyId: string }[] }>(
-    accessToken,
-    "/sell/account/v1/payment_policy",
-    { query: { marketplace_id: EBAY_MARKETPLACE_ID } },
-  );
-  if (data.paymentPolicies?.length) return data.paymentPolicies[0].paymentPolicyId;
+  const { data } = await ebayRequest<{
+    paymentPolicies?: { paymentPolicyId: string }[];
+  }>(accessToken, "/sell/account/v1/payment_policy", {
+    query: { marketplace_id: EBAY_MARKETPLACE_ID },
+  });
+  if (data.paymentPolicies?.length)
+    return data.paymentPolicies[0].paymentPolicyId;
 
   const created = await ebayRequest<{ paymentPolicyId: string }>(
     accessToken,
@@ -43,11 +44,11 @@ const resolvePaymentPolicy = async (accessToken: string): Promise<string> => {
 };
 
 const resolveReturnPolicy = async (accessToken: string): Promise<string> => {
-  const { data } = await ebayRequest<{ returnPolicies?: { returnPolicyId: string }[] }>(
-    accessToken,
-    "/sell/account/v1/return_policy",
-    { query: { marketplace_id: EBAY_MARKETPLACE_ID } },
-  );
+  const { data } = await ebayRequest<{
+    returnPolicies?: { returnPolicyId: string }[];
+  }>(accessToken, "/sell/account/v1/return_policy", {
+    query: { marketplace_id: EBAY_MARKETPLACE_ID },
+  });
   if (data.returnPolicies?.length) return data.returnPolicies[0].returnPolicyId;
 
   const created = await ebayRequest<{ returnPolicyId: string }>(
@@ -68,7 +69,9 @@ const resolveReturnPolicy = async (accessToken: string): Promise<string> => {
   return created.data.returnPolicyId;
 };
 
-const resolveFulfillmentPolicy = async (accessToken: string): Promise<string> => {
+const resolveFulfillmentPolicy = async (
+  accessToken: string,
+): Promise<string> => {
   const { data } = await ebayRequest<{
     fulfillmentPolicies?: { fulfillmentPolicyId: string }[];
   }>(accessToken, "/sell/account/v1/fulfillment_policy", {
@@ -111,11 +114,9 @@ const resolveLocation = async (accessToken: string): Promise<string> => {
   // GET /location (the list endpoint) is unreliable in sandbox (errorId 25001),
   // so try it but fall back to a keyed create, which is idempotent.
   try {
-    const { data } = await ebayRequest<{ locations?: { merchantLocationKey: string }[] }>(
-      accessToken,
-      "/sell/inventory/v1/location",
-      { query: { limit: "1" } },
-    );
+    const { data } = await ebayRequest<{
+      locations?: { merchantLocationKey: string }[];
+    }>(accessToken, "/sell/inventory/v1/location", { query: { limit: "1" } });
     if (data.locations?.length) return data.locations[0].merchantLocationKey;
   } catch {
     // fall through to create
@@ -123,26 +124,31 @@ const resolveLocation = async (accessToken: string): Promise<string> => {
 
   try {
     // createInventoryLocation returns 204 No Content; the key is what we chose.
-    await ebayRequest(accessToken, `/sell/inventory/v1/location/${DEFAULT_LOCATION_KEY}`, {
-      method: "POST",
-      body: {
-        name: "Primary Warehouse",
-        locationTypes: ["WAREHOUSE"],
-        merchantLocationStatus: "ENABLED",
-        location: {
-          address: {
-            addressLine1: "2025 Hamilton Ave",
-            city: "San Jose",
-            stateOrProvince: "CA",
-            postalCode: "95125",
-            country: "US",
+    await ebayRequest(
+      accessToken,
+      `/sell/inventory/v1/location/${DEFAULT_LOCATION_KEY}`,
+      {
+        method: "POST",
+        body: {
+          name: "Primary Warehouse",
+          locationTypes: ["WAREHOUSE"],
+          merchantLocationStatus: "ENABLED",
+          location: {
+            address: {
+              addressLine1: "2025 Hamilton Ave",
+              city: "San Jose",
+              stateOrProvince: "CA",
+              postalCode: "95125",
+              country: "US",
+            },
           },
         },
       },
-    });
+    );
   } catch (error) {
     // errorId 25803 = a location already exists for this key, which is fine.
-    if (!(error instanceof Error && error.message.includes("25803"))) throw error;
+    if (!(error instanceof Error && error.message.includes("25803")))
+      throw error;
   }
   return DEFAULT_LOCATION_KEY;
 };
@@ -154,12 +160,21 @@ export const resolveSellerSetup = async (
   accessToken: string,
 ): Promise<SellerSetup> => {
   await ensureOptedIn(accessToken);
-  const [paymentPolicyId, returnPolicyId, fulfillmentPolicyId, merchantLocationKey] =
-    await Promise.all([
-      resolvePaymentPolicy(accessToken),
-      resolveReturnPolicy(accessToken),
-      resolveFulfillmentPolicy(accessToken),
-      resolveLocation(accessToken),
-    ]);
-  return { paymentPolicyId, returnPolicyId, fulfillmentPolicyId, merchantLocationKey };
+  const [
+    paymentPolicyId,
+    returnPolicyId,
+    fulfillmentPolicyId,
+    merchantLocationKey,
+  ] = await Promise.all([
+    resolvePaymentPolicy(accessToken),
+    resolveReturnPolicy(accessToken),
+    resolveFulfillmentPolicy(accessToken),
+    resolveLocation(accessToken),
+  ]);
+  return {
+    paymentPolicyId,
+    returnPolicyId,
+    fulfillmentPolicyId,
+    merchantLocationKey,
+  };
 };

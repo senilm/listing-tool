@@ -33,7 +33,9 @@ export const SidebarUser = () => {
         </Avatar>
         <div className="grid flex-1 text-left text-sm leading-tight">
           <span className="truncate font-medium">{name}</span>
-          <span className="truncate text-xs text-muted-foreground">{email}</span>
+          <span className="truncate text-xs text-muted-foreground">
+            {email}
+          </span>
         </div>
       </Link>
     </SidebarMenuButton>

@@ -10,7 +10,10 @@ import { renameEbayAccountSchema } from "@/validations/ebay-account";
 type RouteContext = { params: Promise<{ id: string }> };
 
 // Soft-disconnect: marks the account disabled and wipes its stored token.
-export const DELETE = async (request: NextRequest, { params }: RouteContext) => {
+export const DELETE = async (
+  request: NextRequest,
+  { params }: RouteContext,
+) => {
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

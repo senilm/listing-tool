@@ -129,16 +129,16 @@ ebay-account-columns.tsx  (⋯ row actions, in the table)
 
 ## Layers
 
-| Layer | Files | Job |
-|---|---|---|
-| **Pages / components** | `app/(app)/ebay-accounts/`, `features/ebay-accounts/components/` | Render UI, trigger actions |
-| **Data hooks** | `features/ebay-accounts/hooks/` | React Query read (`use-ebay-accounts-query`) + mutations (`use-ebay-account-mutations`) |
-| **Client HTTP** | `features/ebay-accounts/services/ebay-account-client.ts` | `fetch` wrappers the hooks call |
-| **API routes** | `app/api/ebay/accounts/{route,connect,callback,[id]}` | HTTP edges — auth check + call the service |
-| **Service (DAL)** | `features/ebay-accounts/services/ebay-account-service.ts` | All DB access; the only code that touches the token |
-| **Helpers** | `lib/ebay/{oauth,identity,config}`, `lib/crypto/token-cipher`, `lib/auth/session` | Pure building blocks |
+| Layer                  | Files                                                                             | Job                                                                                     |
+| ---------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Pages / components** | `app/(app)/ebay-accounts/`, `features/ebay-accounts/components/`                  | Render UI, trigger actions                                                              |
+| **Data hooks**         | `features/ebay-accounts/hooks/`                                                   | React Query read (`use-ebay-accounts-query`) + mutations (`use-ebay-account-mutations`) |
+| **Client HTTP**        | `features/ebay-accounts/services/ebay-account-client.ts`                          | `fetch` wrappers the hooks call                                                         |
+| **API routes**         | `app/api/ebay/accounts/{route,connect,callback,[id]}`                             | HTTP edges — auth check + call the service                                              |
+| **Service (DAL)**      | `features/ebay-accounts/services/ebay-account-service.ts`                         | All DB access; the only code that touches the token                                     |
+| **Helpers**            | `lib/ebay/{oauth,identity,config}`, `lib/crypto/token-cipher`, `lib/auth/session` | Pure building blocks                                                                    |
 
-**Auth:** every `/api/ebay/accounts/*` handler sits *outside* the `(app)` layout guard,
+**Auth:** every `/api/ebay/accounts/*` handler sits _outside_ the `(app)` layout guard,
 so each re-checks the session itself (`getSession`) and returns **401 JSON** rather than
 redirecting. The list `GET` is no exception — reads and writes both authenticate at the
 route.

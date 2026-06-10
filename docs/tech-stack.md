@@ -5,17 +5,18 @@ the data model.
 
 ## Stack
 
-| Layer | Choice | Why |
-|---|---|---|
-| **Framework** | Next.js 16 (App Router) + TypeScript | Already set up; route handlers serve as the backend. |
-| **Hosting** | Vercel | Zero-config Next.js deploys, preview environments. |
-| **Database** | Neon (serverless Postgres) | Free tier, Vercel-native, scales to zero. Schema is relational with multi-way queries, so Postgres over DynamoDB. |
-| **ORM** | Drizzle | SQL-first, strong TS inference, serverless-friendly, pairs with Neon's HTTP driver and Better Auth. |
-| **Auth** | Better Auth | Email + password, sessions in Postgres. Full control, minimal lock-in. |
-| **Validation** | Zod | Shared schemas across API input and forms. |
-| **UI** | shadcn/ui + Tailwind v4 | Already installed. |
+| Layer          | Choice                               | Why                                                                                                               |
+| -------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| **Framework**  | Next.js 16 (App Router) + TypeScript | Already set up; route handlers serve as the backend.                                                              |
+| **Hosting**    | Vercel                               | Zero-config Next.js deploys, preview environments.                                                                |
+| **Database**   | Neon (serverless Postgres)           | Free tier, Vercel-native, scales to zero. Schema is relational with multi-way queries, so Postgres over DynamoDB. |
+| **ORM**        | Drizzle                              | SQL-first, strong TS inference, serverless-friendly, pairs with Neon's HTTP driver and Better Auth.               |
+| **Auth**       | Better Auth                          | Email + password, sessions in Postgres. Full control, minimal lock-in.                                            |
+| **Validation** | Zod                                  | Shared schemas across API input and forms.                                                                        |
+| **UI**         | shadcn/ui + Tailwind v4              | Already installed.                                                                                                |
 
 > **Implementation notes**
+>
 > - **DB driver**: `drizzle-orm/neon-http` + `@neondatabase/serverless`. Provider-portable
 >   — switching Postgres hosts is a one-file driver swap in `lib/db/client.ts`.
 > - **Neon region**: **Singapore (`ap-southeast-1`)** — chosen to match the Vercel
@@ -68,9 +69,9 @@ the data model.
   encrypted token against the session user. **The RuName "Auth accepted URL" must point at
   `/api/ebay/accounts/callback`.**
 - **Management**: list / rename (`PATCH`) / disconnect (`DELETE`, soft — `status = Disabled`
-  + token wiped) under `features/ebay-accounts/`. Reconnecting the same eBay username revives
-  the existing row instead of duplicating it. The list is a URL-driven data-table on TanStack
-  Query (`GET /api/ebay/accounts`), the same pattern as products — see **Product CRUD**.
+  - token wiped) under `features/ebay-accounts/`. Reconnecting the same eBay username revives
+    the existing row instead of duplicating it. The list is a URL-driven data-table on TanStack
+    Query (`GET /api/ebay/accounts`), the same pattern as products — see **Product CRUD**.
 - **Scopes**: consent requests `EBAY_CONSENT_SCOPES` (sell.inventory + sell.account +
   commerce.identity.readonly); the refresh path keeps the narrower `EBAY_SCOPES`.
 - **Replaced**: all POC scaffolding is gone — the `/api/ebay/auth/{login,callback}` routes, the
@@ -87,7 +88,7 @@ The master listings, under `features/products/`. Create / list / edit / soft-del
 
 - **Soft delete**: a `product_status` enum (`active` / `archived`, `lib/enums/product.ts`) drives a
   reversible archive. Archived products drop out of the default list (publications cascade on a
-  *hard* delete, so we never hard-delete from the UI). The list shows archived only when the status
+  _hard_ delete, so we never hard-delete from the UI). The list shows archived only when the status
   filter asks for it.
 - **Fixed fields**: every listing is **USD** and condition **new** — no pickers (`DEFAULT_CURRENCY`,
   `DEFAULT_CONDITION` in `validations/product.ts`). The columns stay in the schema for future
@@ -142,6 +143,7 @@ rate limits, so the fan-out runs through a job/queue rather than firing all call
 once. This is **deferred** — we build products, accounts, and manual publish first.
 
 Candidates to revisit when we get there:
+
 - **Inngest** — durable functions with cron scheduling, retries, built-in
   concurrency/throttling. Best fit for rate-limited fan-out; generous free tier.
 - **Upstash QStash** — lightweight HTTP queue + scheduled messages. Cheap, simpler.
@@ -158,7 +160,7 @@ Candidates to revisit when we get there:
    TanStack Query. See **Product CRUD** above.
 5. ✅ Manual publish — product → one or more selected accounts, on per-account decrypted tokens,
    recorded as `publication` rows. See **Manual publish** above.
-6. *Later:* scheduling + rate-limited fan-out
+6. _Later:_ scheduling + rate-limited fan-out
 
 ## Scaling path
 

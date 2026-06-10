@@ -16,7 +16,10 @@ type DataTableExportProps = {
   disabled?: boolean;
 };
 
-export const DataTableExport = ({ handlers, disabled }: DataTableExportProps) => (
+export const DataTableExport = ({
+  handlers,
+  disabled,
+}: DataTableExportProps) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button variant="outline" size="sm" disabled={disabled}>
@@ -25,13 +28,21 @@ export const DataTableExport = ({ handlers, disabled }: DataTableExportProps) =>
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
-      {!!handlers.csv && <DropdownMenuItem onClick={() => void handlers.csv?.()}>CSV</DropdownMenuItem>}
+      {!!handlers.csv && (
+        <DropdownMenuItem onClick={() => void handlers.csv?.()}>
+          CSV
+        </DropdownMenuItem>
+      )}
       {!!handlers.xlsx && (
         <DropdownMenuItem onClick={() => void handlers.xlsx?.()}>
           Excel (XLSX)
         </DropdownMenuItem>
       )}
-      {!!handlers.pdf && <DropdownMenuItem onClick={() => void handlers.pdf?.()}>PDF</DropdownMenuItem>}
+      {!!handlers.pdf && (
+        <DropdownMenuItem onClick={() => void handlers.pdf?.()}>
+          PDF
+        </DropdownMenuItem>
+      )}
     </DropdownMenuContent>
   </DropdownMenu>
 );

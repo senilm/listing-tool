@@ -104,7 +104,10 @@ export const DataTablePagination = <TData,>({
                   goTo(page - 1);
                 }}
                 aria-disabled={page <= 1}
-                className={cn("h-8", page <= 1 && "pointer-events-none opacity-50")}
+                className={cn(
+                  "h-8",
+                  page <= 1 && "pointer-events-none opacity-50",
+                )}
               />
             </PaginationItem>
             {getPageItems(page, pageCount).map((item, index) =>

@@ -11,12 +11,15 @@ export const fetchEbayUsername = async (
   accessToken: string,
 ): Promise<string | null> => {
   try {
-    const res = await fetch(`${ebayConfig.apiBase}/commerce/identity/v1/user/`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/json",
+    const res = await fetch(
+      `${ebayConfig.apiBase}/commerce/identity/v1/user/`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
       },
-    });
+    );
     if (!res.ok) return null;
     const data = (await res.json()) as EbayUserResponse;
     return data.username ?? null;

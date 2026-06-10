@@ -36,7 +36,9 @@ export const publication = pgTable(
     ebayAccountId: uuid("ebay_account_id")
       .notNull()
       .references(() => ebayAccount.id, { onDelete: "cascade" }),
-    status: publicationStatusEnum("status").notNull().default(PublicationStatus.Draft),
+    status: publicationStatusEnum("status")
+      .notNull()
+      .default(PublicationStatus.Draft),
     scheduledAt: timestamp("scheduled_at"),
     publishedAt: timestamp("published_at"),
     title: text("title").notNull(),

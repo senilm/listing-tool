@@ -36,12 +36,12 @@ export const MultiToggleGroupItem = ({
   <ToggleGroupPrimitive.Item
     data-slot="multi-toggle-group-item"
     className={cn(
-      "relative inline-flex h-9 flex-1 items-center justify-center whitespace-nowrap rounded-md border px-3 text-xs font-medium",
+      "relative inline-flex h-9 flex-1 items-center justify-center rounded-md border px-3 text-xs font-medium whitespace-nowrap",
       "border-input bg-background text-foreground shadow-sm",
       "transition-colors duration-200",
       "hover:bg-accent",
       "data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
-      "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+      "focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
       "disabled:pointer-events-none disabled:opacity-50",
       className,
     )}

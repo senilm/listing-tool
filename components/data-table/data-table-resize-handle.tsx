@@ -17,7 +17,7 @@ export const DataTableResizeHandle = <TData, TValue>({
     onTouchStart={header.getResizeHandler()}
     onDoubleClick={() => header.column.resetSize()}
     className={cn(
-      "absolute top-0 right-0 h-full w-1 cursor-col-resize touch-none select-none bg-border opacity-0 transition-opacity hover:opacity-100",
+      "absolute top-0 right-0 h-full w-1 cursor-col-resize touch-none bg-border opacity-0 transition-opacity select-none hover:opacity-100",
       header.column.getIsResizing() && "bg-primary opacity-100",
     )}
   />

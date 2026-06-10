@@ -26,7 +26,9 @@ export const EbayConnectFeedback = () => {
     if (connected) {
       toast.success("eBay account connected");
     } else if (error) {
-      toast.error(ERROR_MESSAGES[error] ?? "Could not connect the eBay account.");
+      toast.error(
+        ERROR_MESSAGES[error] ?? "Could not connect the eBay account.",
+      );
     }
 
     router.replace(ebayAccountsRoute());

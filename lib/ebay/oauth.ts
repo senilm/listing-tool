@@ -1,4 +1,8 @@
-import { ebayConfig, EBAY_CONSENT_SCOPES, EBAY_SCOPES } from "@/lib/ebay/config";
+import {
+  ebayConfig,
+  EBAY_CONSENT_SCOPES,
+  EBAY_SCOPES,
+} from "@/lib/ebay/config";
 
 type TokenResponse = {
   access_token: string;
@@ -25,7 +29,9 @@ const postToken = async (body: URLSearchParams): Promise<TokenResponse> => {
     body,
   });
   if (!res.ok) {
-    throw new Error(`eBay token request failed: ${res.status} ${await res.text()}`);
+    throw new Error(
+      `eBay token request failed: ${res.status} ${await res.text()}`,
+    );
   }
   return res.json();
 };

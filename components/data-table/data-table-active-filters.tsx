@@ -68,14 +68,20 @@ export const DataTableActiveFilters = <TData,>({
         const field = filterFields.find((entry) => entry.id === filter.id);
         if (!field) return null;
         return (
-          <Badge key={filter.id} variant="secondary" className="gap-1 font-normal">
+          <Badge
+            key={filter.id}
+            variant="secondary"
+            className="gap-1 font-normal"
+          >
             <span className="text-muted-foreground">{field.label}:</span>
             <TruncatedText className="max-w-40">
               {formatValue(field, filter.value)}
             </TruncatedText>
             <button
               type="button"
-              onClick={() => table.getColumn(filter.id)?.setFilterValue(undefined)}
+              onClick={() =>
+                table.getColumn(filter.id)?.setFilterValue(undefined)
+              }
               aria-label={`Clear ${field.label} filter`}
               className="ml-0.5 cursor-pointer"
             >

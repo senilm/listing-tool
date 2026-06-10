@@ -1,4 +1,12 @@
-import { index, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  index,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 import { user } from "@/lib/db/schema/auth";
 import { EbayAccountStatus } from "@/lib/enums/ebay-account";

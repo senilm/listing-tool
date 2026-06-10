@@ -38,11 +38,36 @@ type QuickAction = {
 // Stubbed search: quick navigation only. Live cross-module results land here
 // once a search service exists.
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: "Create Product", icon: Plus, path: productCreateRoute(), group: "Actions" },
-  { label: "Dashboard", icon: LayoutDashboard, path: dashboardRoute(), group: "Navigate" },
-  { label: "Products", icon: Package, path: productsRoute(), group: "Navigate" },
-  { label: "eBay Accounts", icon: Store, path: ebayAccountsRoute(), group: "Navigate" },
-  { label: "Publications", icon: Send, path: publicationsRoute(), group: "Navigate" },
+  {
+    label: "Create Product",
+    icon: Plus,
+    path: productCreateRoute(),
+    group: "Actions",
+  },
+  {
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    path: dashboardRoute(),
+    group: "Navigate",
+  },
+  {
+    label: "Products",
+    icon: Package,
+    path: productsRoute(),
+    group: "Navigate",
+  },
+  {
+    label: "eBay Accounts",
+    icon: Store,
+    path: ebayAccountsRoute(),
+    group: "Navigate",
+  },
+  {
+    label: "Publications",
+    icon: Send,
+    path: publicationsRoute(),
+    group: "Navigate",
+  },
 ];
 
 const ACTION_GROUPS = ["Actions", "Navigate"];

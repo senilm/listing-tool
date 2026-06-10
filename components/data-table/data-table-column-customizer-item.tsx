@@ -23,8 +23,14 @@ export const DataTableColumnCustomizerItem = ({
   canHide,
   onToggle,
 }: DataTableColumnCustomizerItemProps) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
 
   return (
     <div

@@ -38,7 +38,9 @@ export const DataTableRowActions = <TData,>({
         <Fragment key={action.label}>
           {!!action.separatorBefore && index > 0 && <DropdownMenuSeparator />}
           <DropdownMenuItem
-            variant={action.variant === "destructive" ? "destructive" : "default"}
+            variant={
+              action.variant === "destructive" ? "destructive" : "default"
+            }
             disabled={action.disabled?.(row)}
             onClick={(event) => {
               event.stopPropagation();

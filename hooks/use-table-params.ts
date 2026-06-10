@@ -116,7 +116,8 @@ export const useTableParams = ({
     const result: ColumnFiltersState = [];
     for (const key of filterKeys) {
       const raw = searchParams.get(key);
-      if (raw) result.push({ id: key, value: raw.split(MULTI_VALUE_SEPARATOR) });
+      if (raw)
+        result.push({ id: key, value: raw.split(MULTI_VALUE_SEPARATOR) });
     }
     return result;
   }, [searchParams, filterKeys]);

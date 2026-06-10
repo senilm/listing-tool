@@ -42,8 +42,12 @@ export const ProductsTable = () => {
   const { data, isLoading, isFetching } = useProductsQuery(params.apiParams);
   const archiveProduct = useArchiveProduct();
 
-  const [archiveTarget, setArchiveTarget] = useState<ProductSummary | null>(null);
-  const [publishTarget, setPublishTarget] = useState<ProductSummary | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<ProductSummary | null>(
+    null,
+  );
+  const [publishTarget, setPublishTarget] = useState<ProductSummary | null>(
+    null,
+  );
 
   const columns = useMemo(
     () =>
@@ -107,7 +111,9 @@ export const ProductsTable = () => {
         onOpenChange={(open) => {
           if (!open) setArchiveTarget(null);
         }}
-        title={archiveTarget ? `Archive ${archiveTarget.title}?` : "Archive product?"}
+        title={
+          archiveTarget ? `Archive ${archiveTarget.title}?` : "Archive product?"
+        }
         description="Archiving hides the product from your active list. Its existing publications stay intact, and you can restore it later."
         confirmLabel="Archive"
         variant="destructive"

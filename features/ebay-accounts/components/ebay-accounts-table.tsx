@@ -36,7 +36,9 @@ const FILTER_FIELDS: DataTableFilterField[] = [
 
 export const EbayAccountsTable = () => {
   const params = useTableParams({ filterKeys: FILTER_KEYS });
-  const { data, isLoading, isFetching } = useEbayAccountsQuery(params.apiParams);
+  const { data, isLoading, isFetching } = useEbayAccountsQuery(
+    params.apiParams,
+  );
 
   const [renameTarget, setRenameTarget] = useState<EbayAccountSummary | null>(
     null,

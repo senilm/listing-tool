@@ -61,7 +61,9 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
         await createProduct.mutateAsync(input);
       }
     } catch {
-      toast.error(isEdit ? "Could not save the product" : "Could not create the product");
+      toast.error(
+        isEdit ? "Could not save the product" : "Could not create the product",
+      );
       return;
     }
 
@@ -85,7 +87,11 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
             label="Title"
             required
             render={(field) => (
-              <Input placeholder="18ct Gold Diamond Ring" maxLength={200} {...field} />
+              <Input
+                placeholder="18ct Gold Diamond Ring"
+                maxLength={200}
+                {...field}
+              />
             )}
           />
           <FormField
@@ -93,7 +99,11 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
             name="sku"
             label="SKU"
             render={(field) => (
-              <Input placeholder="Optional stock-keeping unit" maxLength={100} {...field} />
+              <Input
+                placeholder="Optional stock-keeping unit"
+                maxLength={100}
+                {...field}
+              />
             )}
           />
           <FormField

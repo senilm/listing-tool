@@ -64,7 +64,10 @@ export const SignUpForm = () => {
         description="Get started in a few seconds."
       />
 
-      <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="flex flex-col gap-6">
+      <form
+        onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+        className="flex flex-col gap-6"
+      >
         <FieldGroup>
           <FormField
             control={form.control}

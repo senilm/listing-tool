@@ -86,9 +86,7 @@ export const FormField = <
           {description ? (
             <FieldDescription>{description}</FieldDescription>
           ) : null}
-          {fieldState.error ? (
-            <FieldError errors={[fieldState.error]} />
-          ) : null}
+          {fieldState.error ? <FieldError errors={[fieldState.error]} /> : null}
         </Field>
       )}
     />

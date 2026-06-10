@@ -56,7 +56,10 @@ export const SignInForm = () => {
         description="Enter your credentials to continue."
       />
 
-      <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="flex flex-col gap-6">
+      <form
+        onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+        className="flex flex-col gap-6"
+      >
         <FieldGroup>
           <FormField
             control={form.control}
