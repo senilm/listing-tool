@@ -17,7 +17,7 @@ const EbayAccountsPage = () => {
         <EbayConnectFeedback />
       </Suspense>
 
-      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+      <Suspense fallback={<Skeleton className="h-full w-full" />}>
         <EbayAccountsTable />
       </Suspense>
     </>

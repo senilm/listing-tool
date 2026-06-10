@@ -11,7 +11,7 @@ const ProductsPage = () => {
         title="Products"
         description="Your master jewellery listings."
       />
-      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+      <Suspense fallback={<Skeleton className="h-full w-full" />}>
         <ProductsTable />
       </Suspense>
     </>

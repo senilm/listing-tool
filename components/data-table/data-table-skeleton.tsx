@@ -8,7 +8,7 @@ type DataTableSkeletonProps = {
 
 export const DataTableSkeleton = ({
   columns,
-  rows = 8,
+  rows = 11,
 }: DataTableSkeletonProps) => (
   <TableBody>
     {Array.from({ length: rows }).map((_, rowIndex) => (

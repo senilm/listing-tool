@@ -12,7 +12,7 @@ const PublicationsPage = () => {
         description="Per-account publish records."
       />
 
-      <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+      <Suspense fallback={<Skeleton className="h-full w-full" />}>
         <PublicationsTable />
       </Suspense>
     </>

@@ -183,7 +183,7 @@ export const DataTable = <TData,>({
   const visibleColumnCount = table.getVisibleLeafColumns().length;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
       <DataTableToolbar
         table={table}
         filterFields={filterFields}
@@ -204,7 +204,7 @@ export const DataTable = <TData,>({
         </DataTableBulkActions>
       )}
 
-      <div className="rounded-lg border">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-lg border">
         <Table
           style={
             enableColumnResizing
@@ -242,7 +242,7 @@ export const DataTable = <TData,>({
 
           {isLoading ? (
             <DataTableSkeleton columns={visibleColumnCount} />
-          ) : rows.length ? (
+          ) : (
             <TableBody>
               {rows.map((row) => (
                 <TableRow
@@ -271,19 +271,16 @@ export const DataTable = <TData,>({
                 </TableRow>
               ))}
             </TableBody>
-          ) : (
-            <TableBody>
-              <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={visibleColumnCount}>
-                  <EmptyState
-                    title={emptyTitle}
-                    description={emptyDescription}
-                  />
-                </TableCell>
-              </TableRow>
-            </TableBody>
           )}
         </Table>
+
+        {!isLoading && !rows.length && (
+          <EmptyState
+            title={emptyTitle}
+            description={emptyDescription}
+            className="flex-1 py-0"
+          />
+        )}
       </div>
 
       <DataTablePagination
