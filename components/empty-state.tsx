@@ -2,12 +2,14 @@ import { InboxIcon, type LucideIcon } from "lucide-react";
 import { type ReactNode } from "react";
 
 import { Typography } from "@/components/typography";
+import { cn } from "@/lib/utils";
 
 type EmptyStateProps = {
   icon?: LucideIcon;
   title?: string;
   description?: string;
   children?: ReactNode;
+  className?: string;
 };
 
 export const EmptyState = ({
@@ -15,8 +17,14 @@ export const EmptyState = ({
   title = "Nothing here yet",
   description = "There are no items to display.",
   children,
+  className,
 }: EmptyStateProps) => (
-  <div className="flex h-full flex-col items-center justify-center gap-3 py-16">
+  <div
+    className={cn(
+      "flex h-full flex-col items-center justify-center gap-3 py-16",
+      className,
+    )}
+  >
     <Icon className="size-12 text-muted-foreground/40" />
     <div className="text-center">
       <Typography variant="small">{title}</Typography>
