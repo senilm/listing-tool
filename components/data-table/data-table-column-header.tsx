@@ -35,7 +35,11 @@ export const DataTableColumnHeader = <TData, TValue>({
       variant="ghost"
       size="sm"
       className={cn("-ml-2 h-7", className)}
-      onClick={() => column.toggleSorting(sorted === "asc")}
+      onClick={() => {
+        // Cycle: none → asc → desc → none
+        if (sorted === "desc") column.clearSorting();
+        else column.toggleSorting(sorted === "asc");
+      }}
     >
       <TruncatedText>{title}</TruncatedText>
       {sorted === "asc" ? (
