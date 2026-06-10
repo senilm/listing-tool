@@ -1,10 +1,10 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { HeaderBreadcrumb } from "@/components/layout/header-breadcrumb";
 import { HeaderSearch } from "@/components/layout/header-search";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const AppHeader = () => {
   return (

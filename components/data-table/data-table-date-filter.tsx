@@ -1,11 +1,10 @@
 "use client";
 
 import { type Column } from "@tanstack/react-table";
-import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 
-import { toSafeDate, formatDateToISO } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -15,6 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { toSafeDate, formatDateToISO } from "@/lib/format";
 
 type DateRangeValue = { from?: string; to?: string };
 
@@ -49,14 +49,12 @@ export const DataTableDateFilter = <TData, TValue>({
         <Button variant="outline" size="sm" className="border-dashed">
           <CalendarIcon />
           {title}
-          {label && (
-            <>
+          {!!label && <>
               <Separator orientation="vertical" className="mx-0.5 h-4" />
               <Badge variant="secondary" className="rounded-sm px-1 font-normal">
                 {label}
               </Badge>
-            </>
-          )}
+            </>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -75,7 +73,7 @@ export const DataTableDateFilter = <TData, TValue>({
             )
           }
         />
-        {label && (
+        {!!label && (
           <div className="border-t p-2">
             <Button
               variant="ghost"

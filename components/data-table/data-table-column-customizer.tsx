@@ -1,6 +1,5 @@
 "use client";
 
-import { type Column, type Table } from "@tanstack/react-table";
 import {
   DndContext,
   KeyboardSensor,
@@ -17,8 +16,10 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { type Column, type Table } from "@tanstack/react-table";
 import { Settings2 } from "lucide-react";
 
+import { DataTableColumnCustomizerItem } from "@/components/data-table/data-table-column-customizer-item";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -26,7 +27,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { DataTableColumnCustomizerItem } from "@/components/data-table/data-table-column-customizer-item";
 
 const FIXED_COLUMNS = new Set(["select", "actions"]);
 

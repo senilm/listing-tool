@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -15,8 +14,21 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { DataTableBulkActions } from "@/components/data-table/data-table-bulk-actions";
+import { DataTableDefaultCell } from "@/components/data-table/data-table-default-cell";
+import { DataTablePagination } from "@/components/data-table/data-table-pagination";
+import { DataTableResizeHandle } from "@/components/data-table/data-table-resize-handle";
+import { createSelectionColumn } from "@/components/data-table/data-table-select-column";
+import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
+import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
+import {
+  type DataTableExportHandlers,
+  type DataTableFilterField,
+  type DataTablePaginationState,
+} from "@/components/data-table/data-table.types";
+import { EmptyState } from "@/components/empty-state";
 import {
   Table,
   TableBody,
@@ -25,19 +37,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { EmptyState } from "@/components/empty-state";
-import { createSelectionColumn } from "@/components/data-table/data-table-select-column";
-import { DataTableDefaultCell } from "@/components/data-table/data-table-default-cell";
-import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
-import { DataTablePagination } from "@/components/data-table/data-table-pagination";
-import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
-import { DataTableBulkActions } from "@/components/data-table/data-table-bulk-actions";
-import { DataTableResizeHandle } from "@/components/data-table/data-table-resize-handle";
-import {
-  type DataTableExportHandlers,
-  type DataTableFilterField,
-  type DataTablePaginationState,
-} from "@/components/data-table/data-table.types";
+import { cn } from "@/lib/utils";
 
 type DataTableProps<TData> = {
   columns: ColumnDef<TData, unknown>[];
@@ -189,7 +189,7 @@ export const DataTable = <TData,>({
         exportHandlers={exportHandlers}
       />
 
-      {enableRowSelection && renderBulkActions && (
+      {!!enableRowSelection && !!renderBulkActions && (
         <DataTableBulkActions
           selectedCount={selectedRows.length}
           onClear={() => table.resetRowSelection()}
@@ -225,9 +225,7 @@ export const DataTable = <TData,>({
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
-                    {enableColumnResizing && header.column.getCanResize() && (
-                      <DataTableResizeHandle header={header} />
-                    )}
+                    {!!enableColumnResizing && header.column.getCanResize() && <DataTableResizeHandle header={header} />}
                   </TableHead>
                 ))}
               </TableRow>

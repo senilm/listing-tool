@@ -1,9 +1,21 @@
 "use client";
 
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useRouter } from "next/navigation";
 import { useForm, type DefaultValues } from "react-hook-form";
-import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 
+import { FormField } from "@/components/form-field";
+import { NumberInput } from "@/components/number-input";
+import { Button } from "@/components/ui/button";
+import { FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ProductAspectsField } from "@/features/products/components/product-aspects-field";
+import { ProductImagesField } from "@/features/products/components/product-images-field";
+import {
+  useCreateProduct,
+  useUpdateProduct,
+} from "@/features/products/hooks/use-product-mutations";
 import { productsRoute } from "@/lib/routes";
 import { toast } from "@/lib/toast";
 import {
@@ -11,18 +23,6 @@ import {
   toProductInput,
   type ProductFormValues,
 } from "@/validations/product";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
-import { FormField } from "@/components/form-field";
-import { NumberInput } from "@/components/number-input";
-import { ProductImagesField } from "@/features/products/components/product-images-field";
-import { ProductAspectsField } from "@/features/products/components/product-aspects-field";
-import {
-  useCreateProduct,
-  useUpdateProduct,
-} from "@/features/products/hooks/use-product-mutations";
 
 const EMPTY_VALUES: DefaultValues<ProductFormValues> = {
   sku: "",
@@ -73,7 +73,7 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
 
   return (
     <form
-      onSubmit={form.handleSubmit(onSubmit)}
+      onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
       className="flex max-w-2xl flex-col gap-8"
     >
       <FieldSet>

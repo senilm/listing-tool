@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth/server";
 import {
   isEbayAccountSortField,
   listEbayAccounts,
 } from "@/features/ebay-accounts/services/ebay-account-service";
+import { auth } from "@/lib/auth/server";
 import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 
 const DEFAULT_LIMIT = 20;

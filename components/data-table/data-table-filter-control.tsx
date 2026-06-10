@@ -2,9 +2,9 @@
 
 import { type Table } from "@tanstack/react-table";
 
-import { DataTableTextFilter } from "@/components/data-table/data-table-text-filter";
-import { DataTableFacetedFilter } from "@/components/data-table/data-table-faceted-filter";
 import { DataTableDateFilter } from "@/components/data-table/data-table-date-filter";
+import { DataTableFacetedFilter } from "@/components/data-table/data-table-faceted-filter";
+import { DataTableTextFilter } from "@/components/data-table/data-table-text-filter";
 import {
   DataTableFilterType,
   type DataTableFilterField,

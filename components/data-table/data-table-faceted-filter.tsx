@@ -3,7 +3,8 @@
 import { type Column } from "@tanstack/react-table";
 import { Check, PlusCircle } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { type FacetedFilterOption } from "@/components/data-table/data-table.types";
+import { TruncatedText } from "@/components/truncated-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +22,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { TruncatedText } from "@/components/truncated-text";
-import { type FacetedFilterOption } from "@/components/data-table/data-table.types";
+import { cn } from "@/lib/utils";
 
 type DataTableFacetedFilterProps<TData, TValue> = {
   column: Column<TData, TValue>;

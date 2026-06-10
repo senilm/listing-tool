@@ -2,6 +2,7 @@
 
 import { Download } from "lucide-react";
 
+import { type DataTableExportHandlers } from "@/components/data-table/data-table.types";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { type DataTableExportHandlers } from "@/components/data-table/data-table.types";
 
 type DataTableExportProps = {
   handlers: DataTableExportHandlers;
@@ -25,17 +25,13 @@ export const DataTableExport = ({ handlers, disabled }: DataTableExportProps) =>
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
-      {handlers.csv && (
-        <DropdownMenuItem onClick={() => handlers.csv?.()}>CSV</DropdownMenuItem>
-      )}
-      {handlers.xlsx && (
-        <DropdownMenuItem onClick={() => handlers.xlsx?.()}>
+      {!!handlers.csv && <DropdownMenuItem onClick={() => void handlers.csv?.()}>CSV</DropdownMenuItem>}
+      {!!handlers.xlsx && (
+        <DropdownMenuItem onClick={() => void handlers.xlsx?.()}>
           Excel (XLSX)
         </DropdownMenuItem>
       )}
-      {handlers.pdf && (
-        <DropdownMenuItem onClick={() => handlers.pdf?.()}>PDF</DropdownMenuItem>
-      )}
+      {!!handlers.pdf && <DropdownMenuItem onClick={() => void handlers.pdf?.()}>PDF</DropdownMenuItem>}
     </DropdownMenuContent>
   </DropdownMenu>
 );

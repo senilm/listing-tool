@@ -1,14 +1,14 @@
 "use client";
 
-import { useFieldArray, type Control } from "react-hook-form";
 import { Plus, Trash2 } from "lucide-react";
+import { useFieldArray, type Control } from "react-hook-form";
 
-import { type ProductFormValues } from "@/validations/product";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FieldGroup } from "@/components/ui/field";
 import { FormField } from "@/components/form-field";
 import { Typography } from "@/components/typography";
+import { Button } from "@/components/ui/button";
+import { FieldGroup } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { type ProductFormValues } from "@/validations/product";
 
 type ProductImagesFieldProps = {
   control: Control<ProductFormValues>;

@@ -15,9 +15,9 @@ export const PageHeader = ({ title, description, children }: PageHeaderProps) =>
         <Typography variant="h3" as="h1">
           {title}
         </Typography>
-        {description && <Typography variant="muted">{description}</Typography>}
+        {!!description && <Typography variant="muted">{description}</Typography>}
       </div>
-      {children && <div className="flex items-center gap-2">{children}</div>}
+      {!!children && <div className="flex items-center gap-2">{children}</div>}
     </div>
   );
 };

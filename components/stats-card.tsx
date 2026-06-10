@@ -1,14 +1,14 @@
 import { type LucideIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { TruncatedText } from "@/components/truncated-text";
+import { Typography } from "@/components/typography";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Typography } from "@/components/typography";
-import { TruncatedText } from "@/components/truncated-text";
+import { cn } from "@/lib/utils";
 
 type StatsCardProps = {
   title: string;

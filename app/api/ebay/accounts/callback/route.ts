@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { linkEbayAccount } from "@/features/ebay-accounts/services/ebay-account-service";
 import { auth } from "@/lib/auth/server";
 import { EBAY_OAUTH_STATE_COOKIE } from "@/lib/constants";
 import { EBAY_CONSENT_SCOPES } from "@/lib/ebay/config";
 import { fetchEbayUsername } from "@/lib/ebay/identity";
 import { exchangeCodeForTokens } from "@/lib/ebay/oauth";
-import { linkEbayAccount } from "@/features/ebay-accounts/services/ebay-account-service";
 import { ebayAccountsRoute, loginRoute } from "@/lib/routes";
 
 const backTo = (request: NextRequest, params: Record<string, string>) => {

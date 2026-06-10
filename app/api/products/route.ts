@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth/server";
 import {
   createProduct,
   isProductSortField,
   listProducts,
 } from "@/features/products/services/product-service";
+import { auth } from "@/lib/auth/server";
 import { ProductStatus } from "@/lib/enums/product";
 import { productInputSchema } from "@/validations/product";
 

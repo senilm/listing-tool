@@ -8,7 +8,7 @@ export const REDIRECT_PARAM = "redirect";
 export const getSafeRedirectPath = (
   path: string | null | undefined,
 ): string | null => {
-  if (!path || !path.startsWith("/")) return null;
+  if (!path?.startsWith("/")) return null;
   if (path[1] === "/" || path[1] === "\\") return null;
   return path;
 };

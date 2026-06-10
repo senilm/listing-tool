@@ -4,12 +4,12 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ExternalLink } from "lucide-react";
 
-import { type PublicationSummary } from "@/features/publications/services/publication-service";
-import { Typography } from "@/components/typography";
-import { TruncatedText } from "@/components/truncated-text";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { DataTableRowActions } from "@/components/data-table/data-table-row-actions";
+import { TruncatedText } from "@/components/truncated-text";
+import { Typography } from "@/components/typography";
 import { PublicationStatusBadge } from "@/features/publications/components/publication-status-badge";
+import { type PublicationSummary } from "@/features/publications/services/publication-service";
 
 export const createPublicationColumns = (): ColumnDef<PublicationSummary>[] => [
   {

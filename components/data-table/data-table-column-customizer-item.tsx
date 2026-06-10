@@ -4,9 +4,9 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 
-import { cn } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
 import { TruncatedText } from "@/components/truncated-text";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 type DataTableColumnCustomizerItemProps = {
   id: string;

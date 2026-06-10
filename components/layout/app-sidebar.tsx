@@ -1,11 +1,12 @@
 "use client";
 
+import { Gem } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gem } from "lucide-react";
 
-import { APP_NAME } from "@/lib/constants";
-import { dashboardRoute } from "@/lib/routes";
+import { navConfig } from "@/components/layout/nav-config";
+import { SidebarLogout } from "@/components/layout/sidebar-logout";
+import { SidebarUser } from "@/components/layout/sidebar-user";
 import {
   Sidebar,
   SidebarContent,
@@ -19,9 +20,8 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { navConfig } from "@/components/layout/nav-config";
-import { SidebarLogout } from "@/components/layout/sidebar-logout";
-import { SidebarUser } from "@/components/layout/sidebar-user";
+import { APP_NAME } from "@/lib/constants";
+import { dashboardRoute } from "@/lib/routes";
 
 const isItemActive = (pathname: string, path: string) =>
   pathname === path || pathname.startsWith(`${path}/`);

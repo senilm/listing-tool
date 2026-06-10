@@ -1,16 +1,9 @@
 "use client";
 
-import * as React from "react";
-import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import * as React from "react";
 
-import { cn } from "@/lib/utils";
-import {
-  toSafeDate,
-  formatDateToISO,
-  CALENDAR_START,
-  CALENDAR_END,
-} from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -18,6 +11,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  toSafeDate,
+  formatDateToISO,
+  CALENDAR_START,
+  CALENDAR_END,
+} from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 type DateInputProps = {
   value?: string;
@@ -50,7 +50,7 @@ export const DateInput = ({
         <Button
           variant="outline"
           disabled={disabled}
-          aria-invalid={error || undefined}
+          aria-invalid={error ? true : undefined}
           className={cn(
             "w-full justify-start font-normal",
             !value && "text-muted-foreground",

@@ -4,13 +4,13 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Archive, Pencil, Upload } from "lucide-react";
 
-import { ProductStatus } from "@/lib/enums/product";
-import { type ProductSummary } from "@/features/products/services/product-service";
-import { Typography } from "@/components/typography";
-import { TruncatedText } from "@/components/truncated-text";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { DataTableRowActions } from "@/components/data-table/data-table-row-actions";
+import { TruncatedText } from "@/components/truncated-text";
+import { Typography } from "@/components/typography";
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge";
+import { type ProductSummary } from "@/features/products/services/product-service";
+import { ProductStatus } from "@/lib/enums/product";
 
 const formatPrice = (amount: string, currency: string): string => {
   const value = Number(amount);

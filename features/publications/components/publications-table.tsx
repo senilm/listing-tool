@@ -2,8 +2,6 @@
 
 import { useMemo } from "react";
 
-import { PublicationStatus } from "@/lib/enums/publication";
-import { useTableParams } from "@/hooks/use-table-params";
 import { DataTable } from "@/components/data-table/data-table";
 import {
   DataTableFilterType,
@@ -11,6 +9,8 @@ import {
 } from "@/components/data-table/data-table.types";
 import { createPublicationColumns } from "@/features/publications/components/publication-columns";
 import { usePublicationsQuery } from "@/features/publications/hooks/use-publications-query";
+import { useTableParams } from "@/hooks/use-table-params";
+import { PublicationStatus } from "@/lib/enums/publication";
 
 const FILTER_KEYS = ["status"];
 

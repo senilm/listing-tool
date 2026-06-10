@@ -2,7 +2,7 @@
 
 import { type Table } from "@tanstack/react-table";
 
-import { cn } from "@/lib/utils";
+import { type DataTablePaginationState } from "@/components/data-table/data-table.types";
 import {
   Pagination,
   PaginationContent,
@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { type DataTablePaginationState } from "@/components/data-table/data-table.types";
+import { cn } from "@/lib/utils";
 
 // First/last/current±1 with ellipsis once there are more than 7 pages.
 const getPageItems = (

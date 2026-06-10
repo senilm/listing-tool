@@ -1,28 +1,28 @@
 "use client";
 
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import { ArrowRight } from "lucide-react";
 
+import { FormField } from "@/components/form-field";
+import { PasswordInput } from "@/components/password-input";
+import { Typography } from "@/components/typography";
+import { Button } from "@/components/ui/button";
+import { FieldGroup } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { AuthFormHeader } from "@/features/auth/components/auth-form-header";
 import { authClient } from "@/lib/auth/client";
 import { APP_NAME } from "@/lib/constants";
-import { dashboardRoute, registerRoute } from "@/lib/routes";
 import {
   REDIRECT_PARAM,
   getSafeRedirectPath,
   withRedirectParam,
 } from "@/lib/redirect";
+import { dashboardRoute, registerRoute } from "@/lib/routes";
 import { toast } from "@/lib/toast";
 import { signInSchema, type SignInValues } from "@/validations/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FieldGroup } from "@/components/ui/field";
-import { FormField } from "@/components/form-field";
-import { PasswordInput } from "@/components/password-input";
-import { Typography } from "@/components/typography";
-import { AuthFormHeader } from "@/features/auth/components/auth-form-header";
 
 export const SignInForm = () => {
   const router = useRouter();
@@ -56,7 +56,7 @@ export const SignInForm = () => {
         description="Enter your credentials to continue."
       />
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="flex flex-col gap-6">
         <FieldGroup>
           <FormField
             control={form.control}

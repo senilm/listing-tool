@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
 import { XIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -42,7 +42,7 @@ export const FullScreenDialogHeader = ({
     {...props}
   >
     <div className="flex-1 min-w-0 flex flex-col gap-1">{children}</div>
-    {showCloseButton && (
+    {!!showCloseButton && (
       <DialogPrimitive.Close className="mt-0.5 shrink-0 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-ring/50 focus-visible:ring-[3px] focus:outline-hidden cursor-pointer">
         <XIcon className="size-5" />
         <span className="sr-only">Close</span>

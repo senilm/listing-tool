@@ -1,8 +1,8 @@
 "use client";
 
-import { toast } from "@/lib/toast";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useDisconnectEbayAccount } from "@/features/ebay-accounts/hooks/use-ebay-account-mutations";
+import { toast } from "@/lib/toast";
 
 type DisconnectEbayAccountDialogProps = {
   id: string;
@@ -40,7 +40,7 @@ export const DisconnectEbayAccountDialog = ({
       confirmLabel="Disconnect"
       variant="destructive"
       isLoading={disconnectAccount.isPending}
-      onConfirm={handleDisconnect}
+      onConfirm={() => void handleDisconnect()}
     />
   );
 };

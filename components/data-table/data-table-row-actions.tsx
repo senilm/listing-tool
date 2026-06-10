@@ -1,8 +1,9 @@
 "use client";
 
-import { Fragment } from "react";
 import { MoreHorizontal } from "lucide-react";
+import { Fragment } from "react";
 
+import { type DataTableRowAction } from "@/components/data-table/data-table.types";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { type DataTableRowAction } from "@/components/data-table/data-table.types";
 
 type DataTableRowActionsProps<TData> = {
   row: TData;
@@ -36,7 +36,7 @@ export const DataTableRowActions = <TData,>({
     <DropdownMenuContent align="end" className="w-40">
       {actions.map((action, index) => (
         <Fragment key={action.label}>
-          {action.separatorBefore && index > 0 && <DropdownMenuSeparator />}
+          {!!action.separatorBefore && index > 0 && <DropdownMenuSeparator />}
           <DropdownMenuItem
             variant={action.variant === "destructive" ? "destructive" : "default"}
             disabled={action.disabled?.(row)}
@@ -45,7 +45,7 @@ export const DataTableRowActions = <TData,>({
               action.onSelect(row);
             }}
           >
-            {action.icon && <action.icon />}
+            {!!action.icon && <action.icon />}
             {action.label}
           </DropdownMenuItem>
         </Fragment>

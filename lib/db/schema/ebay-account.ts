@@ -1,7 +1,7 @@
 import { index, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 import { user } from "@/lib/db/schema/auth";
+import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 
 export const ebayAccountStatusEnum = pgEnum(
   "ebay_account_status",

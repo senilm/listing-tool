@@ -1,7 +1,7 @@
 import { AuthGuard } from "@/components/auth-guard";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 const AppGroupLayout = async ({
   children,

@@ -1,14 +1,9 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { useForm } from "react-hook-form";
 
-import { toast } from "@/lib/toast";
-import {
-  renameEbayAccountSchema,
-  type RenameEbayAccountValues,
-} from "@/validations/ebay-account";
-import { useRenameEbayAccount } from "@/features/ebay-accounts/hooks/use-ebay-account-mutations";
+import { FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,9 +13,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { FieldGroup } from "@/components/ui/field";
-import { FormField } from "@/components/form-field";
+import { Input } from "@/components/ui/input";
+import { useRenameEbayAccount } from "@/features/ebay-accounts/hooks/use-ebay-account-mutations";
+import { toast } from "@/lib/toast";
+import {
+  renameEbayAccountSchema,
+  type RenameEbayAccountValues,
+} from "@/validations/ebay-account";
 
 type RenameEbayAccountDialogProps = {
   id: string;
@@ -63,7 +63,7 @@ export const RenameEbayAccountDialog = ({
           </DialogDescription>
         </DialogHeader>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
           className="flex flex-col gap-6"
         >
           <FieldGroup>

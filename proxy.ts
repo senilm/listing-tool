@@ -1,8 +1,8 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
+import { type NextRequest, NextResponse } from "next/server";
 
-import { dashboardRoute, loginRoute } from "@/lib/routes";
 import { REDIRECT_PARAM, getSafeRedirectPath } from "@/lib/redirect";
+import { dashboardRoute, loginRoute } from "@/lib/routes";
 
 const AUTH_ROUTES = ["/login", "/register"];
 

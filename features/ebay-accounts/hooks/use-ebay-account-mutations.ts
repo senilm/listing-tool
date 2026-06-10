@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { QUERY_KEYS } from "@/lib/query-keys";
 import {
   disconnectEbayAccountRequest,
   renameEbayAccountRequest,
 } from "@/features/ebay-accounts/services/ebay-account-client";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 const useInvalidateEbayAccounts = () => {
   const queryClient = useQueryClient();

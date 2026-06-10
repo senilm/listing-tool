@@ -1,7 +1,5 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Package,
@@ -11,14 +9,9 @@ import {
   Store,
   type LucideIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 
-import {
-  dashboardRoute,
-  ebayAccountsRoute,
-  productCreateRoute,
-  productsRoute,
-  publicationsRoute,
-} from "@/lib/routes";
 import {
   CommandDialog,
   CommandEmpty,
@@ -27,6 +20,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  dashboardRoute,
+  ebayAccountsRoute,
+  productCreateRoute,
+  productsRoute,
+  publicationsRoute,
+} from "@/lib/routes";
 
 type QuickAction = {
   label: string;

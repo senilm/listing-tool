@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth/server";
-import { PublicationStatus } from "@/lib/enums/publication";
 import {
   isPublicationSortField,
   listPublications,
   publishProductToAccounts,
 } from "@/features/publications/services/publication-service";
+import { auth } from "@/lib/auth/server";
+import { PublicationStatus } from "@/lib/enums/publication";
 import { publishRequestSchema } from "@/validations/publication";
 
 const DEFAULT_LIMIT = 20;

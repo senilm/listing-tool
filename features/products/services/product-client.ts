@@ -1,6 +1,6 @@
+import { type ListProductsResult } from "@/features/products/services/product-service";
 import { productApiRoute, productsApiRoute } from "@/lib/api-routes";
 import { type ProductInput } from "@/validations/product";
-import { type ListProductsResult } from "@/features/products/services/product-service";
 
 // Client-side HTTP calls to the product API. The server service
 // (product-service.ts) is the only code that touches the DB; this module is

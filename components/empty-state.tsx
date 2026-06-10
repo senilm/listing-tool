@@ -1,5 +1,5 @@
-import { type ReactNode } from "react";
 import { InboxIcon, type LucideIcon } from "lucide-react";
+import { type ReactNode } from "react";
 
 import { Typography } from "@/components/typography";
 

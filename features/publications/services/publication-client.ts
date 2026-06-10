@@ -1,8 +1,8 @@
-import { publicationsApiRoute } from "@/lib/api-routes";
 import {
   type ListPublicationsResult,
   type PublishResult,
 } from "@/features/publications/services/publication-service";
+import { publicationsApiRoute } from "@/lib/api-routes";
 import { type PublishRequest } from "@/validations/publication";
 
 // Client-side HTTP calls to the publications API. The server service

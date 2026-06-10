@@ -4,12 +4,12 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Pencil, Unplug } from "lucide-react";
 
-import { EbayAccountStatus } from "@/lib/enums/ebay-account";
-import { type EbayAccountSummary } from "@/features/ebay-accounts/services/ebay-account-service";
-import { TruncatedText } from "@/components/truncated-text";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { DataTableRowActions } from "@/components/data-table/data-table-row-actions";
+import { TruncatedText } from "@/components/truncated-text";
 import { EbayAccountStatusBadge } from "@/features/ebay-accounts/components/ebay-account-status-badge";
+import { type EbayAccountSummary } from "@/features/ebay-accounts/services/ebay-account-service";
+import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 
 type EbayAccountColumnHandlers = {
   onRename: (account: EbayAccountSummary) => void;

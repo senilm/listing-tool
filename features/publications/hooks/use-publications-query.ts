@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { QUERY_KEYS } from "@/lib/query-keys";
 import { fetchPublications } from "@/features/publications/services/publication-client";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 export const usePublicationsQuery = (apiParams: string) =>
   useQuery({

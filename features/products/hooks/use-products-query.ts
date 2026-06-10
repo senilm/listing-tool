@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { QUERY_KEYS } from "@/lib/query-keys";
 import { fetchProducts } from "@/features/products/services/product-client";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 // Fetches a page of products for the given API query string. React Query owns
 // caching and request cancellation (via the passed signal), so no manual

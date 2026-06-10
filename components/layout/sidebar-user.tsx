@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { authClient } from "@/lib/auth/client";
-import { getInitials } from "@/lib/format";
-import { settingsRoute } from "@/lib/routes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   SidebarMenuButton,
   SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth/client";
+import { getInitials } from "@/lib/format";
+import { settingsRoute } from "@/lib/routes";
 
 export const SidebarUser = () => {
   const { data: session, isPending } = authClient.useSession();
@@ -26,7 +26,7 @@ export const SidebarUser = () => {
     <SidebarMenuButton asChild size="lg" isActive={isActive} tooltip={name}>
       <Link href={settingsRoute()}>
         <Avatar className="size-7 rounded-md">
-          {image && <AvatarImage src={image} alt={name} />}
+          {!!image && <AvatarImage src={image} alt={name} />}
           <AvatarFallback className="rounded-md text-xs font-semibold">
             {getInitials(name)}
           </AvatarFallback>

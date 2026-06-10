@@ -1,7 +1,7 @@
 import { Gem, Globe, Layers, ShieldCheck, type LucideIcon } from "lucide-react";
 
-import { APP_NAME } from "@/lib/constants";
 import { Typography } from "@/components/typography";
+import { APP_NAME } from "@/lib/constants";
 
 type PanelFeature = {
   icon: LucideIcon;

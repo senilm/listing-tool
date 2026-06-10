@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { QUERY_KEYS } from "@/lib/query-keys";
-import { type ProductInput } from "@/validations/product";
 import {
   archiveProductRequest,
   createProductRequest,
   updateProductRequest,
 } from "@/features/products/services/product-client";
+import { QUERY_KEYS } from "@/lib/query-keys";
+import { type ProductInput } from "@/validations/product";
 
 // Each mutation invalidates the products prefix on success so every cached list
 // refetches — no manual router.refresh().

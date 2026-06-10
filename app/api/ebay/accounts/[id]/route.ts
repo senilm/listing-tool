@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth/server";
 import {
   disableEbayAccount,
   renameEbayAccount,
 } from "@/features/ebay-accounts/services/ebay-account-service";
+import { auth } from "@/lib/auth/server";
 import { renameEbayAccountSchema } from "@/validations/ebay-account";
 
 type RouteContext = { params: Promise<{ id: string }> };

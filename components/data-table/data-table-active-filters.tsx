@@ -3,13 +3,13 @@
 import { type Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { TruncatedText } from "@/components/truncated-text";
 import {
   DataTableFilterType,
   type DataTableFilterField,
 } from "@/components/data-table/data-table.types";
+import { TruncatedText } from "@/components/truncated-text";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 type DataTableActiveFiltersProps<TData> = {
   table: Table<TData>;
@@ -50,7 +50,7 @@ export const DataTableActiveFilters = <TData,>({
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      {hasGlobal && (
+      {!!hasGlobal && (
         <Badge variant="secondary" className="gap-1 font-normal">
           <span className="text-muted-foreground">Search:</span>
           <TruncatedText className="max-w-32">{globalFilter}</TruncatedText>

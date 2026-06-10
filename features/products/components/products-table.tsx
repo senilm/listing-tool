@@ -1,26 +1,26 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { productCreateRoute, productDetailRoute } from "@/lib/routes";
-import { ProductStatus } from "@/lib/enums/product";
-import { toast } from "@/lib/toast";
-import { useTableParams } from "@/hooks/use-table-params";
-import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DataTable } from "@/components/data-table/data-table";
 import {
   DataTableFilterType,
   type DataTableFilterField,
 } from "@/components/data-table/data-table.types";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Button } from "@/components/ui/button";
 import { createProductColumns } from "@/features/products/components/product-columns";
-import { useProductsQuery } from "@/features/products/hooks/use-products-query";
 import { useArchiveProduct } from "@/features/products/hooks/use-product-mutations";
+import { useProductsQuery } from "@/features/products/hooks/use-products-query";
 import { type ProductSummary } from "@/features/products/services/product-service";
 import { PublishProductDialog } from "@/features/publications/components/publish-product-dialog";
+import { useTableParams } from "@/hooks/use-table-params";
+import { ProductStatus } from "@/lib/enums/product";
+import { productCreateRoute, productDetailRoute } from "@/lib/routes";
+import { toast } from "@/lib/toast";
 
 const FILTER_KEYS = ["status"];
 
@@ -112,7 +112,7 @@ export const ProductsTable = () => {
         confirmLabel="Archive"
         variant="destructive"
         isLoading={archiveProduct.isPending}
-        onConfirm={handleArchive}
+        onConfirm={() => void handleArchive()}
       />
 
       <PublishProductDialog

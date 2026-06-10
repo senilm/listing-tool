@@ -1,13 +1,13 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 
+import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth/client";
 import { loginRoute } from "@/lib/routes";
 import { toErrorMessage, toast } from "@/lib/toast";
-import { SidebarMenuButton } from "@/components/ui/sidebar";
 
 export const SidebarLogout = () => {
   const router = useRouter();
@@ -27,7 +27,7 @@ export const SidebarLogout = () => {
 
   return (
     <SidebarMenuButton
-      onClick={handleLogout}
+      onClick={() => void handleLogout()}
       disabled={isLoggingOut}
       tooltip="Logout"
     >

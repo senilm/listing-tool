@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth/server";
 import {
   archiveProduct,
   updateProduct,
 } from "@/features/products/services/product-service";
+import { auth } from "@/lib/auth/server";
 import { productInputSchema } from "@/validations/product";
 
 type RouteContext = { params: Promise<{ id: string }> };

@@ -1,10 +1,12 @@
-import { type LucideIcon } from "lucide-react";
 import { type RowData } from "@tanstack/react-table";
+import { type LucideIcon } from "lucide-react";
 
 // Lets a column declare a human label (used by the column customizer and the
 // active-filter chips, where the header may be a component, not a string).
 declare module "@tanstack/react-table" {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // Augmentation must stay an interface (declaration merging) and must match
+  // the library's generic signature, hence the unused type params.
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions, unused-imports/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     label?: string;
   }

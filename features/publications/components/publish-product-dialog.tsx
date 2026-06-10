@@ -1,20 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { useState } from "react";
 
-import { QUERY_KEYS } from "@/lib/query-keys";
-import { ebayAccountsRoute } from "@/lib/routes";
-import { EbayAccountStatus } from "@/lib/enums/ebay-account";
-import { PublicationStatus } from "@/lib/enums/publication";
-import { toast } from "@/lib/toast";
-import { fetchEbayAccounts } from "@/features/ebay-accounts/services/ebay-account-client";
-import { usePublishProduct } from "@/features/publications/hooks/use-publish-product";
+import { Typography } from "@/components/typography";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +15,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Typography } from "@/components/typography";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { fetchEbayAccounts } from "@/features/ebay-accounts/services/ebay-account-client";
+import { usePublishProduct } from "@/features/publications/hooks/use-publish-product";
+import { EbayAccountStatus } from "@/lib/enums/ebay-account";
+import { PublicationStatus } from "@/lib/enums/publication";
+import { QUERY_KEYS } from "@/lib/query-keys";
+import { ebayAccountsRoute } from "@/lib/routes";
+import { toast } from "@/lib/toast";
 
 const ACTIVE_ACCOUNTS_PARAMS = `status=${EbayAccountStatus.Active}&limit=100`;
 
@@ -151,7 +151,7 @@ export const PublishProductDialog = ({
             type="button"
             loading={publishProduct.isPending}
             disabled={selectedIds.length === 0}
-            onClick={handlePublish}
+            onClick={() => void handlePublish()}
           >
             Publish
             {selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
