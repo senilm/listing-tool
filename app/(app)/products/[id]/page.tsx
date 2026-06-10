@@ -18,13 +18,13 @@ const ProductDetailPage = async ({ params }: ProductDetailPageProps) => {
   if (!product) notFound();
 
   return (
-    <div>
+    <>
       <PageHeader title="Edit product" description={product.title} />
       <ProductForm
         productId={product.id}
         initialValues={toProductFormValues(product)}
       />
-    </div>
+    </>
   );
 };
 

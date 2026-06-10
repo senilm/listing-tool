@@ -6,7 +6,7 @@ import { ProductsTable } from "@/features/products/components/products-table";
 
 const ProductsPage = () => {
   return (
-    <div>
+    <>
       <PageHeader
         title="Products"
         description="Your master jewellery listings."
@@ -14,7 +14,7 @@ const ProductsPage = () => {
       <Suspense fallback={<Skeleton className="h-96 w-full" />}>
         <ProductsTable />
       </Suspense>
-    </div>
+    </>
   );
 };
 

@@ -2,10 +2,12 @@ import { PageHeader } from "@/components/page-header";
 
 const DashboardPage = () => {
   return (
-    <PageHeader
-      title="Dashboard"
-      description="Overview of your listing activity."
-    />
+    <>
+      <PageHeader
+        title="Dashboard"
+        description="Overview of your listing activity."
+      />
+    </>
   );
 };
 

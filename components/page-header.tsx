@@ -14,7 +14,7 @@ export const PageHeader = ({
   children,
 }: PageHeaderProps) => {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="space-y-1">
         <Typography variant="h3" as="h1">
           {title}

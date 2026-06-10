@@ -6,7 +6,7 @@ import { PublicationsTable } from "@/features/publications/components/publicatio
 
 const PublicationsPage = () => {
   return (
-    <div>
+    <>
       <PageHeader
         title="Publications"
         description="Per-account publish records."
@@ -15,7 +15,7 @@ const PublicationsPage = () => {
       <Suspense fallback={<Skeleton className="h-96 w-full" />}>
         <PublicationsTable />
       </Suspense>
-    </div>
+    </>
   );
 };
 

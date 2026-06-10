@@ -7,7 +7,7 @@ import { EbayConnectFeedback } from "@/features/ebay-accounts/components/ebay-co
 
 const EbayAccountsPage = () => {
   return (
-    <div>
+    <>
       <PageHeader
         title="eBay Accounts"
         description="Linked eBay seller accounts."
@@ -20,7 +20,7 @@ const EbayAccountsPage = () => {
       <Suspense fallback={<Skeleton className="h-96 w-full" />}>
         <EbayAccountsTable />
       </Suspense>
-    </div>
+    </>
   );
 };
 
