@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
+import { DataTableFallback } from "@/components/data-table/data-table-fallback";
 import { PageHeader } from "@/components/page-header";
-import { Skeleton } from "@/components/ui/skeleton";
 import { EbayAccountsTable } from "@/features/ebay-accounts/components/ebay-accounts-table";
 import { EbayConnectFeedback } from "@/features/ebay-accounts/components/ebay-connect-feedback";
 
@@ -17,7 +17,7 @@ const EbayAccountsPage = () => {
         <EbayConnectFeedback />
       </Suspense>
 
-      <Suspense fallback={<Skeleton className="h-full w-full" />}>
+      <Suspense fallback={<DataTableFallback />}>
         <EbayAccountsTable />
       </Suspense>
     </>

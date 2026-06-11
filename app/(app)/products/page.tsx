@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
+import { DataTableFallback } from "@/components/data-table/data-table-fallback";
 import { PageHeader } from "@/components/page-header";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ProductsTable } from "@/features/products/components/products-table";
 
 const ProductsPage = () => {
@@ -11,7 +11,7 @@ const ProductsPage = () => {
         title="Products"
         description="Your master jewellery listings."
       />
-      <Suspense fallback={<Skeleton className="h-full w-full" />}>
+      <Suspense fallback={<DataTableFallback />}>
         <ProductsTable />
       </Suspense>
     </>

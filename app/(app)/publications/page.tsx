@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
+import { DataTableFallback } from "@/components/data-table/data-table-fallback";
 import { PageHeader } from "@/components/page-header";
-import { Skeleton } from "@/components/ui/skeleton";
 import { PublicationsTable } from "@/features/publications/components/publications-table";
 
 const PublicationsPage = () => {
@@ -12,7 +12,7 @@ const PublicationsPage = () => {
         description="Per-account publish records."
       />
 
-      <Suspense fallback={<Skeleton className="h-full w-full" />}>
+      <Suspense fallback={<DataTableFallback />}>
         <PublicationsTable />
       </Suspense>
     </>
