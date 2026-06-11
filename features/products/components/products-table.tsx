@@ -7,38 +7,23 @@ import { useMemo, useState } from "react";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DataTable } from "@/components/data-table/data-table";
-import {
-  DataTableFilterType,
-  type DataTableFilterField,
-} from "@/components/data-table/data-table.types";
 import { Button } from "@/components/ui/button";
 import { createProductColumns } from "@/features/products/components/product-columns";
+import {
+  PRODUCT_FILTER_FIELDS,
+  PRODUCT_FILTER_KEYS,
+} from "@/features/products/config/product-filters";
 import { useArchiveProduct } from "@/features/products/hooks/use-product-mutations";
 import { useProductsQuery } from "@/features/products/hooks/use-products-query";
 import { type ProductSummary } from "@/features/products/services/product-service";
 import { PublishProductDialog } from "@/features/publications/components/publish-product-dialog";
 import { useTableParams } from "@/hooks/use-table-params";
-import { ProductStatus } from "@/lib/enums/product";
 import { productCreateRoute, productDetailRoute } from "@/lib/routes";
 import { toast } from "@/lib/toast";
 
-const FILTER_KEYS = ["status"];
-
-const FILTER_FIELDS: DataTableFilterField[] = [
-  {
-    id: "status",
-    label: "Status",
-    type: DataTableFilterType.MultiSelect,
-    options: [
-      { label: "Active", value: ProductStatus.Active },
-      { label: "Archived", value: ProductStatus.Archived },
-    ],
-  },
-];
-
 export const ProductsTable = () => {
   const router = useRouter();
-  const params = useTableParams({ filterKeys: FILTER_KEYS });
+  const params = useTableParams({ filterKeys: PRODUCT_FILTER_KEYS });
   const { data, isLoading, isFetching } = useProductsQuery(params.apiParams);
   const archiveProduct = useArchiveProduct();
 
@@ -89,7 +74,7 @@ export const ProductsTable = () => {
         onColumnFiltersChange={params.onColumnFiltersChange}
         globalFilter={params.globalFilter}
         onGlobalFilterChange={params.onGlobalFilterChange}
-        filterFields={FILTER_FIELDS}
+        filterFields={PRODUCT_FILTER_FIELDS}
         enableGlobalFilter
         searchPlaceholder="Search by title or SKU"
         isLoading={isLoading || isFetching}

@@ -3,35 +3,16 @@
 import { useMemo } from "react";
 
 import { DataTable } from "@/components/data-table/data-table";
-import {
-  DataTableFilterType,
-  type DataTableFilterField,
-} from "@/components/data-table/data-table.types";
 import { createPublicationColumns } from "@/features/publications/components/publication-columns";
+import {
+  PUBLICATION_FILTER_FIELDS,
+  PUBLICATION_FILTER_KEYS,
+} from "@/features/publications/config/publication-filters";
 import { usePublicationsQuery } from "@/features/publications/hooks/use-publications-query";
 import { useTableParams } from "@/hooks/use-table-params";
-import { PublicationStatus } from "@/lib/enums/publication";
-
-const FILTER_KEYS = ["status"];
-
-const FILTER_FIELDS: DataTableFilterField[] = [
-  {
-    id: "status",
-    label: "Status",
-    type: DataTableFilterType.MultiSelect,
-    options: [
-      { label: "Publishing", value: PublicationStatus.Publishing },
-      { label: "Published", value: PublicationStatus.Published },
-      { label: "Failed", value: PublicationStatus.Failed },
-      { label: "Draft", value: PublicationStatus.Draft },
-      { label: "Scheduled", value: PublicationStatus.Scheduled },
-      { label: "Ended", value: PublicationStatus.Ended },
-    ],
-  },
-];
 
 export const PublicationsTable = () => {
-  const params = useTableParams({ filterKeys: FILTER_KEYS });
+  const params = useTableParams({ filterKeys: PUBLICATION_FILTER_KEYS });
   const { data, isLoading, isFetching } = usePublicationsQuery(
     params.apiParams,
   );
@@ -56,7 +37,7 @@ export const PublicationsTable = () => {
       onColumnFiltersChange={params.onColumnFiltersChange}
       globalFilter={params.globalFilter}
       onGlobalFilterChange={params.onGlobalFilterChange}
-      filterFields={FILTER_FIELDS}
+      filterFields={PUBLICATION_FILTER_FIELDS}
       enableGlobalFilter
       searchPlaceholder="Search by product title"
       isLoading={isLoading || isFetching}

@@ -5,37 +5,21 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { DataTable } from "@/components/data-table/data-table";
-import {
-  DataTableFilterType,
-  type DataTableFilterField,
-} from "@/components/data-table/data-table.types";
 import { Button } from "@/components/ui/button";
 import { DisconnectEbayAccountDialog } from "@/features/ebay-accounts/components/disconnect-ebay-account-dialog";
 import { createEbayAccountColumns } from "@/features/ebay-accounts/components/ebay-account-columns";
 import { RenameEbayAccountDialog } from "@/features/ebay-accounts/components/rename-ebay-account-dialog";
+import {
+  EBAY_ACCOUNT_FILTER_FIELDS,
+  EBAY_ACCOUNT_FILTER_KEYS,
+} from "@/features/ebay-accounts/config/ebay-account-filters";
 import { useEbayAccountsQuery } from "@/features/ebay-accounts/hooks/use-ebay-accounts-query";
 import { type EbayAccountSummary } from "@/features/ebay-accounts/services/ebay-account-service";
 import { useTableParams } from "@/hooks/use-table-params";
 import { ebayAccountConnectApiRoute } from "@/lib/api-routes";
-import { EbayAccountStatus } from "@/lib/enums/ebay-account";
-
-const FILTER_KEYS = ["status"];
-
-const FILTER_FIELDS: DataTableFilterField[] = [
-  {
-    id: "status",
-    label: "Status",
-    type: DataTableFilterType.MultiSelect,
-    options: [
-      { label: "Active", value: EbayAccountStatus.Active },
-      { label: "Needs reconsent", value: EbayAccountStatus.NeedsReconsent },
-      { label: "Disabled", value: EbayAccountStatus.Disabled },
-    ],
-  },
-];
 
 export const EbayAccountsTable = () => {
-  const params = useTableParams({ filterKeys: FILTER_KEYS });
+  const params = useTableParams({ filterKeys: EBAY_ACCOUNT_FILTER_KEYS });
   const { data, isLoading, isFetching } = useEbayAccountsQuery(
     params.apiParams,
   );
@@ -74,7 +58,7 @@ export const EbayAccountsTable = () => {
         onColumnFiltersChange={params.onColumnFiltersChange}
         globalFilter={params.globalFilter}
         onGlobalFilterChange={params.onGlobalFilterChange}
-        filterFields={FILTER_FIELDS}
+        filterFields={EBAY_ACCOUNT_FILTER_FIELDS}
         enableGlobalFilter
         searchPlaceholder="Search by label or username"
         isLoading={isLoading || isFetching}
