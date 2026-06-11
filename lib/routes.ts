@@ -17,3 +17,5 @@ export const ebayAccountsRoute = () => "/ebay-accounts";
 export const publicationsRoute = () => "/publications";
 
 export const settingsRoute = () => "/settings";
+
+export const privacyPolicyRoute = () => "/privacy-policy";

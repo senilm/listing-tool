@@ -2,14 +2,21 @@ import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { REDIRECT_PARAM, getSafeRedirectPath } from "@/lib/redirect";
-import { dashboardRoute, loginRoute } from "@/lib/routes";
+import { dashboardRoute, loginRoute, privacyPolicyRoute } from "@/lib/routes";
 
 const AUTH_ROUTES = ["/login", "/register"];
 
-const isAuthRoute = (pathname: string) =>
-  AUTH_ROUTES.some(
+const PUBLIC_ROUTES = [privacyPolicyRoute()];
+
+const matchesRoute = (pathname: string, routes: string[]) =>
+  routes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
+
+const isAuthRoute = (pathname: string) => matchesRoute(pathname, AUTH_ROUTES);
+
+const isPublicRoute = (pathname: string) =>
+  matchesRoute(pathname, PUBLIC_ROUTES);
 
 // Optimistic gate: checks only for the presence of the session cookie, never
 // the database (this runs on every non-excluded request, including prefetches).
@@ -18,6 +25,10 @@ const proxy = (request: NextRequest) => {
   const { pathname } = request.nextUrl;
   const hasSession = Boolean(getSessionCookie(request));
   const onAuthRoute = isAuthRoute(pathname);
+
+  if (isPublicRoute(pathname)) {
+    return NextResponse.next();
+  }
 
   if (!hasSession && !onAuthRoute) {
     const loginUrl = new URL(loginRoute(), request.url);
