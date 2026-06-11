@@ -10,12 +10,31 @@ export const DEFAULT_CONDITION = ProductCondition.New;
 const MAX_PRICE = 9_999_999.99;
 const MAX_QUANTITY = 1_000_000;
 
+// eBay's publish step rejects gallery URLs whose path lacks a file name
+// ("Gallery URL has no file name"), so the URL path must end in an image file.
+const IMAGE_FILE_NAME_PATTERN = /\.(jpe?g|png|gif|webp|bmp|tiff?)$/i;
+
+const isImageFileUrl = (value: string): boolean => {
+  try {
+    return IMAGE_FILE_NAME_PATTERN.test(new URL(value).pathname);
+  } catch {
+    return false;
+  }
+};
+
+const IMAGE_FILE_NAME_MESSAGE =
+  "URL must end in an image file name (e.g. .jpg)";
+
 // --- Form shape ---------------------------------------------------------------
 // What react-hook-form holds. Images and aspects are wrapped in objects so
 // useFieldArray gets stable keys; the mappers below flatten them for the API.
 
 const imageFormSchema = z.object({
-  url: z.string().trim().pipe(z.url("Enter a valid image URL")),
+  url: z
+    .string()
+    .trim()
+    .pipe(z.url("Enter a valid image URL"))
+    .refine(isImageFileUrl, IMAGE_FILE_NAME_MESSAGE),
 });
 
 const aspectFormSchema = z.object({
@@ -35,6 +54,12 @@ export const productFormSchema = z.object({
     .string()
     .trim()
     .max(4000, "Keep the description under 4000 characters"),
+  brand: z.string().trim().min(1, "Enter a brand"),
+  metal: z.string().trim().min(1, "Enter a metal"),
+  metalPurity: z.string().trim().min(1, "Enter a metal purity"),
+  mainStone: z.string().trim().min(1, "Enter a main stone"),
+  jewelleryType: z.string().trim().min(1, "Enter a type"),
+  ringSize: z.string().trim().min(1, "Enter a ring size"),
   basePrice: z
     .number({ message: "Enter a price" })
     .positive("Price must be greater than 0")
@@ -58,9 +83,15 @@ export const productInputSchema = z.object({
   sku: z.string().trim().max(100).nullable(),
   title: z.string().trim().min(1).max(200),
   description: z.string().trim().max(4000).nullable(),
+  brand: z.string().trim().min(1),
+  metal: z.string().trim().min(1),
+  metalPurity: z.string().trim().min(1),
+  mainStone: z.string().trim().min(1),
+  jewelleryType: z.string().trim().min(1),
+  ringSize: z.string().trim().min(1),
   basePrice: z.number().positive().max(MAX_PRICE),
   quantity: z.number().int().min(0).max(MAX_QUANTITY),
-  images: z.array(z.url()),
+  images: z.array(z.url().refine(isImageFileUrl, IMAGE_FILE_NAME_MESSAGE)),
   aspects: z.record(z.string(), z.array(z.string())),
 });
 
@@ -72,6 +103,12 @@ export const toProductInput = (values: ProductFormValues): ProductInput => ({
   sku: values.sku.trim() ? values.sku.trim() : null,
   title: values.title.trim(),
   description: values.description.trim() ? values.description.trim() : null,
+  brand: values.brand.trim(),
+  metal: values.metal.trim(),
+  metalPurity: values.metalPurity.trim(),
+  mainStone: values.mainStone.trim(),
+  jewelleryType: values.jewelleryType.trim(),
+  ringSize: values.ringSize.trim(),
   basePrice: values.basePrice,
   quantity: values.quantity,
   images: values.images.map((image) => image.url.trim()).filter(Boolean),
@@ -97,6 +134,12 @@ export type ProductFormSource = {
   sku: string | null;
   title: string;
   description: string | null;
+  brand: string | null;
+  metal: string | null;
+  metalPurity: string | null;
+  mainStone: string | null;
+  jewelleryType: string | null;
+  ringSize: string | null;
   basePrice: string;
   quantity: number;
   images: string[] | null;
@@ -109,6 +152,12 @@ export const toProductFormValues = (
   sku: product.sku ?? "",
   title: product.title,
   description: product.description ?? "",
+  brand: product.brand ?? "",
+  metal: product.metal ?? "",
+  metalPurity: product.metalPurity ?? "",
+  mainStone: product.mainStone ?? "",
+  jewelleryType: product.jewelleryType ?? "",
+  ringSize: product.ringSize ?? "",
   basePrice: Number(product.basePrice),
   quantity: product.quantity,
   images: (product.images ?? []).map((url) => ({ url })),

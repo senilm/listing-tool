@@ -116,6 +116,26 @@ export const listPublications = async (
   return { items, total: Number(totals?.value ?? 0) };
 };
 
+type ProductSource = NonNullable<Awaited<ReturnType<typeof getProduct>>>;
+
+const toListingAspects = (source: ProductSource): Record<string, string[]> => {
+  const dedicated: Record<string, string | null> = {
+    Brand: source.brand,
+    Metal: source.metal,
+    "Metal Purity": source.metalPurity,
+    "Main Stone": source.mainStone,
+    Type: source.jewelleryType,
+    "Ring Size": source.ringSize,
+  };
+
+  const aspects: Record<string, string[]> = { ...(source.aspects ?? {}) };
+  for (const [name, value] of Object.entries(dedicated)) {
+    const trimmed = value?.trim();
+    if (trimmed) aspects[name] = [trimmed];
+  }
+  return aspects;
+};
+
 export type PublishResult = {
   accountId: string;
   publicationId: string;
@@ -147,6 +167,7 @@ export const publishProductToAccounts = async ({
 
   const ebaySku = source.sku ?? `prod-${source.id}`;
   const description = source.description ?? source.title;
+  const aspects = toListingAspects(source);
   const results: PublishResult[] = [];
 
   for (const accountId of accountIds) {
@@ -164,7 +185,7 @@ export const publishProductToAccounts = async ({
         quantity: source.quantity,
         categoryId: source.categoryId,
         images: source.images,
-        aspects: source.aspects,
+        aspects,
         overriddenFields: [],
         ebaySku,
       })
@@ -191,7 +212,7 @@ export const publishProductToAccounts = async ({
           price: source.basePrice,
           quantity: source.quantity,
           imageUrls: source.images ?? [],
-          aspects: source.aspects ?? {},
+          aspects,
         },
       });
 

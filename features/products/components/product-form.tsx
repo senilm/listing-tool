@@ -28,6 +28,12 @@ const EMPTY_VALUES: DefaultValues<ProductFormValues> = {
   sku: "",
   title: "",
   description: "",
+  brand: "",
+  metal: "",
+  metalPurity: "",
+  mainStone: "",
+  jewelleryType: "",
+  ringSize: "",
   basePrice: undefined,
   quantity: 1,
   images: [],
@@ -118,6 +124,62 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
               />
             )}
           />
+        </FieldGroup>
+      </FieldSet>
+
+      <FieldSet>
+        <FieldLegend>Jewellery details</FieldLegend>
+        <FieldGroup>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="brand"
+              label="Brand"
+              required
+              render={(field) => <Input placeholder="Unbranded" {...field} />}
+            />
+            <FormField
+              control={form.control}
+              name="jewelleryType"
+              label="Type"
+              required
+              render={(field) => (
+                <Input placeholder="Statement Ring" {...field} />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="metal"
+              label="Metal"
+              required
+              render={(field) => (
+                <Input placeholder="Sterling Silver" {...field} />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="metalPurity"
+              label="Metal purity"
+              required
+              render={(field) => <Input placeholder="925" {...field} />}
+            />
+            <FormField
+              control={form.control}
+              name="mainStone"
+              label="Main stone"
+              required
+              render={(field) => (
+                <Input placeholder="Cubic Zirconia" {...field} />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="ringSize"
+              label="Ring size"
+              required
+              render={(field) => <Input placeholder="7" {...field} />}
+            />
+          </div>
         </FieldGroup>
       </FieldSet>
 
