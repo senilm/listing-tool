@@ -44,7 +44,6 @@ const aspectFormSchema = z.object({
 });
 
 export const productFormSchema = z.object({
-  sku: z.string().trim().max(100, "Keep the SKU under 100 characters"),
   title: z
     .string()
     .trim()
@@ -80,7 +79,6 @@ export type ProductFormValues = z.infer<typeof productFormSchema>;
 // form (the client is untrusted).
 
 export const productInputSchema = z.object({
-  sku: z.string().trim().max(100).nullable(),
   title: z.string().trim().min(1).max(200),
   description: z.string().trim().max(4000).nullable(),
   brand: z.string().trim().min(1),
@@ -100,7 +98,6 @@ export type ProductInput = z.infer<typeof productInputSchema>;
 // --- Mappers ------------------------------------------------------------------
 
 export const toProductInput = (values: ProductFormValues): ProductInput => ({
-  sku: values.sku.trim() ? values.sku.trim() : null,
   title: values.title.trim(),
   description: values.description.trim() ? values.description.trim() : null,
   brand: values.brand.trim(),
@@ -131,7 +128,6 @@ export const toProductInput = (values: ProductFormValues): ProductInput => ({
 // The fields toProductFormValues needs from a stored product row. Structural so
 // validations stay decoupled from the Drizzle schema.
 export type ProductFormSource = {
-  sku: string | null;
   title: string;
   description: string | null;
   brand: string | null;
@@ -149,7 +145,6 @@ export type ProductFormSource = {
 export const toProductFormValues = (
   product: ProductFormSource,
 ): ProductFormValues => ({
-  sku: product.sku ?? "",
   title: product.title,
   description: product.description ?? "",
   brand: product.brand ?? "",

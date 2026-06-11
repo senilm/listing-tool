@@ -76,7 +76,7 @@ export const ProductsTable = () => {
         onGlobalFilterChange={params.onGlobalFilterChange}
         filterFields={PRODUCT_FILTER_FIELDS}
         enableGlobalFilter
-        searchPlaceholder="Search by title or SKU"
+        searchPlaceholder="Search by title"
         isLoading={isLoading || isFetching}
         emptyTitle="No products yet"
         emptyDescription="Create your first master listing to get started."

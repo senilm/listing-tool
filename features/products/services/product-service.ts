@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db/client";
 import { product } from "@/lib/db/schema/product";
@@ -10,7 +10,6 @@ type ProductRow = typeof product.$inferSelect;
 export type ProductSummary = Pick<
   ProductRow,
   | "id"
-  | "sku"
   | "title"
   | "status"
   | "basePrice"
@@ -65,13 +64,7 @@ export const listProducts = async (
   ];
 
   const q = params.q?.trim();
-  if (q) {
-    const search = or(
-      ilike(product.title, `%${q}%`),
-      ilike(product.sku, `%${q}%`),
-    );
-    if (search) conditions.push(search);
-  }
+  if (q) conditions.push(ilike(product.title, `%${q}%`));
 
   const where = and(...conditions);
 
@@ -83,7 +76,6 @@ export const listProducts = async (
   const items = await db
     .select({
       id: product.id,
-      sku: product.sku,
       title: product.title,
       status: product.status,
       basePrice: product.basePrice,
@@ -124,7 +116,6 @@ export const getProduct = async ({
 };
 
 const toRowValues = (input: ProductInput) => ({
-  sku: input.sku,
   title: input.title,
   description: input.description,
   condition: DEFAULT_CONDITION,

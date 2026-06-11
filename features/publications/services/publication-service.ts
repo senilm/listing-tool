@@ -9,7 +9,11 @@ import { db } from "@/lib/db/client";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
 import { publication } from "@/lib/db/schema/publication";
 import { ebayConfig } from "@/lib/ebay/config";
-import { DEFAULT_CATEGORY_ID, publishListing } from "@/lib/ebay/listing";
+import {
+  buildEbaySku,
+  DEFAULT_CATEGORY_ID,
+  publishListing,
+} from "@/lib/ebay/listing";
 import { PublicationStatus } from "@/lib/enums/publication";
 
 export type PublicationSummary = {
@@ -165,12 +169,12 @@ export const publishProductToAccounts = async ({
   const source = await getProduct({ id: productId, userId });
   if (!source) return { productFound: false, results: [] };
 
-  const ebaySku = source.sku ?? `prod-${source.id}`;
   const description = source.description ?? source.title;
   const aspects = toListingAspects(source);
   const results: PublishResult[] = [];
 
   for (const accountId of accountIds) {
+    const ebaySku = buildEbaySku({ title: source.title, accountId });
     const [row] = await db
       .insert(publication)
       .values({

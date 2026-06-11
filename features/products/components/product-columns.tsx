@@ -7,7 +7,6 @@ import { Archive, Pencil, Upload } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { DataTableRowActions } from "@/components/data-table/data-table-row-actions";
 import { TruncatedText } from "@/components/truncated-text";
-import { Typography } from "@/components/typography";
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge";
 import { type ProductSummary } from "@/features/products/services/product-service";
 import { ProductStatus } from "@/lib/enums/product";
@@ -39,16 +38,9 @@ export const createProductColumns = ({
       <DataTableColumnHeader column={column} title="Title" />
     ),
     cell: ({ row }) => (
-      <div className="flex flex-col">
-        <TruncatedText className="font-medium">
-          {row.original.title}
-        </TruncatedText>
-        {row.original.sku ? (
-          <Typography variant="muted" className="text-xs">
-            {row.original.sku}
-          </Typography>
-        ) : null}
-      </div>
+      <TruncatedText className="font-medium">
+        {row.original.title}
+      </TruncatedText>
     ),
   },
   {

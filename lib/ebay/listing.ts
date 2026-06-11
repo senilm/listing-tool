@@ -6,6 +6,40 @@ import { ebayConfig } from "@/lib/ebay/config";
 // Fashion Jewelry > Rings. Real per-product leaf selection comes later.
 export const DEFAULT_CATEGORY_ID = "67681";
 
+// eBay caps SKUs at 50 characters.
+const EBAY_SKU_MAX_LENGTH = 50;
+const SKU_TITLE_SLUG_LENGTH = 24;
+const SKU_ACCOUNT_FRAGMENT_LENGTH = 8;
+
+// SKUs are internal bookkeeping the user never sees (mirroring eBay's own UI,
+// which has no required SKU). Generated fresh per publish: the title slug for
+// readability, an account fragment so the same product never shares a SKU
+// across accounts, and a timestamp so retries never collide with a stale
+// offer left by an earlier failed publish.
+export const buildEbaySku = ({
+  title,
+  accountId,
+}: {
+  title: string;
+  accountId: string;
+}): string => {
+  const slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, SKU_TITLE_SLUG_LENGTH)
+    .replace(/-+$/, "");
+  const account = accountId
+    .replace(/-/g, "")
+    .slice(0, SKU_ACCOUNT_FRAGMENT_LENGTH);
+  const stamp = Date.now().toString(36);
+
+  return [slug, account, stamp]
+    .filter(Boolean)
+    .join("-")
+    .slice(0, EBAY_SKU_MAX_LENGTH);
+};
+
 export type ListingInput = {
   sku: string;
   title: string;

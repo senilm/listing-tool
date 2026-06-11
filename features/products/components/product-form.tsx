@@ -25,7 +25,6 @@ import {
 } from "@/validations/product";
 
 const EMPTY_VALUES: DefaultValues<ProductFormValues> = {
-  sku: "",
   title: "",
   description: "",
   brand: "",
@@ -96,18 +95,6 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
               <Input
                 placeholder="18ct Gold Diamond Ring"
                 maxLength={200}
-                {...field}
-              />
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="sku"
-            label="SKU"
-            render={(field) => (
-              <Input
-                placeholder="Optional stock-keeping unit"
-                maxLength={100}
                 {...field}
               />
             )}
