@@ -104,6 +104,26 @@ export const listEbayAccounts = async (
   return { items, total: Number(totals?.value ?? 0) };
 };
 
+// Single account scoped to the user — same metadata shape as the list; the
+// token column is never exposed.
+export const getEbayAccount = async ({
+  id,
+  userId,
+}: OwnedAccount): Promise<EbayAccountSummary | null> => {
+  const [row] = await db
+    .select({
+      id: ebayAccount.id,
+      label: ebayAccount.label,
+      ebayUsername: ebayAccount.ebayUsername,
+      status: ebayAccount.status,
+      createdAt: ebayAccount.createdAt,
+    })
+    .from(ebayAccount)
+    .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)))
+    .limit(1);
+  return row ?? null;
+};
+
 // Reconnecting a known account (same eBay username) revives the existing row
 // rather than creating a duplicate. Username-less links always insert.
 export const linkEbayAccount = async (

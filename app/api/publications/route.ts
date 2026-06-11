@@ -38,6 +38,7 @@ export const GET = async (request: NextRequest) => {
   );
   const q = params.get("q") ?? undefined;
   const statuses = parseStatuses(params.getAll("status"));
+  const accountId = params.get("accountId") ?? undefined;
 
   const sortField = params.get("sort");
   const sort =
@@ -51,6 +52,7 @@ export const GET = async (request: NextRequest) => {
     limit,
     q,
     statuses,
+    accountId,
     sort,
   });
 

@@ -2,6 +2,7 @@
 
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { DataTable } from "@/components/data-table/data-table";
@@ -17,8 +18,10 @@ import { useEbayAccountsQuery } from "@/features/ebay-accounts/hooks/use-ebay-ac
 import { type EbayAccountSummary } from "@/features/ebay-accounts/services/ebay-account-service";
 import { useTableParams } from "@/hooks/use-table-params";
 import { ebayAccountConnectApiRoute } from "@/lib/api-routes";
+import { ebayAccountDetailRoute } from "@/lib/routes";
 
 export const EbayAccountsTable = () => {
+  const router = useRouter();
   const params = useTableParams({ filterKeys: EBAY_ACCOUNT_FILTER_KEYS });
   const { data, isLoading, isFetching } = useEbayAccountsQuery(
     params.apiParams,
@@ -64,6 +67,7 @@ export const EbayAccountsTable = () => {
         isLoading={isLoading || isFetching}
         emptyTitle="No eBay accounts linked"
         emptyDescription="Connect an eBay seller account to start listing."
+        onRowClick={(row) => router.push(ebayAccountDetailRoute(row.id))}
         toolbarActions={
           <Button asChild size="sm">
             <Link href={ebayAccountConnectApiRoute()}>

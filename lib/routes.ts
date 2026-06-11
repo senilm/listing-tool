@@ -13,6 +13,7 @@ export const productCreateRoute = () => "/products/create";
 export const productDetailRoute = (id: string) => `/products/${id}`;
 
 export const ebayAccountsRoute = () => "/ebay-accounts";
+export const ebayAccountDetailRoute = (id: string) => `/ebay-accounts/${id}`;
 
 export const publicationsRoute = () => "/publications";
 

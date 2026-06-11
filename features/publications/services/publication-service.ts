@@ -48,6 +48,7 @@ export type ListPublicationsParams = {
   limit: number;
   q?: string;
   statuses?: PublicationStatus[];
+  accountId?: string;
   sort?: { id: PublicationSortField; desc: boolean };
 };
 
@@ -68,6 +69,10 @@ export const listPublications = async (
 
   if (params.statuses && params.statuses.length > 0) {
     conditions.push(inArray(publication.status, params.statuses));
+  }
+
+  if (params.accountId) {
+    conditions.push(eq(publication.ebayAccountId, params.accountId));
   }
 
   const q = params.q?.trim();
