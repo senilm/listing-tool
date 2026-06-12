@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { navConfig } from "@/components/layout/nav-config";
-import { SidebarLogout } from "@/components/layout/sidebar-logout";
 import { SidebarUser } from "@/components/layout/sidebar-user";
 import {
   Sidebar,
@@ -78,9 +77,6 @@ export const AppSidebar = () => {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarUser />
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarLogout />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

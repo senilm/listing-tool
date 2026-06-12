@@ -4,12 +4,16 @@ import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import { SidebarMenuButton } from "@/components/ui/sidebar";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth/client";
 import { loginRoute } from "@/lib/routes";
 import { toErrorMessage, toast } from "@/lib/toast";
 
-export const SidebarLogout = () => {
+type LogoutMenuItemProps = {
+  onLoggedOut?: () => void;
+};
+
+export const LogoutMenuItem = ({ onLoggedOut }: LogoutMenuItemProps) => {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
@@ -17,6 +21,7 @@ export const SidebarLogout = () => {
     setIsLoggingOut(true);
     try {
       await authClient.signOut();
+      onLoggedOut?.();
       router.push(loginRoute());
       router.refresh();
     } catch (error) {
@@ -26,13 +31,13 @@ export const SidebarLogout = () => {
   };
 
   return (
-    <SidebarMenuButton
-      onClick={() => void handleLogout()}
+    <DropdownMenuItem
+      variant="destructive"
+      onSelect={() => void handleLogout()}
       disabled={isLoggingOut}
-      tooltip="Logout"
     >
       <LogOut />
-      <span>Logout</span>
-    </SidebarMenuButton>
+      Logout
+    </DropdownMenuItem>
   );
 };
