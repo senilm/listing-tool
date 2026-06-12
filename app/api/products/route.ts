@@ -6,42 +6,18 @@ import {
   listProducts,
 } from "@/features/products/services/product-service";
 import { requireSession } from "@/lib/api/auth";
+import { parseListParams } from "@/lib/api/list-params";
 import { ProductStatus } from "@/lib/enums/product";
 import { productInputSchema } from "@/validations/product";
-
-const DEFAULT_LIMIT = 20;
-const MAX_LIMIT = 100;
-
-const parsePositiveInt = (value: string | null, fallback: number): number => {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
-};
-
-const parseStatuses = (values: string[]): ProductStatus[] => {
-  const allowed = Object.values(ProductStatus);
-  return values.filter((value): value is ProductStatus =>
-    allowed.includes(value as ProductStatus),
-  );
-};
 
 export const GET = async (request: NextRequest) => {
   const { session, response } = await requireSession(request);
   if (response) return response;
 
-  const params = request.nextUrl.searchParams;
-  const page = parsePositiveInt(params.get("page"), 1);
-  const limit = Math.min(
-    parsePositiveInt(params.get("limit"), DEFAULT_LIMIT),
-    MAX_LIMIT,
+  const { page, limit, q, statuses, sort } = parseListParams(
+    request.nextUrl.searchParams,
+    { statusEnum: ProductStatus, isSortField: isProductSortField },
   );
-  const q = params.get("q") ?? undefined;
-  const statuses = parseStatuses(params.getAll("status"));
-
-  const sortField = params.get("sort");
-  const sort =
-    sortField && isProductSortField(sortField)
-      ? { id: sortField, desc: params.get("dir") !== "asc" }
-      : undefined;
 
   const result = await listProducts({
     userId: session.user.id,

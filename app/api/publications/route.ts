@@ -6,43 +6,20 @@ import {
   publishProductToAccounts,
 } from "@/features/publications/services/publication-service";
 import { requireSession } from "@/lib/api/auth";
+import { parseListParams } from "@/lib/api/list-params";
 import { PublicationStatus } from "@/lib/enums/publication";
 import { publishRequestSchema } from "@/validations/publication";
-
-const DEFAULT_LIMIT = 20;
-const MAX_LIMIT = 100;
-
-const parsePositiveInt = (value: string | null, fallback: number): number => {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
-};
-
-const parseStatuses = (values: string[]): PublicationStatus[] => {
-  const allowed = Object.values(PublicationStatus);
-  return values.filter((value): value is PublicationStatus =>
-    allowed.includes(value as PublicationStatus),
-  );
-};
 
 export const GET = async (request: NextRequest) => {
   const { session, response } = await requireSession(request);
   if (response) return response;
 
   const params = request.nextUrl.searchParams;
-  const page = parsePositiveInt(params.get("page"), 1);
-  const limit = Math.min(
-    parsePositiveInt(params.get("limit"), DEFAULT_LIMIT),
-    MAX_LIMIT,
-  );
-  const q = params.get("q") ?? undefined;
-  const statuses = parseStatuses(params.getAll("status"));
+  const { page, limit, q, statuses, sort } = parseListParams(params, {
+    statusEnum: PublicationStatus,
+    isSortField: isPublicationSortField,
+  });
   const accountId = params.get("accountId") ?? undefined;
-
-  const sortField = params.get("sort");
-  const sort =
-    sortField && isPublicationSortField(sortField)
-      ? { id: sortField, desc: params.get("dir") !== "asc" }
-      : undefined;
 
   const result = await listPublications({
     userId: session.user.id,
