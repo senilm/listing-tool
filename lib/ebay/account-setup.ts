@@ -1,3 +1,11 @@
+import {
+  ebayFulfillmentPolicyRoute,
+  ebayLocationRoute,
+  ebayLocationsRoute,
+  ebayPaymentPolicyRoute,
+  ebayProgramOptInRoute,
+  ebayReturnPolicyRoute,
+} from "@/lib/ebay/api-routes";
 import { ebayRequest, EBAY_MARKETPLACE_ID } from "@/lib/ebay/client";
 
 export type SellerSetup = {
@@ -13,7 +21,7 @@ const DEFAULT_LOCATION_KEY = "warehouse-1";
 // Sellers using the Inventory API must be opted into business policies.
 // Opting in again is a no-op error we can safely ignore.
 const ensureOptedIn = async (accessToken: string) => {
-  await ebayRequest(accessToken, "/sell/account/v1/program/opt_in", {
+  await ebayRequest(accessToken, ebayProgramOptInRoute(), {
     method: "POST",
     body: { programType: "SELLING_POLICY_MANAGEMENT" },
   }).catch(() => undefined);
@@ -22,7 +30,7 @@ const ensureOptedIn = async (accessToken: string) => {
 const resolvePaymentPolicy = async (accessToken: string): Promise<string> => {
   const { data } = await ebayRequest<{
     paymentPolicies?: { paymentPolicyId: string }[];
-  }>(accessToken, "/sell/account/v1/payment_policy", {
+  }>(accessToken, ebayPaymentPolicyRoute(), {
     query: { marketplace_id: EBAY_MARKETPLACE_ID },
   });
   if (data.paymentPolicies?.length)
@@ -30,7 +38,7 @@ const resolvePaymentPolicy = async (accessToken: string): Promise<string> => {
 
   const created = await ebayRequest<{ paymentPolicyId: string }>(
     accessToken,
-    "/sell/account/v1/payment_policy",
+    ebayPaymentPolicyRoute(),
     {
       method: "POST",
       body: {
@@ -46,14 +54,14 @@ const resolvePaymentPolicy = async (accessToken: string): Promise<string> => {
 const resolveReturnPolicy = async (accessToken: string): Promise<string> => {
   const { data } = await ebayRequest<{
     returnPolicies?: { returnPolicyId: string }[];
-  }>(accessToken, "/sell/account/v1/return_policy", {
+  }>(accessToken, ebayReturnPolicyRoute(), {
     query: { marketplace_id: EBAY_MARKETPLACE_ID },
   });
   if (data.returnPolicies?.length) return data.returnPolicies[0].returnPolicyId;
 
   const created = await ebayRequest<{ returnPolicyId: string }>(
     accessToken,
-    "/sell/account/v1/return_policy",
+    ebayReturnPolicyRoute(),
     {
       method: "POST",
       body: {
@@ -74,7 +82,7 @@ const resolveFulfillmentPolicy = async (
 ): Promise<string> => {
   const { data } = await ebayRequest<{
     fulfillmentPolicies?: { fulfillmentPolicyId: string }[];
-  }>(accessToken, "/sell/account/v1/fulfillment_policy", {
+  }>(accessToken, ebayFulfillmentPolicyRoute(), {
     query: { marketplace_id: EBAY_MARKETPLACE_ID },
   });
   if (data.fulfillmentPolicies?.length) {
@@ -83,7 +91,7 @@ const resolveFulfillmentPolicy = async (
 
   const created = await ebayRequest<{ fulfillmentPolicyId: string }>(
     accessToken,
-    "/sell/account/v1/fulfillment_policy",
+    ebayFulfillmentPolicyRoute(),
     {
       method: "POST",
       body: {
@@ -116,7 +124,7 @@ const resolveLocation = async (accessToken: string): Promise<string> => {
   try {
     const { data } = await ebayRequest<{
       locations?: { merchantLocationKey: string }[];
-    }>(accessToken, "/sell/inventory/v1/location", { query: { limit: "1" } });
+    }>(accessToken, ebayLocationsRoute(), { query: { limit: "1" } });
     if (data.locations?.length) return data.locations[0].merchantLocationKey;
   } catch {
     // fall through to create
@@ -124,27 +132,23 @@ const resolveLocation = async (accessToken: string): Promise<string> => {
 
   try {
     // createInventoryLocation returns 204 No Content; the key is what we chose.
-    await ebayRequest(
-      accessToken,
-      `/sell/inventory/v1/location/${DEFAULT_LOCATION_KEY}`,
-      {
-        method: "POST",
-        body: {
-          name: "Primary Warehouse",
-          locationTypes: ["WAREHOUSE"],
-          merchantLocationStatus: "ENABLED",
-          location: {
-            address: {
-              addressLine1: "2025 Hamilton Ave",
-              city: "San Jose",
-              stateOrProvince: "CA",
-              postalCode: "95125",
-              country: "US",
-            },
+    await ebayRequest(accessToken, ebayLocationRoute(DEFAULT_LOCATION_KEY), {
+      method: "POST",
+      body: {
+        name: "Primary Warehouse",
+        locationTypes: ["WAREHOUSE"],
+        merchantLocationStatus: "ENABLED",
+        location: {
+          address: {
+            addressLine1: "2025 Hamilton Ave",
+            city: "San Jose",
+            stateOrProvince: "CA",
+            postalCode: "95125",
+            country: "US",
           },
         },
       },
-    );
+    });
   } catch (error) {
     // errorId 25803 = a location already exists for this key, which is fine.
     if (!(error instanceof Error && error.message.includes("25803")))

@@ -1,4 +1,8 @@
 import {
+  ebayOAuthAuthorizeRoute,
+  ebayOAuthTokenRoute,
+} from "@/lib/ebay/api-routes";
+import {
   ebayConfig,
   EBAY_CONSENT_SCOPES,
   EBAY_SCOPES,
@@ -12,7 +16,7 @@ type TokenResponse = {
   token_type: string;
 };
 
-const tokenEndpoint = () => `${ebayConfig.apiBase}/identity/v1/oauth2/token`;
+const tokenEndpoint = () => `${ebayConfig.apiBase}${ebayOAuthTokenRoute()}`;
 
 const basicAuthHeader = () => {
   const creds = `${ebayConfig.clientId}:${ebayConfig.clientSecret}`;
@@ -46,7 +50,7 @@ export const buildConsentUrl = (state: string) => {
     state,
     prompt: "login",
   });
-  return `${ebayConfig.authBase}/oauth2/authorize?${params.toString()}`;
+  return `${ebayConfig.authBase}${ebayOAuthAuthorizeRoute()}?${params.toString()}`;
 };
 
 // Step 3: trade the authorization code for access + refresh tokens.
