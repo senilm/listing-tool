@@ -1,4 +1,9 @@
 import { type SellerSetup } from "@/lib/ebay/account-setup";
+import {
+  ebayInventoryItemRoute,
+  ebayOffersRoute,
+  ebayPublishOfferRoute,
+} from "@/lib/ebay/api-routes";
 import { ebayRequest, EBAY_MARKETPLACE_ID } from "@/lib/ebay/client";
 import { ebayConfig } from "@/lib/ebay/config";
 
@@ -75,7 +80,7 @@ export const publishListing = async ({
   const { sku, quantity, description } = listing;
 
   // 1. Create/replace the inventory item for this SKU.
-  await ebayRequest(accessToken, `/sell/inventory/v1/inventory_item/${sku}`, {
+  await ebayRequest(accessToken, ebayInventoryItemRoute(sku), {
     method: "PUT",
     body: {
       availability: { shipToLocationAvailability: { quantity } },
@@ -89,42 +94,53 @@ export const publishListing = async ({
     },
   });
 
-  // 2. Stage an unpublished offer tying the SKU to the marketplace.
-  const offer = await ebayRequest<{ offerId: string }>(
-    accessToken,
-    "/sell/inventory/v1/offer",
-    {
-      method: "POST",
-      body: {
-        sku,
-        marketplaceId: EBAY_MARKETPLACE_ID,
-        format: "FIXED_PRICE",
-        availableQuantity: quantity,
-        categoryId: listing.categoryId,
-        listingDescription: description,
-        listingPolicies: {
-          paymentPolicyId: setup.paymentPolicyId,
-          returnPolicyId: setup.returnPolicyId,
-          fulfillmentPolicyId: setup.fulfillmentPolicyId,
+  try {
+    // 2. Stage an unpublished offer tying the SKU to the marketplace.
+    const offer = await ebayRequest<{ offerId: string }>(
+      accessToken,
+      ebayOffersRoute(),
+      {
+        method: "POST",
+        body: {
+          sku,
+          marketplaceId: EBAY_MARKETPLACE_ID,
+          format: "FIXED_PRICE",
+          availableQuantity: quantity,
+          categoryId: listing.categoryId,
+          listingDescription: description,
+          listingPolicies: {
+            paymentPolicyId: setup.paymentPolicyId,
+            returnPolicyId: setup.returnPolicyId,
+            fulfillmentPolicyId: setup.fulfillmentPolicyId,
+          },
+          pricingSummary: { price: { value: listing.price, currency: "USD" } },
+          merchantLocationKey: setup.merchantLocationKey,
+          listingDuration: "GTC",
         },
-        pricingSummary: { price: { value: listing.price, currency: "USD" } },
-        merchantLocationKey: setup.merchantLocationKey,
-        listingDuration: "GTC",
       },
-    },
-  );
+    );
 
-  // 3. Publish the offer into a live eBay listing.
-  const published = await ebayRequest<{ listingId: string }>(
-    accessToken,
-    `/sell/inventory/v1/offer/${offer.data.offerId}/publish`,
-    { method: "POST" },
-  );
+    // 3. Publish the offer into a live eBay listing.
+    const published = await ebayRequest<{ listingId: string }>(
+      accessToken,
+      ebayPublishOfferRoute(offer.data.offerId),
+      { method: "POST" },
+    );
 
-  return {
-    sku,
-    offerId: offer.data.offerId,
-    listingId: published.data.listingId,
-    viewUrl: `${ebayConfig.webBase}/itm/${published.data.listingId}`,
-  };
+    return {
+      sku,
+      offerId: offer.data.offerId,
+      listingId: published.data.listingId,
+      viewUrl: `${ebayConfig.webBase}/itm/${published.data.listingId}`,
+    };
+  } catch (error) {
+    // SKUs are single-use, so a failed attempt would otherwise strand the
+    // inventory item (and its unpublished offer) on the account forever.
+    // Deleting the inventory item also deletes its unpublished offers.
+    // Best-effort: the original failure is what the caller needs to see.
+    await ebayRequest(accessToken, ebayInventoryItemRoute(sku), {
+      method: "DELETE",
+    }).catch(() => undefined);
+    throw error;
+  }
 };
