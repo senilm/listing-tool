@@ -6,6 +6,7 @@ import {
 } from "@/features/ebay-accounts/services/ebay-account-service";
 import { requireSession } from "@/lib/api/auth";
 import { parseBody } from "@/lib/api/body";
+import { notFound } from "@/lib/api/responses";
 import { renameEbayAccountSchema } from "@/validations/ebay-account";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -21,7 +22,7 @@ export const DELETE = async (
   const { id } = await params;
   const disabled = await disableEbayAccount({ id, userId: session.user.id });
   if (!disabled) {
-    return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    return notFound("Account not found");
   }
   return NextResponse.json({ success: true });
 };
@@ -44,7 +45,7 @@ export const PATCH = async (request: NextRequest, { params }: RouteContext) => {
     label: body.data.label,
   });
   if (!renamed) {
-    return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    return notFound("Account not found");
   }
   return NextResponse.json({ success: true });
 };

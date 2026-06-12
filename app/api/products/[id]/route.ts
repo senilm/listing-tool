@@ -6,6 +6,7 @@ import {
 } from "@/features/products/services/product-service";
 import { requireSession } from "@/lib/api/auth";
 import { parseBody } from "@/lib/api/body";
+import { notFound } from "@/lib/api/responses";
 import { productInputSchema } from "@/validations/product";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -24,7 +25,7 @@ export const PATCH = async (request: NextRequest, { params }: RouteContext) => {
     input: body.data,
   });
   if (!updated) {
-    return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    return notFound("Product not found");
   }
   return NextResponse.json({ success: true });
 };
@@ -40,7 +41,7 @@ export const DELETE = async (
   const { id } = await params;
   const archived = await archiveProduct({ id, userId: session.user.id });
   if (!archived) {
-    return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    return notFound("Product not found");
   }
   return NextResponse.json({ success: true });
 };

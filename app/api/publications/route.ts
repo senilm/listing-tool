@@ -8,6 +8,7 @@ import {
 import { requireSession } from "@/lib/api/auth";
 import { parseBody } from "@/lib/api/body";
 import { parseListParams } from "@/lib/api/list-params";
+import { notFound } from "@/lib/api/responses";
 import { PublicationStatus } from "@/lib/enums/publication";
 import { publishRequestSchema } from "@/validations/publication";
 
@@ -53,7 +54,7 @@ export const POST = async (request: NextRequest) => {
   });
 
   if (!outcome.productFound) {
-    return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    return notFound("Product not found");
   }
 
   return NextResponse.json({ results: outcome.results }, { status: 201 });

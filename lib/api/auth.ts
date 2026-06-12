@@ -1,5 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest, type NextResponse } from "next/server";
 
+import { unauthorized } from "@/lib/api/responses";
 import { auth } from "@/lib/auth/server";
 
 type Session = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
@@ -16,10 +17,7 @@ export const requireSession = async (
 ): Promise<RequireSessionResult> => {
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session) {
-    return {
-      session: null,
-      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-    };
+    return { session: null, response: unauthorized() };
   }
   return { session, response: null };
 };

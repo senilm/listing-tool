@@ -1,5 +1,7 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest, type NextResponse } from "next/server";
 import type { ZodType } from "zod";
+
+import { badRequest } from "@/lib/api/responses";
 
 type ParseBodyResult<T> =
   | { data: T; response: null }
@@ -15,10 +17,7 @@ export const parseBody = async <T>(
   const body = await request.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
-    return {
-      data: null,
-      response: NextResponse.json({ error: errorMessage }, { status: 400 }),
-    };
+    return { data: null, response: badRequest(errorMessage) };
   }
   return { data: parsed.data, response: null };
 };
