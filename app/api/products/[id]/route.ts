@@ -4,16 +4,14 @@ import {
   archiveProduct,
   updateProduct,
 } from "@/features/products/services/product-service";
-import { auth } from "@/lib/auth/server";
+import { requireSession } from "@/lib/api/auth";
 import { productInputSchema } from "@/validations/product";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 export const PATCH = async (request: NextRequest, { params }: RouteContext) => {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { session, response } = await requireSession(request);
+  if (response) return response;
 
   const body = await request.json().catch(() => null);
   const parsed = productInputSchema.safeParse(body);
@@ -38,10 +36,8 @@ export const DELETE = async (
   request: NextRequest,
   { params }: RouteContext,
 ) => {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { session, response } = await requireSession(request);
+  if (response) return response;
 
   const { id } = await params;
   const archived = await archiveProduct({ id, userId: session.user.id });

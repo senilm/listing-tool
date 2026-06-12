@@ -5,7 +5,7 @@ import {
   isProductSortField,
   listProducts,
 } from "@/features/products/services/product-service";
-import { auth } from "@/lib/auth/server";
+import { requireSession } from "@/lib/api/auth";
 import { ProductStatus } from "@/lib/enums/product";
 import { productInputSchema } from "@/validations/product";
 
@@ -25,10 +25,8 @@ const parseStatuses = (values: string[]): ProductStatus[] => {
 };
 
 export const GET = async (request: NextRequest) => {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { session, response } = await requireSession(request);
+  if (response) return response;
 
   const params = request.nextUrl.searchParams;
   const page = parsePositiveInt(params.get("page"), 1);
@@ -58,10 +56,8 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = async (request: NextRequest) => {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { session, response } = await requireSession(request);
+  if (response) return response;
 
   const body = await request.json().catch(() => null);
   const parsed = productInputSchema.safeParse(body);

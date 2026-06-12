@@ -4,7 +4,7 @@ import {
   isEbayAccountSortField,
   listEbayAccounts,
 } from "@/features/ebay-accounts/services/ebay-account-service";
-import { auth } from "@/lib/auth/server";
+import { requireSession } from "@/lib/api/auth";
 import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 
 const DEFAULT_LIMIT = 20;
@@ -23,10 +23,8 @@ const parseStatuses = (values: string[]): EbayAccountStatus[] => {
 };
 
 export const GET = async (request: NextRequest) => {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { session, response } = await requireSession(request);
+  if (response) return response;
 
   const params = request.nextUrl.searchParams;
   const page = parsePositiveInt(params.get("page"), 1);

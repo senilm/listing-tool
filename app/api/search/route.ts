@@ -1,13 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { globalSearch } from "@/features/search/services/search-service";
-import { auth } from "@/lib/auth/server";
+import { requireSession } from "@/lib/api/auth";
 
 export const GET = async (request: NextRequest) => {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { session, response } = await requireSession(request);
+  if (response) return response;
 
   const q = request.nextUrl.searchParams.get("q")?.trim() ?? "";
   if (!q) {

@@ -4,7 +4,7 @@ import {
   disableEbayAccount,
   renameEbayAccount,
 } from "@/features/ebay-accounts/services/ebay-account-service";
-import { auth } from "@/lib/auth/server";
+import { requireSession } from "@/lib/api/auth";
 import { renameEbayAccountSchema } from "@/validations/ebay-account";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -14,10 +14,8 @@ export const DELETE = async (
   request: NextRequest,
   { params }: RouteContext,
 ) => {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { session, response } = await requireSession(request);
+  if (response) return response;
 
   const { id } = await params;
   const disabled = await disableEbayAccount({ id, userId: session.user.id });
@@ -28,10 +26,8 @@ export const DELETE = async (
 };
 
 export const PATCH = async (request: NextRequest, { params }: RouteContext) => {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { session, response } = await requireSession(request);
+  if (response) return response;
 
   const body = await request.json().catch(() => null);
   const parsed = renameEbayAccountSchema.safeParse(body);
