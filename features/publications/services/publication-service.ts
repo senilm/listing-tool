@@ -5,6 +5,7 @@ import {
   getAccountAccessToken,
 } from "@/features/ebay-accounts/services/ebay-account-service";
 import { getProduct } from "@/features/products/services/product-service";
+import { createSortFieldGuard } from "@/lib/api/sort-field";
 import { db } from "@/lib/db/client";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
 import { publication } from "@/lib/db/schema/publication";
@@ -38,9 +39,7 @@ const SORTABLE_COLUMNS = {
 
 export type PublicationSortField = keyof typeof SORTABLE_COLUMNS;
 
-export const isPublicationSortField = (
-  value: string,
-): value is PublicationSortField => value in SORTABLE_COLUMNS;
+export const isPublicationSortField = createSortFieldGuard(SORTABLE_COLUMNS);
 
 export type ListPublicationsParams = {
   userId: string;

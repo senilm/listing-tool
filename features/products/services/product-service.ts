@@ -1,5 +1,6 @@
 import { and, asc, count, desc, eq, ilike, inArray } from "drizzle-orm";
 
+import { createSortFieldGuard } from "@/lib/api/sort-field";
 import { db } from "@/lib/db/client";
 import { product } from "@/lib/db/schema/product";
 import { ProductStatus } from "@/lib/enums/product";
@@ -31,8 +32,7 @@ const SORTABLE_COLUMNS = {
 
 export type ProductSortField = keyof typeof SORTABLE_COLUMNS;
 
-export const isProductSortField = (value: string): value is ProductSortField =>
-  value in SORTABLE_COLUMNS;
+export const isProductSortField = createSortFieldGuard(SORTABLE_COLUMNS);
 
 export type ListProductsParams = {
   userId: string;

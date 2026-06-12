@@ -1,5 +1,6 @@
 import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 
+import { createSortFieldGuard } from "@/lib/api/sort-field";
 import { decryptToken, encryptToken } from "@/lib/crypto/token-cipher";
 import { db } from "@/lib/db/client";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
@@ -23,9 +24,7 @@ const SORTABLE_COLUMNS = {
 
 export type EbayAccountSortField = keyof typeof SORTABLE_COLUMNS;
 
-export const isEbayAccountSortField = (
-  value: string,
-): value is EbayAccountSortField => value in SORTABLE_COLUMNS;
+export const isEbayAccountSortField = createSortFieldGuard(SORTABLE_COLUMNS);
 
 export type ListEbayAccountsParams = {
   userId: string;
