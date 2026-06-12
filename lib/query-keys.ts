@@ -12,4 +12,8 @@ export const QUERY_KEYS = {
   // Prefix for all publication queries.
   publicationsRoot: ["publications"] as const,
   publications: (params: string) => ["publications", "list", params] as const,
+
+  // Global (cross-module) search.
+  searchRoot: ["search"] as const,
+  search: (q: string) => ["search", "global", q] as const,
 };

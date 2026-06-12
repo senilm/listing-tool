@@ -20,10 +20,18 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { useGlobalSearchQuery } from "@/features/search/hooks/use-global-search-query";
+import {
+  type GlobalSearchResult,
+  type SearchResultItem,
+} from "@/features/search/services/search-service";
+import { useDebounce } from "@/hooks/use-debounce";
 import {
   dashboardRoute,
+  ebayAccountDetailRoute,
   ebayAccountsRoute,
   productCreateRoute,
+  productDetailRoute,
   productsRoute,
   publicationsRoute,
 } from "@/lib/routes";
@@ -35,8 +43,6 @@ type QuickAction = {
   group: string;
 };
 
-// Stubbed search: quick navigation only. Live cross-module results land here
-// once a search service exists.
 const QUICK_ACTIONS: QuickAction[] = [
   {
     label: "Create Product",
@@ -72,9 +78,45 @@ const QUICK_ACTIONS: QuickAction[] = [
 
 const ACTION_GROUPS = ["Actions", "Navigate"];
 
+type ResultGroup = {
+  key: keyof GlobalSearchResult;
+  heading: string;
+  icon: LucideIcon;
+  route: (item: SearchResultItem) => string;
+};
+
+const RESULT_GROUPS: ResultGroup[] = [
+  {
+    key: "products",
+    heading: "Products",
+    icon: Package,
+    route: (item) => productDetailRoute(item.id),
+  },
+  {
+    key: "accounts",
+    heading: "eBay Accounts",
+    icon: Store,
+    route: (item) => ebayAccountDetailRoute(item.id),
+  },
+  {
+    key: "publications",
+    heading: "Publications",
+    icon: Send,
+    route: (item) =>
+      `${publicationsRoute()}?s=${encodeURIComponent(item.title)}`,
+  },
+];
+
 export const HeaderSearch = () => {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState("");
+
+  const debouncedQuery = useDebounce(query);
+  const { data: results, isFetching } = useGlobalSearchQuery(debouncedQuery);
+
+  const isSearching =
+    query.trim().length > 0 && (query !== debouncedQuery || isFetching);
 
   React.useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -87,8 +129,13 @@ export const HeaderSearch = () => {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (!next) setQuery("");
+  };
+
   const handleSelect = (path: string) => {
-    setOpen(false);
+    handleOpenChange(false);
     router.push(path);
   };
 
@@ -108,13 +155,50 @@ export const HeaderSearch = () => {
 
       <CommandDialog
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={handleOpenChange}
         title="Search"
         description="Search and navigate across the app"
       >
-        <CommandInput placeholder="Search..." />
+        <CommandInput
+          placeholder="Search products, accounts, publications..."
+          value={query}
+          onValueChange={setQuery}
+        />
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty>
+            {isSearching ? "Searching…" : "No results found."}
+          </CommandEmpty>
+
+          {RESULT_GROUPS.map((group) => {
+            const items = results?.[group.key] ?? [];
+            if (items.length === 0) return null;
+            return (
+              <CommandGroup key={group.key} heading={group.heading}>
+                {items.map((item) => (
+                  <CommandItem
+                    key={item.id}
+                    value={`${group.key}-${item.id}`}
+                    keywords={[
+                      item.title,
+                      ...(item.subtitle ? [item.subtitle] : []),
+                    ]}
+                    onSelect={() => handleSelect(group.route(item))}
+                  >
+                    <group.icon />
+                    <div className="grid flex-1 text-left leading-tight">
+                      <span className="truncate">{item.title}</span>
+                      {item.subtitle ? (
+                        <span className="truncate text-xs text-muted-foreground">
+                          {item.subtitle}
+                        </span>
+                      ) : null}
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            );
+          })}
+
           {ACTION_GROUPS.map((group) => (
             <CommandGroup key={group} heading={group}>
               {QUICK_ACTIONS.filter((action) => action.group === group).map(

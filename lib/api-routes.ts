@@ -9,3 +9,5 @@ export const productsApiRoute = () => "/api/products";
 export const productApiRoute = (id: string) => `/api/products/${id}`;
 
 export const publicationsApiRoute = () => "/api/publications";
+
+export const searchApiRoute = () => "/api/search";
