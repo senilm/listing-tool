@@ -5,6 +5,7 @@ import {
   updateProduct,
 } from "@/features/products/services/product-service";
 import { requireSession } from "@/lib/api/auth";
+import { parseBody } from "@/lib/api/body";
 import { productInputSchema } from "@/validations/product";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -13,17 +14,14 @@ export const PATCH = async (request: NextRequest, { params }: RouteContext) => {
   const { session, response } = await requireSession(request);
   if (response) return response;
 
-  const body = await request.json().catch(() => null);
-  const parsed = productInputSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid product" }, { status: 400 });
-  }
+  const body = await parseBody(request, productInputSchema, "Invalid product");
+  if (body.response) return body.response;
 
   const { id } = await params;
   const updated = await updateProduct({
     id,
     userId: session.user.id,
-    input: parsed.data,
+    input: body.data,
   });
   if (!updated) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });

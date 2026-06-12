@@ -6,6 +6,7 @@ import {
   listProducts,
 } from "@/features/products/services/product-service";
 import { requireSession } from "@/lib/api/auth";
+import { parseBody } from "@/lib/api/body";
 import { parseListParams } from "@/lib/api/list-params";
 import { ProductStatus } from "@/lib/enums/product";
 import { productInputSchema } from "@/validations/product";
@@ -35,15 +36,12 @@ export const POST = async (request: NextRequest) => {
   const { session, response } = await requireSession(request);
   if (response) return response;
 
-  const body = await request.json().catch(() => null);
-  const parsed = productInputSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid product" }, { status: 400 });
-  }
+  const body = await parseBody(request, productInputSchema, "Invalid product");
+  if (body.response) return body.response;
 
   const id = await createProduct({
     userId: session.user.id,
-    input: parsed.data,
+    input: body.data,
   });
   return NextResponse.json({ id }, { status: 201 });
 };

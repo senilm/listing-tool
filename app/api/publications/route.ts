@@ -6,6 +6,7 @@ import {
   publishProductToAccounts,
 } from "@/features/publications/services/publication-service";
 import { requireSession } from "@/lib/api/auth";
+import { parseBody } from "@/lib/api/body";
 import { parseListParams } from "@/lib/api/list-params";
 import { PublicationStatus } from "@/lib/enums/publication";
 import { publishRequestSchema } from "@/validations/publication";
@@ -38,19 +39,17 @@ export const POST = async (request: NextRequest) => {
   const { session, response } = await requireSession(request);
   if (response) return response;
 
-  const body = await request.json().catch(() => null);
-  const parsed = publishRequestSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Invalid publish request" },
-      { status: 400 },
-    );
-  }
+  const body = await parseBody(
+    request,
+    publishRequestSchema,
+    "Invalid publish request",
+  );
+  if (body.response) return body.response;
 
   const outcome = await publishProductToAccounts({
     userId: session.user.id,
-    productId: parsed.data.productId,
-    accountIds: parsed.data.accountIds,
+    productId: body.data.productId,
+    accountIds: body.data.accountIds,
   });
 
   if (!outcome.productFound) {
