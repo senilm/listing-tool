@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, ilike, isNull } from "drizzle-orm";
 
-import { createSortFieldGuard } from "@/lib/api/sort-field";
+import { createSortFieldGuard } from "@/lib/api/sort-params";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
 import { product } from "@/lib/db/schema/product";

@@ -4,15 +4,19 @@ import {
   isEbayAccountSortField,
   listEbayAccounts,
 } from "@/features/ebay-accounts/services/ebay-account-service";
-import { parseListParams } from "@/lib/api/list-params";
+import { parseStatusFilter } from "@/lib/api/filter-params";
+import { parsePagination } from "@/lib/api/pagination-params";
+import { parseSearch } from "@/lib/api/search-params";
+import { parseSort } from "@/lib/api/sort-params";
 import { withApi } from "@/lib/api/with-api";
 import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 
 export const GET = withApi(async (request: NextRequest, _context, session) => {
-  const { page, limit, q, statuses, sort } = parseListParams(
-    request.nextUrl.searchParams,
-    { statusEnum: EbayAccountStatus, isSortField: isEbayAccountSortField },
-  );
+  const params = request.nextUrl.searchParams;
+  const { page, limit } = parsePagination(params);
+  const q = parseSearch(params);
+  const statuses = parseStatusFilter(params, EbayAccountStatus);
+  const sort = parseSort(params, isEbayAccountSortField);
 
   const result = await listEbayAccounts({
     userId: session.user.id,

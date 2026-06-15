@@ -6,15 +6,17 @@ import {
   listProducts,
 } from "@/features/products/services/product-service";
 import { parseBody } from "@/lib/api/body";
-import { parseListParams } from "@/lib/api/list-params";
+import { parsePagination } from "@/lib/api/pagination-params";
+import { parseSearch } from "@/lib/api/search-params";
+import { parseSort } from "@/lib/api/sort-params";
 import { withApi } from "@/lib/api/with-api";
 import { productInputSchema } from "@/validations/product";
 
 export const GET = withApi(async (request: NextRequest, _context, session) => {
-  const { page, limit, q, sort } = parseListParams(
-    request.nextUrl.searchParams,
-    { isSortField: isProductSortField },
-  );
+  const params = request.nextUrl.searchParams;
+  const { page, limit } = parsePagination(params);
+  const q = parseSearch(params);
+  const sort = parseSort(params, isProductSortField);
 
   const result = await listProducts({
     userId: session.user.id,

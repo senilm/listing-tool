@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchEbayAccounts } from "@/features/ebay-accounts/services/ebay-account-client";
 import { usePublishProduct } from "@/features/publications/hooks/use-publish-product";
-import { MAX_LIMIT } from "@/lib/api/list-params";
+import { MAX_LIMIT } from "@/lib/api/pagination-params";
 import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 import { PublicationStatus } from "@/lib/enums/publication";
 import { QUERY_KEYS } from "@/lib/query-keys";

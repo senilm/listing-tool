@@ -10,7 +10,7 @@ import {
   or,
 } from "drizzle-orm";
 
-import { createSortFieldGuard } from "@/lib/api/sort-field";
+import { createSortFieldGuard } from "@/lib/api/sort-params";
 import { decryptToken, encryptToken } from "@/lib/crypto/token-cipher";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";

@@ -5,7 +5,7 @@ import {
   getAccountAccessToken,
 } from "@/features/ebay-accounts/services/ebay-account-service";
 import { getProduct } from "@/features/products/services/product-service";
-import { createSortFieldGuard } from "@/lib/api/sort-field";
+import { createSortFieldGuard } from "@/lib/api/sort-params";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
