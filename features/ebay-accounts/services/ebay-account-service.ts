@@ -3,6 +3,7 @@ import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { createSortFieldGuard } from "@/lib/api/sort-field";
 import { decryptToken, encryptToken } from "@/lib/crypto/token-cipher";
 import { db } from "@/lib/db/client";
+import { likeContains } from "@/lib/db/like";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
 import { resolveSellerSetup, type SellerSetup } from "@/lib/ebay/account-setup";
 import { refreshAccessToken } from "@/lib/ebay/oauth";
@@ -68,8 +69,8 @@ export const listEbayAccounts = async (
   const q = params.q?.trim();
   if (q) {
     const search = or(
-      ilike(ebayAccount.label, `%${q}%`),
-      ilike(ebayAccount.ebayUsername, `%${q}%`),
+      ilike(ebayAccount.label, likeContains(q)),
+      ilike(ebayAccount.ebayUsername, likeContains(q)),
     );
     if (search) conditions.push(search);
   }

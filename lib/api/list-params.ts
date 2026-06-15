@@ -1,5 +1,6 @@
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
+const MAX_QUERY_LENGTH = 100;
 
 const parsePositiveInt = (value: string | null, fallback: number): number => {
   const parsed = Number(value);
@@ -30,7 +31,7 @@ export const parseListParams = <S extends string, F extends string>(
     parsePositiveInt(params.get("limit"), DEFAULT_LIMIT),
     MAX_LIMIT,
   );
-  const q = params.get("q") ?? undefined;
+  const q = params.get("q")?.trim().slice(0, MAX_QUERY_LENGTH);
   const statuses = parseEnumValues(params.getAll("status"), statusEnum);
 
   const sortField = params.get("sort");

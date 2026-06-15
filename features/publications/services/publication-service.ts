@@ -7,6 +7,7 @@ import {
 import { getProduct } from "@/features/products/services/product-service";
 import { createSortFieldGuard } from "@/lib/api/sort-field";
 import { db } from "@/lib/db/client";
+import { likeContains } from "@/lib/db/like";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
 import { publication } from "@/lib/db/schema/publication";
 import { ebayConfig } from "@/lib/ebay/config";
@@ -75,7 +76,7 @@ export const listPublications = async (
   }
 
   const q = params.q?.trim();
-  if (q) conditions.push(ilike(publication.title, `%${q}%`));
+  if (q) conditions.push(ilike(publication.title, likeContains(q)));
 
   const where = and(...conditions);
 

@@ -2,6 +2,7 @@ import { and, asc, count, desc, eq, ilike, inArray } from "drizzle-orm";
 
 import { createSortFieldGuard } from "@/lib/api/sort-field";
 import { db } from "@/lib/db/client";
+import { likeContains } from "@/lib/db/like";
 import { product } from "@/lib/db/schema/product";
 import { ProductStatus } from "@/lib/enums/product";
 import { DEFAULT_CONDITION, type ProductInput } from "@/validations/product";
@@ -64,7 +65,7 @@ export const listProducts = async (
   ];
 
   const q = params.q?.trim();
-  if (q) conditions.push(ilike(product.title, `%${q}%`));
+  if (q) conditions.push(ilike(product.title, likeContains(q)));
 
   const where = and(...conditions);
 

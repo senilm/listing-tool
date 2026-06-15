@@ -1,15 +1,13 @@
 import { and, desc, eq, ilike, or } from "drizzle-orm";
 
 import { db } from "@/lib/db/client";
+import { likeContains } from "@/lib/db/like";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
 import { product } from "@/lib/db/schema/product";
 import { publication } from "@/lib/db/schema/publication";
 import { ProductStatus } from "@/lib/enums/product";
 
 const RESULTS_PER_GROUP = 5;
-
-const escapeLike = (value: string) =>
-  value.replace(/[\\%_]/g, (ch) => `\\${ch}`);
 
 export type SearchResultItem = {
   id: string;
@@ -30,7 +28,7 @@ export const globalSearch = async ({
   userId: string;
   q: string;
 }): Promise<GlobalSearchResult> => {
-  const term = `%${escapeLike(q)}%`;
+  const term = likeContains(q);
 
   const [products, accounts, publications] = await Promise.all([
     db
