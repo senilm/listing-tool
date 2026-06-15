@@ -4,48 +4,42 @@ import {
   disableEbayAccount,
   renameEbayAccount,
 } from "@/features/ebay-accounts/services/ebay-account-service";
-import { requireSession } from "@/lib/api/auth";
 import { parseBody } from "@/lib/api/body";
-import { notFound } from "@/lib/api/responses";
+import { NotFoundError } from "@/lib/api/errors";
+import { withApi } from "@/lib/api/with-api";
 import { renameEbayAccountSchema } from "@/validations/ebay-account";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 // Soft-disconnect: marks the account disabled and wipes its stored token.
-export const DELETE = async (
-  request: NextRequest,
-  { params }: RouteContext,
-) => {
-  const { session, response } = await requireSession(request);
-  if (response) return response;
+export const DELETE = withApi(
+  async (_request: NextRequest, { params }: RouteContext, session) => {
+    const { id } = await params;
+    const disabled = await disableEbayAccount({ id, userId: session.user.id });
+    if (!disabled) {
+      throw new NotFoundError("Account not found");
+    }
+    return NextResponse.json({ success: true });
+  },
+);
 
-  const { id } = await params;
-  const disabled = await disableEbayAccount({ id, userId: session.user.id });
-  if (!disabled) {
-    return notFound("Account not found");
-  }
-  return NextResponse.json({ success: true });
-};
+export const PATCH = withApi(
+  async (request: NextRequest, { params }: RouteContext, session) => {
+    const { label } = await parseBody(
+      request,
+      renameEbayAccountSchema,
+      "Invalid label",
+    );
 
-export const PATCH = async (request: NextRequest, { params }: RouteContext) => {
-  const { session, response } = await requireSession(request);
-  if (response) return response;
-
-  const body = await parseBody(
-    request,
-    renameEbayAccountSchema,
-    "Invalid label",
-  );
-  if (body.response) return body.response;
-
-  const { id } = await params;
-  const renamed = await renameEbayAccount({
-    id,
-    userId: session.user.id,
-    label: body.data.label,
-  });
-  if (!renamed) {
-    return notFound("Account not found");
-  }
-  return NextResponse.json({ success: true });
-};
+    const { id } = await params;
+    const renamed = await renameEbayAccount({
+      id,
+      userId: session.user.id,
+      label,
+    });
+    if (!renamed) {
+      throw new NotFoundError("Account not found");
+    }
+    return NextResponse.json({ success: true });
+  },
+);

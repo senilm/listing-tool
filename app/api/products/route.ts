@@ -5,16 +5,13 @@ import {
   isProductSortField,
   listProducts,
 } from "@/features/products/services/product-service";
-import { requireSession } from "@/lib/api/auth";
 import { parseBody } from "@/lib/api/body";
 import { parseListParams } from "@/lib/api/list-params";
+import { withApi } from "@/lib/api/with-api";
 import { ProductStatus } from "@/lib/enums/product";
 import { productInputSchema } from "@/validations/product";
 
-export const GET = async (request: NextRequest) => {
-  const { session, response } = await requireSession(request);
-  if (response) return response;
-
+export const GET = withApi(async (request: NextRequest, _context, session) => {
   const { page, limit, q, statuses, sort } = parseListParams(
     request.nextUrl.searchParams,
     { statusEnum: ProductStatus, isSortField: isProductSortField },
@@ -30,18 +27,14 @@ export const GET = async (request: NextRequest) => {
   });
 
   return NextResponse.json(result);
-};
+});
 
-export const POST = async (request: NextRequest) => {
-  const { session, response } = await requireSession(request);
-  if (response) return response;
-
-  const body = await parseBody(request, productInputSchema, "Invalid product");
-  if (body.response) return body.response;
+export const POST = withApi(async (request: NextRequest, _context, session) => {
+  const input = await parseBody(request, productInputSchema, "Invalid product");
 
   const id = await createProduct({
     userId: session.user.id,
-    input: body.data,
+    input,
   });
   return NextResponse.json({ id }, { status: 201 });
-};
+});

@@ -1,12 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { globalSearch } from "@/features/search/services/search-service";
-import { requireSession } from "@/lib/api/auth";
+import { withApi } from "@/lib/api/with-api";
 
-export const GET = async (request: NextRequest) => {
-  const { session, response } = await requireSession(request);
-  if (response) return response;
-
+export const GET = withApi(async (request: NextRequest, _context, session) => {
   const q = request.nextUrl.searchParams.get("q")?.trim() ?? "";
   if (!q) {
     return NextResponse.json({ products: [], accounts: [], publications: [] });
@@ -14,4 +11,4 @@ export const GET = async (request: NextRequest) => {
 
   const result = await globalSearch({ userId: session.user.id, q });
   return NextResponse.json(result);
-};
+});
