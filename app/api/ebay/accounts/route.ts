@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import {
-  isEbayAccountSortField,
   listEbayAccounts,
+  SORTABLE_COLUMNS,
 } from "@/features/ebay-accounts/services/ebay-account-service";
 import { parseStatusFilter } from "@/lib/api/filter-params";
 import { parsePagination } from "@/lib/api/pagination-params";
@@ -16,7 +16,7 @@ export const GET = withApi(async (request: NextRequest, _context, session) => {
   const { page, limit } = parsePagination(params);
   const q = parseSearch(params);
   const statuses = parseStatusFilter(params, EbayAccountStatus);
-  const sort = parseSort(params, isEbayAccountSortField);
+  const sort = parseSort(params, SORTABLE_COLUMNS);
 
   const result = await listEbayAccounts({
     userId: session.user.id,

@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import {
-  isPublicationSortField,
   listPublications,
   publishProductToAccounts,
+  SORTABLE_COLUMNS,
 } from "@/features/publications/services/publication-service";
 import { parseBody } from "@/lib/api/body";
 import { NotFoundError } from "@/lib/api/errors";
@@ -21,7 +21,7 @@ export const GET = withApi(async (request: NextRequest, _context, session) => {
   const q = parseSearch(params);
   const statuses = parseStatusFilter(params, PublicationStatus);
   const accountId = params.get("accountId") ?? undefined;
-  const sort = parseSort(params, isPublicationSortField);
+  const sort = parseSort(params, SORTABLE_COLUMNS);
 
   const result = await listPublications({
     userId: session.user.id,

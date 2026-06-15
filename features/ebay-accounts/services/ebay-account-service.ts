@@ -10,7 +10,6 @@ import {
   or,
 } from "drizzle-orm";
 
-import { createSortFieldGuard } from "@/lib/api/sort-params";
 import { decryptToken, encryptToken } from "@/lib/crypto/token-cipher";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
@@ -27,15 +26,13 @@ export type EbayAccountSummary = Pick<
 >;
 
 // Columns the table is allowed to sort by — guards the ORDER BY clause.
-const SORTABLE_COLUMNS = {
+export const SORTABLE_COLUMNS = {
   label: ebayAccount.label,
   ebayUsername: ebayAccount.ebayUsername,
   createdAt: ebayAccount.createdAt,
 } as const;
 
 export type EbayAccountSortField = keyof typeof SORTABLE_COLUMNS;
-
-export const isEbayAccountSortField = createSortFieldGuard(SORTABLE_COLUMNS);
 
 export type ListEbayAccountsParams = {
   userId: string;

@@ -5,7 +5,6 @@ import {
   getAccountAccessToken,
 } from "@/features/ebay-accounts/services/ebay-account-service";
 import { getProduct } from "@/features/products/services/product-service";
-import { createSortFieldGuard } from "@/lib/api/sort-params";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
@@ -32,15 +31,13 @@ export type PublicationSummary = {
 };
 
 // Columns the table is allowed to sort by — guards the ORDER BY clause.
-const SORTABLE_COLUMNS = {
+export const SORTABLE_COLUMNS = {
   status: publication.status,
   publishedAt: publication.publishedAt,
   createdAt: publication.createdAt,
 } as const;
 
 export type PublicationSortField = keyof typeof SORTABLE_COLUMNS;
-
-export const isPublicationSortField = createSortFieldGuard(SORTABLE_COLUMNS);
 
 export type ListPublicationsParams = {
   userId: string;

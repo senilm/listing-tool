@@ -2,8 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import {
   createProduct,
-  isProductSortField,
   listProducts,
+  SORTABLE_COLUMNS,
 } from "@/features/products/services/product-service";
 import { parseBody } from "@/lib/api/body";
 import { parsePagination } from "@/lib/api/pagination-params";
@@ -16,7 +16,7 @@ export const GET = withApi(async (request: NextRequest, _context, session) => {
   const params = request.nextUrl.searchParams;
   const { page, limit } = parsePagination(params);
   const q = parseSearch(params);
-  const sort = parseSort(params, isProductSortField);
+  const sort = parseSort(params, SORTABLE_COLUMNS);
 
   const result = await listProducts({
     userId: session.user.id,

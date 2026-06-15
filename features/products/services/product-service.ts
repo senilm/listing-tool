@@ -1,6 +1,5 @@
 import { and, asc, count, desc, eq, ilike, isNull } from "drizzle-orm";
 
-import { createSortFieldGuard } from "@/lib/api/sort-params";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
 import { product } from "@/lib/db/schema/product";
@@ -21,7 +20,7 @@ export type ProductSummary = Pick<
 
 // Columns the table is allowed to sort by — guards against arbitrary input
 // reaching the ORDER BY clause.
-const SORTABLE_COLUMNS = {
+export const SORTABLE_COLUMNS = {
   title: product.title,
   basePrice: product.basePrice,
   quantity: product.quantity,
@@ -30,8 +29,6 @@ const SORTABLE_COLUMNS = {
 } as const;
 
 export type ProductSortField = keyof typeof SORTABLE_COLUMNS;
-
-export const isProductSortField = createSortFieldGuard(SORTABLE_COLUMNS);
 
 export type ListProductsParams = {
   userId: string;
