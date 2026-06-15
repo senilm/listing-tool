@@ -1,6 +1,6 @@
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
-const MAX_QUERY_LENGTH = 100;
+export const MAX_QUERY_LENGTH = 100;
 
 const parsePositiveInt = (value: string | null, fallback: number): number => {
   const parsed = Number(value);
