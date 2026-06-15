@@ -1,7 +1,6 @@
 "use client";
 
 import { TriangleAlert } from "lucide-react";
-import { useEffect } from "react";
 
 import { Typography } from "@/components/typography";
 import { Button } from "@/components/ui/button";
@@ -12,10 +11,6 @@ type ErrorPageProps = {
 };
 
 const ErrorPage = ({ error, unstable_retry }: ErrorPageProps) => {
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-6">
       <TriangleAlert className="size-12 text-muted-foreground/40" />
