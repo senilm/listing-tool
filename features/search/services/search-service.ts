@@ -8,6 +8,9 @@ import { ProductStatus } from "@/lib/enums/product";
 
 const RESULTS_PER_GROUP = 5;
 
+const escapeLike = (value: string) =>
+  value.replace(/[\\%_]/g, (ch) => `\\${ch}`);
+
 export type SearchResultItem = {
   id: string;
   title: string;
@@ -27,7 +30,7 @@ export const globalSearch = async ({
   userId: string;
   q: string;
 }): Promise<GlobalSearchResult> => {
-  const term = `%${q.trim()}%`;
+  const term = `%${escapeLike(q)}%`;
 
   const [products, accounts, publications] = await Promise.all([
     db
