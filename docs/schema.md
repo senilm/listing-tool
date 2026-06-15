@@ -38,13 +38,14 @@ erDiagram
         text refresh_token "ENCRYPTED at rest"
         timestamp refresh_token_expires_at "drives re-consent"
         json scopes "granted OAuth scopes"
-        enum status "active | needs_reconsent | disabled"
+        enum status "active | needs_reconsent"
         string payment_policy_id "cached setup"
         string return_policy_id "cached setup"
         string fulfillment_policy_id "cached setup"
         string merchant_location_key "cached setup"
         timestamp created_at
         timestamp updated_at
+        timestamp deleted_at "soft delete (disconnect), nullable"
     }
 
     PRODUCT {
@@ -62,6 +63,7 @@ erDiagram
         json aspects "jewellery specifics map"
         timestamp created_at
         timestamp updated_at
+        timestamp deleted_at "soft delete, nullable"
     }
 
     PUBLICATION {

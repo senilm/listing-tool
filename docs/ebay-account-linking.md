@@ -121,7 +121,7 @@ ebay-account-columns.tsx  (⋯ row actions, in the table)
    └─ "Disconnect" → disconnect-ebay-account-dialog.tsx  (wraps <ConfirmDialog>)
            useDisconnectEbayAccount()  → DELETE /api/ebay/accounts/[id]
                • getSession → 401 if none
-               • disableEbayAccount({ id, userId })  ← soft: status=Disabled, token=null
+               • disconnectEbayAccount({ id, userId })  ← soft: deletedAt set, token=null
            onSuccess → invalidate QUERY_KEYS.ebayAccountsRoot
 ```
 

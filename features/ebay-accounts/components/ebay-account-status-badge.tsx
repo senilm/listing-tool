@@ -13,7 +13,6 @@ const STATUS_META: Record<
     label: "Needs reconsent",
     variant: "warning",
   },
-  [EbayAccountStatus.Disabled]: { label: "Disabled", variant: "destructive" },
 };
 
 type EbayAccountStatusBadgeProps = {

@@ -9,11 +9,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DataTable } from "@/components/data-table/data-table";
 import { Button } from "@/components/ui/button";
 import { createProductColumns } from "@/features/products/components/product-columns";
-import {
-  PRODUCT_FILTER_FIELDS,
-  PRODUCT_FILTER_KEYS,
-} from "@/features/products/config/product-filters";
-import { useArchiveProduct } from "@/features/products/hooks/use-product-mutations";
+import { useDeleteProduct } from "@/features/products/hooks/use-product-mutations";
 import { useProductsQuery } from "@/features/products/hooks/use-products-query";
 import { type ProductSummary } from "@/features/products/services/product-service";
 import { PublishProductDialog } from "@/features/publications/components/publish-product-dialog";
@@ -23,13 +19,11 @@ import { toast } from "@/lib/toast";
 
 export const ProductsTable = () => {
   const router = useRouter();
-  const params = useTableParams({ filterKeys: PRODUCT_FILTER_KEYS });
+  const params = useTableParams();
   const { data, isLoading, isFetching } = useProductsQuery(params.apiParams);
-  const archiveProduct = useArchiveProduct();
+  const deleteProduct = useDeleteProduct();
 
-  const [archiveTarget, setArchiveTarget] = useState<ProductSummary | null>(
-    null,
-  );
+  const [deleteTarget, setDeleteTarget] = useState<ProductSummary | null>(null);
   const [publishTarget, setPublishTarget] = useState<ProductSummary | null>(
     null,
   );
@@ -38,20 +32,20 @@ export const ProductsTable = () => {
     () =>
       createProductColumns({
         onEdit: (product) => router.push(productDetailRoute(product.id)),
-        onArchive: (product) => setArchiveTarget(product),
+        onDelete: (product) => setDeleteTarget(product),
         onPublish: (product) => setPublishTarget(product),
       }),
     [router],
   );
 
-  const handleArchive = async () => {
-    if (!archiveTarget) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await archiveProduct.mutateAsync(archiveTarget.id);
-      toast.success("Product archived");
-      setArchiveTarget(null);
+      await deleteProduct.mutateAsync(deleteTarget.id);
+      toast.success("Product deleted");
+      setDeleteTarget(null);
     } catch {
-      toast.error("Could not archive the product");
+      toast.error("Could not delete the product");
     }
   };
 
@@ -70,11 +64,8 @@ export const ProductsTable = () => {
         onLimitChange={params.onLimitChange}
         sorting={params.sorting}
         onSortingChange={params.onSortingChange}
-        columnFilters={params.columnFilters}
-        onColumnFiltersChange={params.onColumnFiltersChange}
         globalFilter={params.globalFilter}
         onGlobalFilterChange={params.onGlobalFilterChange}
-        filterFields={PRODUCT_FILTER_FIELDS}
         enableGlobalFilter
         searchPlaceholder="Search by title"
         isLoading={isLoading || isFetching}
@@ -92,18 +83,18 @@ export const ProductsTable = () => {
       />
 
       <ConfirmDialog
-        open={archiveTarget !== null}
+        open={deleteTarget !== null}
         onOpenChange={(open) => {
-          if (!open) setArchiveTarget(null);
+          if (!open) setDeleteTarget(null);
         }}
         title={
-          archiveTarget ? `Archive ${archiveTarget.title}?` : "Archive product?"
+          deleteTarget ? `Delete ${deleteTarget.title}?` : "Delete product?"
         }
-        description="Archiving hides the product from your active list. Its existing publications stay intact, and you can restore it later."
-        confirmLabel="Archive"
+        description="Deleting removes the product from your list. Its existing publications stay intact."
+        confirmLabel="Delete"
         variant="destructive"
-        isLoading={archiveProduct.isPending}
-        onConfirm={() => void handleArchive()}
+        isLoading={deleteProduct.isPending}
+        onConfirm={() => void handleDelete()}
       />
 
       <PublishProductDialog

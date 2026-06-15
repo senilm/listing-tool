@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
-  archiveProductRequest,
   createProductRequest,
+  deleteProductRequest,
   updateProductRequest,
 } from "@/features/products/services/product-client";
 import { QUERY_KEYS } from "@/lib/query-keys";
@@ -33,10 +33,10 @@ export const useUpdateProduct = () => {
   });
 };
 
-export const useArchiveProduct = () => {
+export const useDeleteProduct = () => {
   const invalidate = useInvalidateProducts();
   return useMutation({
-    mutationFn: (id: string) => archiveProductRequest(id),
+    mutationFn: (id: string) => deleteProductRequest(id),
     onSuccess: invalidate,
   });
 };

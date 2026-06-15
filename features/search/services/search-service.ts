@@ -1,11 +1,10 @@
-import { and, desc, eq, ilike, or } from "drizzle-orm";
+import { and, desc, eq, ilike, isNull, or } from "drizzle-orm";
 
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
 import { product } from "@/lib/db/schema/product";
 import { publication } from "@/lib/db/schema/publication";
-import { ProductStatus } from "@/lib/enums/product";
 
 const RESULTS_PER_GROUP = 5;
 
@@ -37,7 +36,7 @@ export const globalSearch = async ({
       .where(
         and(
           eq(product.userId, userId),
-          eq(product.status, ProductStatus.Active),
+          isNull(product.deletedAt),
           ilike(product.title, term),
         ),
       )
@@ -53,6 +52,7 @@ export const globalSearch = async ({
       .where(
         and(
           eq(ebayAccount.userId, userId),
+          isNull(ebayAccount.deletedAt),
           or(
             ilike(ebayAccount.label, term),
             ilike(ebayAccount.ebayUsername, term),

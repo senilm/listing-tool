@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import {
-  archiveProduct,
+  deleteProduct,
   updateProduct,
 } from "@/features/products/services/product-service";
 import { parseBody } from "@/lib/api/body";
@@ -32,12 +32,12 @@ export const PATCH = withApi(
   },
 );
 
-// Soft delete — archives the product (keeps the row and its publications).
+// Soft delete — stamps deletedAt (keeps the row and its publications).
 export const DELETE = withApi(
   async (_request: NextRequest, { params }: RouteContext, session) => {
     const { id } = await params;
-    const archived = await archiveProduct({ id, userId: session.user.id });
-    if (!archived) {
+    const deleted = await deleteProduct({ id, userId: session.user.id });
+    if (!deleted) {
       throw new NotFoundError("Product not found");
     }
     return NextResponse.json({ success: true });

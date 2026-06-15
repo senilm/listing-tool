@@ -1,4 +1,14 @@
-import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNull,
+  or,
+} from "drizzle-orm";
 
 import { createSortFieldGuard } from "@/lib/api/sort-field";
 import { decryptToken, encryptToken } from "@/lib/crypto/token-cipher";
@@ -55,12 +65,15 @@ type OwnedAccount = {
 };
 
 // Paginated, scoped to the user. The token column is never selected — callers
-// only ever see metadata. No default status filter: disabled accounts stay
-// visible (history) unless the caller narrows it.
+// only ever see metadata. Disconnected accounts (deletedAt set) are always
+// excluded.
 export const listEbayAccounts = async (
   params: ListEbayAccountsParams,
 ): Promise<ListEbayAccountsResult> => {
-  const conditions = [eq(ebayAccount.userId, params.userId)];
+  const conditions = [
+    eq(ebayAccount.userId, params.userId),
+    isNull(ebayAccount.deletedAt),
+  ];
 
   if (params.statuses && params.statuses.length > 0) {
     conditions.push(inArray(ebayAccount.status, params.statuses));
@@ -119,13 +132,20 @@ export const getEbayAccount = async ({
       createdAt: ebayAccount.createdAt,
     })
     .from(ebayAccount)
-    .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)))
+    .where(
+      and(
+        eq(ebayAccount.id, id),
+        eq(ebayAccount.userId, userId),
+        isNull(ebayAccount.deletedAt),
+      ),
+    )
     .limit(1);
   return row ?? null;
 };
 
 // Reconnecting a known account (same eBay username) revives the existing row
-// rather than creating a duplicate. Username-less links always insert.
+// rather than creating a duplicate — including a previously disconnected
+// (soft-deleted) one, which clears deletedAt. Username-less links always insert.
 export const linkEbayAccount = async (
   input: LinkEbayAccountInput,
 ): Promise<void> => {
@@ -151,6 +171,7 @@ export const linkEbayAccount = async (
           refreshTokenExpiresAt: input.refreshTokenExpiresAt,
           scopes: input.scopes,
           status: EbayAccountStatus.Active,
+          deletedAt: null,
         })
         .where(eq(ebayAccount.id, existing.id));
       return;
@@ -167,15 +188,22 @@ export const linkEbayAccount = async (
   });
 };
 
-// Soft disconnect: keep the row for history, but flip status and wipe the token.
-export const disableEbayAccount = async ({
+// Soft disconnect: stamp deletedAt so the row drops out of every list/lookup,
+// and wipe the token. Reconnecting the same eBay username revives the row.
+export const disconnectEbayAccount = async ({
   id,
   userId,
 }: OwnedAccount): Promise<boolean> => {
   const result = await db
     .update(ebayAccount)
-    .set({ status: EbayAccountStatus.Disabled, refreshToken: null })
-    .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)))
+    .set({ deletedAt: new Date(), refreshToken: null })
+    .where(
+      and(
+        eq(ebayAccount.id, id),
+        eq(ebayAccount.userId, userId),
+        isNull(ebayAccount.deletedAt),
+      ),
+    )
     .returning({ id: ebayAccount.id });
   return result.length > 0;
 };
@@ -188,15 +216,21 @@ export const renameEbayAccount = async ({
   const result = await db
     .update(ebayAccount)
     .set({ label })
-    .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)))
+    .where(
+      and(
+        eq(ebayAccount.id, id),
+        eq(ebayAccount.userId, userId),
+        isNull(ebayAccount.deletedAt),
+      ),
+    )
     .returning({ id: ebayAccount.id });
   return result.length > 0;
 };
 
 // Mints a fresh, short-lived access token for one owned account. This is the
 // only path that reads the encrypted refresh token; it's decrypted in memory
-// and exchanged immediately. Throws if the account is missing, disabled, or has
-// no stored token (e.g. after a disconnect).
+// and exchanged immediately. Throws if the account is missing, disconnected, or
+// has no stored token.
 export const getAccountAccessToken = async ({
   id,
   userId,
@@ -204,14 +238,14 @@ export const getAccountAccessToken = async ({
   const [row] = await db
     .select({
       refreshToken: ebayAccount.refreshToken,
-      status: ebayAccount.status,
+      deletedAt: ebayAccount.deletedAt,
     })
     .from(ebayAccount)
     .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)))
     .limit(1);
 
   if (!row) throw new Error("eBay account not found");
-  if (row.status === EbayAccountStatus.Disabled || !row.refreshToken) {
+  if (row.deletedAt || !row.refreshToken) {
     throw new Error("eBay account is disconnected — reconnect it to publish");
   }
 

@@ -21,8 +21,8 @@ uses it, and throws it away.
 publishProductToAccounts(...)  needs to call eBay for an account
    ↓
 getAccountAccessToken({ id, userId })        ← features/ebay-accounts/services/ebay-account-service.ts
-   • SELECT refreshToken, status  WHERE id = … AND userId = …
-   • status Disabled or no token? → throw "reconnect it to publish"
+   • SELECT refreshToken, deletedAt  WHERE id = … AND userId = …
+   • deletedAt set or no token? → throw "reconnect it to publish"
    • decryptToken(refreshToken)               ← in memory only (token-cipher.ts, AES-256-GCM)
    • refreshAccessToken(plainRefreshToken)    ← lib/ebay/oauth.ts
    → returns tokens.access_token  (NOT stored anywhere)

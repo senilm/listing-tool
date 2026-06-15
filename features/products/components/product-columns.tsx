@@ -2,14 +2,12 @@
 
 import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Archive, Pencil, Upload } from "lucide-react";
+import { Pencil, Trash2, Upload } from "lucide-react";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { DataTableRowActions } from "@/components/data-table/data-table-row-actions";
 import { TruncatedText } from "@/components/truncated-text";
-import { ProductStatusBadge } from "@/features/products/components/product-status-badge";
 import { type ProductSummary } from "@/features/products/services/product-service";
-import { ProductStatus } from "@/lib/enums/product";
 
 const formatPrice = (amount: string, currency: string): string => {
   const value = Number(amount);
@@ -22,13 +20,13 @@ const formatPrice = (amount: string, currency: string): string => {
 
 type ProductColumnHandlers = {
   onEdit: (product: ProductSummary) => void;
-  onArchive: (product: ProductSummary) => void;
+  onDelete: (product: ProductSummary) => void;
   onPublish: (product: ProductSummary) => void;
 };
 
 export const createProductColumns = ({
   onEdit,
-  onArchive,
+  onDelete,
   onPublish,
 }: ProductColumnHandlers): ColumnDef<ProductSummary>[] => [
   {
@@ -42,15 +40,6 @@ export const createProductColumns = ({
         {row.original.title}
       </TruncatedText>
     ),
-  },
-  {
-    accessorKey: "status",
-    meta: { label: "Status" },
-    enableSorting: false,
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
-    ),
-    cell: ({ row }) => <ProductStatusBadge status={row.original.status} />,
   },
   {
     accessorKey: "basePrice",
@@ -95,19 +84,13 @@ export const createProductColumns = ({
         row={row.original}
         actions={[
           { label: "Edit", icon: Pencil, onSelect: onEdit },
+          { label: "Publish", icon: Upload, onSelect: onPublish },
           {
-            label: "Publish",
-            icon: Upload,
-            onSelect: onPublish,
-            disabled: (product) => product.status === ProductStatus.Archived,
-          },
-          {
-            label: "Archive",
-            icon: Archive,
+            label: "Delete",
+            icon: Trash2,
             variant: "destructive",
-            onSelect: onArchive,
+            onSelect: onDelete,
             separatorBefore: true,
-            disabled: (product) => product.status === ProductStatus.Archived,
           },
         ]}
       />

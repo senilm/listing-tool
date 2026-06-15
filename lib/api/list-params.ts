@@ -16,13 +16,16 @@ const parseEnumValues = <T extends string>(
 };
 
 type ListParamsOptions<S extends string, F extends string> = {
-  statusEnum: Record<string, S>;
+  statusEnum?: Record<string, S>;
   isSortField: (value: string) => value is F;
 };
 
 // Parses the shared list-endpoint query params (?page&limit&q&status&sort&dir).
 // Status values outside the enum and unknown sort fields are dropped.
-export const parseListParams = <S extends string, F extends string>(
+export const parseListParams = <
+  S extends string = string,
+  F extends string = string,
+>(
   params: URLSearchParams,
   { statusEnum, isSortField }: ListParamsOptions<S, F>,
 ) => {
@@ -32,7 +35,9 @@ export const parseListParams = <S extends string, F extends string>(
     MAX_LIMIT,
   );
   const q = params.get("q")?.trim().slice(0, MAX_QUERY_LENGTH);
-  const statuses = parseEnumValues(params.getAll("status"), statusEnum);
+  const statuses = statusEnum
+    ? parseEnumValues(params.getAll("status"), statusEnum)
+    : [];
 
   const sortField = params.get("sort");
   const sort =

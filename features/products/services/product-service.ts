@@ -1,10 +1,9 @@
-import { and, asc, count, desc, eq, ilike, inArray } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, isNull } from "drizzle-orm";
 
 import { createSortFieldGuard } from "@/lib/api/sort-field";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
 import { product } from "@/lib/db/schema/product";
-import { ProductStatus } from "@/lib/enums/product";
 import { DEFAULT_CONDITION, type ProductInput } from "@/validations/product";
 
 type ProductRow = typeof product.$inferSelect;
@@ -13,7 +12,6 @@ export type ProductSummary = Pick<
   ProductRow,
   | "id"
   | "title"
-  | "status"
   | "basePrice"
   | "currency"
   | "quantity"
@@ -40,7 +38,6 @@ export type ListProductsParams = {
   page: number;
   limit: number;
   q?: string;
-  statuses?: ProductStatus[];
   sort?: { id: ProductSortField; desc: boolean };
 };
 
@@ -49,19 +46,14 @@ export type ListProductsResult = {
   total: number;
 };
 
-// Paginated, scoped to the user. Archived products are hidden unless the caller
-// explicitly asks for them.
+// Paginated, scoped to the user. Soft-deleted products (deletedAt set) are
+// always excluded.
 export const listProducts = async (
   params: ListProductsParams,
 ): Promise<ListProductsResult> => {
-  const statuses =
-    params.statuses && params.statuses.length > 0
-      ? params.statuses
-      : [ProductStatus.Active];
-
   const conditions = [
     eq(product.userId, params.userId),
-    inArray(product.status, statuses),
+    isNull(product.deletedAt),
   ];
 
   const q = params.q?.trim();
@@ -78,7 +70,6 @@ export const listProducts = async (
     .select({
       id: product.id,
       title: product.title,
-      status: product.status,
       basePrice: product.basePrice,
       currency: product.currency,
       quantity: product.quantity,
@@ -111,7 +102,13 @@ export const getProduct = async ({
   const [row] = await db
     .select()
     .from(product)
-    .where(and(eq(product.id, id), eq(product.userId, userId)))
+    .where(
+      and(
+        eq(product.id, id),
+        eq(product.userId, userId),
+        isNull(product.deletedAt),
+      ),
+    )
     .limit(1);
   return row ?? null;
 };
@@ -154,21 +151,33 @@ export const updateProduct = async ({
   const result = await db
     .update(product)
     .set(toRowValues(input))
-    .where(and(eq(product.id, id), eq(product.userId, userId)))
+    .where(
+      and(
+        eq(product.id, id),
+        eq(product.userId, userId),
+        isNull(product.deletedAt),
+      ),
+    )
     .returning({ id: product.id });
   return result.length > 0;
 };
 
-// Soft delete: keep the row (and its publications) but drop it from the default
-// list. Reversible by flipping status back to Active.
-export const archiveProduct = async ({
+// Soft delete: stamp deletedAt so the row drops out of every list/lookup. The
+// row (and its publications) stay in the DB. Already-deleted rows are a no-op.
+export const deleteProduct = async ({
   id,
   userId,
 }: OwnedProduct): Promise<boolean> => {
   const result = await db
     .update(product)
-    .set({ status: ProductStatus.Archived })
-    .where(and(eq(product.id, id), eq(product.userId, userId)))
+    .set({ deletedAt: new Date() })
+    .where(
+      and(
+        eq(product.id, id),
+        eq(product.userId, userId),
+        isNull(product.deletedAt),
+      ),
+    )
     .returning({ id: product.id });
   return result.length > 0;
 };

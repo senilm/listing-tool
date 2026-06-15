@@ -12,7 +12,6 @@ export const EBAY_ACCOUNT_FILTER_FIELDS: DataTableFilterField[] = [
     options: [
       { label: "Active", value: EbayAccountStatus.Active },
       { label: "Needs reconsent", value: EbayAccountStatus.NeedsReconsent },
-      { label: "Disabled", value: EbayAccountStatus.Disabled },
     ],
   },
 ];

@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import {
-  disableEbayAccount,
+  disconnectEbayAccount,
   renameEbayAccount,
 } from "@/features/ebay-accounts/services/ebay-account-service";
 import { parseBody } from "@/lib/api/body";
@@ -11,12 +11,15 @@ import { renameEbayAccountSchema } from "@/validations/ebay-account";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-// Soft-disconnect: marks the account disabled and wipes its stored token.
+// Soft-disconnect: stamps deletedAt and wipes its stored token.
 export const DELETE = withApi(
   async (_request: NextRequest, { params }: RouteContext, session) => {
     const { id } = await params;
-    const disabled = await disableEbayAccount({ id, userId: session.user.id });
-    if (!disabled) {
+    const disconnected = await disconnectEbayAccount({
+      id,
+      userId: session.user.id,
+    });
+    if (!disconnected) {
       throw new NotFoundError("Account not found");
     }
     return NextResponse.json({ success: true });

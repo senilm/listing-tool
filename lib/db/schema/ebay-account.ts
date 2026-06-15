@@ -18,7 +18,7 @@ export const ebayAccountStatusEnum = pgEnum(
 
 // One linked eBay seller account per row. The refresh token is stored ENCRYPTED
 // at rest (encryption handled in the service layer, not the schema) and is
-// nulled out when an account is disconnected (soft-disabled).
+// nulled out when an account is disconnected (soft-deleted via deletedAt).
 export const ebayAccount = pgTable(
   "ebay_account",
   {
@@ -44,6 +44,7 @@ export const ebayAccount = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
+    deletedAt: timestamp("deleted_at"),
   },
   (table) => [index("ebay_account_user_id_idx").on(table.userId)],
 );

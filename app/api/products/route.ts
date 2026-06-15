@@ -8,13 +8,12 @@ import {
 import { parseBody } from "@/lib/api/body";
 import { parseListParams } from "@/lib/api/list-params";
 import { withApi } from "@/lib/api/with-api";
-import { ProductStatus } from "@/lib/enums/product";
 import { productInputSchema } from "@/validations/product";
 
 export const GET = withApi(async (request: NextRequest, _context, session) => {
-  const { page, limit, q, statuses, sort } = parseListParams(
+  const { page, limit, q, sort } = parseListParams(
     request.nextUrl.searchParams,
-    { statusEnum: ProductStatus, isSortField: isProductSortField },
+    { isSortField: isProductSortField },
   );
 
   const result = await listProducts({
@@ -22,7 +21,6 @@ export const GET = withApi(async (request: NextRequest, _context, session) => {
     page,
     limit,
     q,
-    statuses,
     sort,
   });
 

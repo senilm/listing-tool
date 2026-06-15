@@ -3,5 +3,4 @@
 export enum EbayAccountStatus {
   Active = "active",
   NeedsReconsent = "needs_reconsent",
-  Disabled = "disabled",
 }

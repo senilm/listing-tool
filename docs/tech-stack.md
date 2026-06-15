@@ -68,10 +68,11 @@ the data model.
   seller's username (Identity API, best-effort — seeds the default label), and stores the
   encrypted token against the session user. **The RuName "Auth accepted URL" must point at
   `/api/ebay/accounts/callback`.**
-- **Management**: list / rename (`PATCH`) / disconnect (`DELETE`, soft — `status = Disabled`
-  - token wiped) under `features/ebay-accounts/`. Reconnecting the same eBay username revives
-    the existing row instead of duplicating it. The list is a URL-driven data-table on TanStack
-    Query (`GET /api/ebay/accounts`), the same pattern as products — see **Product CRUD**.
+- **Management**: list / rename (`PATCH`) / disconnect (`DELETE`, soft — `deletedAt` set,
+  token wiped) under `features/ebay-accounts/`. Disconnected accounts drop out of the list;
+  reconnecting the same eBay username revives the existing row (clears `deletedAt`) instead of
+  duplicating it. The list is a URL-driven data-table on TanStack
+  Query (`GET /api/ebay/accounts`), the same pattern as products — see **Product CRUD**.
 - **Scopes**: consent requests `EBAY_CONSENT_SCOPES` (sell.inventory + sell.account +
   commerce.identity.readonly); the refresh path keeps the narrower `EBAY_SCOPES`.
 - **Replaced**: all POC scaffolding is gone — the `/api/ebay/auth/{login,callback}` routes, the
@@ -86,10 +87,9 @@ the data model.
 The master listings, under `features/products/`. Create / list / edit / soft-delete, scoped by
 `user_id`.
 
-- **Soft delete**: a `product_status` enum (`active` / `archived`, `lib/enums/product.ts`) drives a
-  reversible archive. Archived products drop out of the default list (publications cascade on a
-  _hard_ delete, so we never hard-delete from the UI). The list shows archived only when the status
-  filter asks for it.
+- **Soft delete**: a nullable `deleted_at` timestamp. Setting it drops the product out of every
+  list/lookup (publications cascade on a _hard_ delete, so we never hard-delete from the UI). There
+  is no UI to view deleted products — delete is one-way from the user's side.
 - **Fixed fields**: every listing is **USD** and condition **new** — no pickers (`DEFAULT_CURRENCY`,
   `DEFAULT_CONDITION` in `validations/product.ts`). The columns stay in the schema for future
   flexibility; the service writes the fixed values.

@@ -42,7 +42,7 @@ export const updateProductRequest = async (
   if (!res.ok) throw new Error("Failed to update product");
 };
 
-export const archiveProductRequest = async (id: string): Promise<void> => {
+export const deleteProductRequest = async (id: string): Promise<void> => {
   const res = await fetch(productApiRoute(id), { method: "DELETE" });
-  if (!res.ok) throw new Error("Failed to archive product");
+  if (!res.ok) throw new Error("Failed to delete product");
 };

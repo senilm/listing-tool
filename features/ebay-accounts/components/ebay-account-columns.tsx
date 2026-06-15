@@ -9,7 +9,6 @@ import { DataTableRowActions } from "@/components/data-table/data-table-row-acti
 import { TruncatedText } from "@/components/truncated-text";
 import { EbayAccountStatusBadge } from "@/features/ebay-accounts/components/ebay-account-status-badge";
 import { type EbayAccountSummary } from "@/features/ebay-accounts/services/ebay-account-service";
-import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 
 type EbayAccountColumnHandlers = {
   onRename: (account: EbayAccountSummary) => void;
@@ -80,8 +79,6 @@ export const createEbayAccountColumns = ({
             icon: Unplug,
             variant: "destructive",
             onSelect: onDisconnect,
-            disabled: (account) =>
-              account.status === EbayAccountStatus.Disabled,
           },
         ]}
       />
