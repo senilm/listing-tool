@@ -34,23 +34,12 @@ export const ebayRequest = async <T = unknown>(
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
   };
 
-  // eBay's sandbox intermittently returns 5xx "System error" (errorId 25001);
-  // retry a few times with backoff before giving up.
-  const maxAttempts = 4;
-  let lastText = "";
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const res = await fetch(url, init);
-    const text = await res.text();
-    if (res.ok) {
-      return { status: res.status, data: (text ? JSON.parse(text) : {}) as T };
-    }
-    lastText = text;
-    if (res.status < 500 || attempt === maxAttempts) {
-      throw new Error(
-        `eBay ${init.method} ${path} failed: ${res.status} ${text}`,
-      );
-    }
-    await new Promise((resolve) => setTimeout(resolve, attempt * 500));
+  const res = await fetch(url, init);
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(
+      `eBay ${init.method} ${path} failed: ${res.status} ${text}`,
+    );
   }
-  throw new Error(`eBay ${init.method} ${path} failed: ${lastText}`);
+  return { status: res.status, data: (text ? JSON.parse(text) : {}) as T };
 };
