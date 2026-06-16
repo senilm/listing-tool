@@ -65,13 +65,14 @@ the data model.
 - **Connect flow**: `/ebay-accounts` → `GET /api/ebay/accounts/connect` mints a CSRF
   `state`, stores it in an httpOnly cookie, and redirects to eBay consent. eBay returns to
   `GET /api/ebay/accounts/callback`, which verifies the state, exchanges the code, reads the
-  seller's username (Identity API, best-effort — seeds the default label), and stores the
-  encrypted token against the session user. **The RuName "Auth accepted URL" must point at
+  seller's immutable user ID (Identity API on the `apiz` host, best-effort — the dedup key;
+  the username, when returned, seeds the default label), and stores the encrypted token
+  against the session user. **The RuName "Auth accepted URL" must point at
   `/api/ebay/accounts/callback`.**
 - **Management**: list / rename (`PATCH`) / disconnect (`DELETE`, soft — `deletedAt` set,
   token wiped) under `features/ebay-accounts/`. Disconnected accounts drop out of the list;
-  reconnecting the same eBay username revives the existing row (clears `deletedAt`) instead of
-  duplicating it. The list is a URL-driven data-table on TanStack
+  reconnecting the same eBay account (matched on its immutable user ID) revives the existing
+  row (clears `deletedAt`) instead of duplicating it. The list is a URL-driven data-table on TanStack
   Query (`GET /api/ebay/accounts`), the same pattern as products — see **Product CRUD**.
 - **Scopes**: consent requests `EBAY_CONSENT_SCOPES` (sell.inventory + sell.account +
   commerce.identity.readonly); the refresh path keeps the narrower `EBAY_SCOPES`.

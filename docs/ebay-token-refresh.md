@@ -44,8 +44,9 @@ Content-Type:  application/x-www-form-urlencoded
 ## Two things worth noting
 
 - **Narrower scope on refresh.** Linking consents to inventory + account **+
-  identity** (so we can read the username once). The refresh path drops identity
-  and asks only for the two scopes publishing actually needs.
+  identity** (so we can read the account's immutable user ID once, on the `apiz`
+  host). The refresh path drops identity and asks only for the two scopes
+  publishing actually needs.
 - **`getAccountAccessToken` is the only reader of the refresh token.** It's the
   single place the encrypted token is decrypted, and the plaintext exists only in
   memory for the duration of the exchange. The token column is never selected by

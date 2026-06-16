@@ -53,7 +53,7 @@ app/api/ebay/accounts/route.ts (GET)
               SELECT … WHERE userId = …          (never selects the token column)
    ↓ { items: EbayAccountSummary[], total }
    ↓
-   DataTable renders rows (label / username / <EbayAccountStatusBadge> / connected date)
+   DataTable renders rows (label / <EbayAccountStatusBadge> / connected date)
    + a ⋯ row-actions column (Rename / Disconnect). The toolbar holds "Connect account".
 ```
 
@@ -73,7 +73,9 @@ Three actors: the app, eBay, the DB.
 
 ```
 [Click "Connect eBay account"]
-   connect-ebay-account-button.tsx → <Link href={ebayAccountConnectApiRoute()}>
+   ebay-accounts-table.tsx (toolbar) → native <a href={ebayAccountConnectApiRoute()}>
+   (a full-page navigation on purpose, NOT next/link: a client-side Link would
+    RSC-fetch/prefetch this redirect route and fail CORS on the cross-origin 302)
    ↓ browser GET
 app/api/ebay/accounts/connect/route.ts
    • requireSession (else → /login)
@@ -85,10 +87,11 @@ app/api/ebay/accounts/connect/route.ts
 app/api/ebay/accounts/callback/route.ts
    • verify ?state === cookie           (CSRF check)
    • exchangeCodeForTokens(code)        (lib/ebay/oauth.ts)
-   • fetchEbayUsername(accessToken)     (lib/ebay/identity.ts, best-effort)
+   • fetchEbayIdentity(accessToken)     (lib/ebay/identity.ts, apiz host, best-effort)
+        - reads the immutable userId (dedup key) + username (default label)
    • linkEbayAccount({ … })             (service):
         - encryptToken(refreshToken)    (lib/crypto/token-cipher.ts, AES-256-GCM)
-        - upsert row by (userId, username)
+        - revive row by (userId, ebayUserId), else insert
    • 302 → /ebay-accounts?connected=1   (or ?error=…)
    ↓
 app/(app)/ebay-accounts/page.tsx  re-renders with the fresh list

@@ -34,7 +34,7 @@ erDiagram
         uuid id PK
         text user_id FK
         string label "nickname, e.g. Store A"
-        string ebay_username "from identity, optional"
+        string ebay_user_id "immutable eBay user id from identity, dedup key, optional"
         text refresh_token "ENCRYPTED at rest"
         timestamp refresh_token_expires_at "drives re-consent"
         json scopes "granted OAuth scopes"
@@ -111,8 +111,14 @@ erDiagram
   product can have many publication rows per account over time.
 - **Key queries**: publications by account, by user, by status (e.g. all `scheduled`,
   all `published`), by product.
-- **Security**: `ebay_account.refresh_token` is to be encrypted at rest (planned in
-  the service layer when account linking is built — not yet implemented).
+- **Security**: `ebay_account.refresh_token` is encrypted at rest (AES-256-GCM) in
+  the service layer (`lib/crypto/token-cipher.ts`); the plaintext is decrypted only
+  in memory when minting an access token, and the column is never selected by
+  list/detail queries.
+- **Account dedup**: `ebay_account.ebay_user_id` holds eBay's immutable per-account
+  user ID (from the Identity API). Reconnecting the same account matches on it to
+  revive the soft-deleted row instead of duplicating; `label` is the separate
+  user-editable display name.
 - **Out of scope (for now)**: inventory/quantity sync, orders/sales, multi-variation
   listings, fan-out batch grouping. A category/required-aspects cache table may be
   added when wiring up the Taxonomy API.
