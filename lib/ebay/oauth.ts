@@ -16,19 +16,14 @@ type TokenResponse = {
   token_type: string;
 };
 
-const tokenEndpoint = () => `${ebayConfig.apiBase}${ebayOAuthTokenRoute()}`;
-
-const basicAuthHeader = () => {
-  const creds = `${ebayConfig.clientId}:${ebayConfig.clientSecret}`;
-  return `Basic ${Buffer.from(creds).toString("base64")}`;
-};
-
 const postToken = async (body: URLSearchParams): Promise<TokenResponse> => {
-  const res = await fetch(tokenEndpoint(), {
+  const creds = `${ebayConfig.clientId}:${ebayConfig.clientSecret}`;
+
+  const res = await fetch(`${ebayConfig.apiBase}${ebayOAuthTokenRoute()}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: basicAuthHeader(),
+      Authorization: `Basic ${Buffer.from(creds).toString("base64")}`,
     },
     body,
   });
