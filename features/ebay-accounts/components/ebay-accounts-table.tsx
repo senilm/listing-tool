@@ -1,7 +1,6 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -70,10 +69,10 @@ export const EbayAccountsTable = () => {
         onRowClick={(row) => router.push(ebayAccountDetailRoute(row.id))}
         toolbarActions={
           <Button asChild size="sm">
-            <Link href={ebayAccountConnectApiRoute()}>
+            <a href={ebayAccountConnectApiRoute()}>
               <Plus />
               Connect account
-            </Link>
+            </a>
           </Button>
         }
       />

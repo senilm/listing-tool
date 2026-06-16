@@ -16,8 +16,8 @@ export type EbayIdentity = {
 //
 // `userId` is eBay's immutable, per-account identifier — our dedup key (the
 // username is user-editable and being withdrawn for US accounts, so we don't
-// rely on it). Best-effort: returns null on any failure (e.g. the sandbox
-// getUser outage), in which case the caller links without a dedup key.
+// rely on it). Best-effort: returns null on any failure, in which case the
+// caller links without a dedup key.
 export const fetchEbayIdentity = async (
   accessToken: string,
 ): Promise<EbayIdentity | null> => {
@@ -31,22 +31,11 @@ export const fetchEbayIdentity = async (
         },
       },
     );
-    // TODO: temporary diagnostics for the sandbox getUser test — remove once confirmed.
-    console.warn("Fetching eBay identity:", res.status, res.statusText);
-    if (!res.ok) {
-      console.error(
-        "Failed to fetch eBay identity:",
-        res.status,
-        res.statusText,
-      );
-      return null;
-    }
+    if (!res.ok) return null;
     const data = (await res.json()) as EbayUserResponse;
-    console.warn("Fetched eBay identity:", data);
     if (!data.userId) return null;
     return { userId: data.userId, username: data.username ?? null };
-  } catch (error) {
-    console.error("Error fetching eBay identity:", error);
+  } catch {
     return null;
   }
 };

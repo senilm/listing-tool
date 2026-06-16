@@ -123,9 +123,11 @@ APIs, so they handle their own session check and return redirects, not JSON.
 ## The UI
 
 - `components/ebay-accounts-table.tsx` — the list page. The **"Connect account"
-  button is just a `<Link>` to the connect API route** — clicking it navigates
-  the browser to the connect route, starting the redirect dance. Holds the
-  rename/disconnect dialog state, opened from row actions.
+  button is a native `<a href>` to the connect API route** (deliberately not a
+  `next/link`: kicking off OAuth must be a full-page navigation — a client-side
+  Link would RSC-fetch and prefetch the redirect route, which fails CORS
+  following the cross-origin 302 to eBay). Holds the rename/disconnect dialog
+  state, opened from row actions.
 - `components/ebay-connect-feedback.tsx` — the other end of the redirect. Reads
   `?connected` / `?error` on the accounts page, fires the matching toast, then
   `router.replace`s to strip the query params so a refresh doesn't re-fire the
@@ -149,7 +151,7 @@ APIs, so they handle their own session check and return redirects, not JSON.
 ## End-to-End Flow Trace: "Connect an eBay account"
 
 ```
-USER clicks "Connect account"  (just a <Link> to the connect route)
+USER clicks "Connect account"  (native <a href> → full-page nav, not next/link)
   └─ GET /api/ebay/accounts/connect
        ├─ check session (else → /login)
        ├─ state = randomBytes(32)
