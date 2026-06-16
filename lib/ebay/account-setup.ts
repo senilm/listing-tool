@@ -15,6 +15,16 @@ export type SellerSetup = {
   merchantLocationKey: string;
 };
 
+type PaymentPolicy = { paymentPolicyId: string };
+type ReturnPolicy = { returnPolicyId: string };
+type FulfillmentPolicy = { fulfillmentPolicyId: string };
+type Location = { merchantLocationKey: string };
+
+type PaymentPolicyList = { paymentPolicies?: PaymentPolicy[] };
+type ReturnPolicyList = { returnPolicies?: ReturnPolicy[] };
+type FulfillmentPolicyList = { fulfillmentPolicies?: FulfillmentPolicy[] };
+type LocationList = { locations?: Location[] };
+
 const CATEGORY_TYPES = [{ name: "ALL_EXCLUDING_MOTORS_VEHICLES" }];
 const DEFAULT_LOCATION_KEY = "warehouse-1";
 
@@ -28,15 +38,15 @@ const ensureOptedIn = async (accessToken: string) => {
 };
 
 const resolvePaymentPolicy = async (accessToken: string): Promise<string> => {
-  const { data } = await ebayRequest<{
-    paymentPolicies?: { paymentPolicyId: string }[];
-  }>(accessToken, ebayPaymentPolicyRoute(), {
-    query: { marketplace_id: EBAY_MARKETPLACE_ID },
-  });
+  const { data } = await ebayRequest<PaymentPolicyList>(
+    accessToken,
+    ebayPaymentPolicyRoute(),
+    { query: { marketplace_id: EBAY_MARKETPLACE_ID } },
+  );
   if (data.paymentPolicies?.length)
     return data.paymentPolicies[0].paymentPolicyId;
 
-  const created = await ebayRequest<{ paymentPolicyId: string }>(
+  const created = await ebayRequest<PaymentPolicy>(
     accessToken,
     ebayPaymentPolicyRoute(),
     {
@@ -52,14 +62,14 @@ const resolvePaymentPolicy = async (accessToken: string): Promise<string> => {
 };
 
 const resolveReturnPolicy = async (accessToken: string): Promise<string> => {
-  const { data } = await ebayRequest<{
-    returnPolicies?: { returnPolicyId: string }[];
-  }>(accessToken, ebayReturnPolicyRoute(), {
-    query: { marketplace_id: EBAY_MARKETPLACE_ID },
-  });
+  const { data } = await ebayRequest<ReturnPolicyList>(
+    accessToken,
+    ebayReturnPolicyRoute(),
+    { query: { marketplace_id: EBAY_MARKETPLACE_ID } },
+  );
   if (data.returnPolicies?.length) return data.returnPolicies[0].returnPolicyId;
 
-  const created = await ebayRequest<{ returnPolicyId: string }>(
+  const created = await ebayRequest<ReturnPolicy>(
     accessToken,
     ebayReturnPolicyRoute(),
     {
@@ -80,16 +90,16 @@ const resolveReturnPolicy = async (accessToken: string): Promise<string> => {
 const resolveFulfillmentPolicy = async (
   accessToken: string,
 ): Promise<string> => {
-  const { data } = await ebayRequest<{
-    fulfillmentPolicies?: { fulfillmentPolicyId: string }[];
-  }>(accessToken, ebayFulfillmentPolicyRoute(), {
-    query: { marketplace_id: EBAY_MARKETPLACE_ID },
-  });
+  const { data } = await ebayRequest<FulfillmentPolicyList>(
+    accessToken,
+    ebayFulfillmentPolicyRoute(),
+    { query: { marketplace_id: EBAY_MARKETPLACE_ID } },
+  );
   if (data.fulfillmentPolicies?.length) {
     return data.fulfillmentPolicies[0].fulfillmentPolicyId;
   }
 
-  const created = await ebayRequest<{ fulfillmentPolicyId: string }>(
+  const created = await ebayRequest<FulfillmentPolicy>(
     accessToken,
     ebayFulfillmentPolicyRoute(),
     {
@@ -122,9 +132,11 @@ const resolveLocation = async (accessToken: string): Promise<string> => {
   // GET /location (the list endpoint) is unreliable in sandbox (errorId 25001),
   // so try it but fall back to a keyed create, which is idempotent.
   try {
-    const { data } = await ebayRequest<{
-      locations?: { merchantLocationKey: string }[];
-    }>(accessToken, ebayLocationsRoute(), { query: { limit: "1" } });
+    const { data } = await ebayRequest<LocationList>(
+      accessToken,
+      ebayLocationsRoute(),
+      { query: { limit: "1" } },
+    );
     if (data.locations?.length) return data.locations[0].merchantLocationKey;
   } catch {
     // fall through to create
