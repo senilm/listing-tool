@@ -115,7 +115,7 @@ export const publishListing = async ({
           },
           pricingSummary: { price: { value: listing.price, currency: "USD" } },
           merchantLocationKey: setup.merchantLocationKey,
-          listingDuration: "GTC",
+          listingDuration: "GTC", // Good 'Til Cancelled
         },
       },
     );
