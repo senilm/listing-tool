@@ -135,11 +135,6 @@ export const PublishProductDialog = ({
                 />
                 <div className="flex flex-col">
                   <span className="font-medium">{account.label}</span>
-                  {account.ebayUsername ? (
-                    <span className="text-xs text-muted-foreground">
-                      {account.ebayUsername}
-                    </span>
-                  ) : null}
                 </div>
               </Label>
             ))}

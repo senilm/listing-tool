@@ -32,19 +32,6 @@ export const createEbayAccountColumns = ({
     ),
   },
   {
-    accessorKey: "ebayUsername",
-    meta: { label: "eBay username" },
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="eBay username" />
-    ),
-    cell: ({ row }) =>
-      row.original.ebayUsername ? (
-        <TruncatedText>{row.original.ebayUsername}</TruncatedText>
-      ) : (
-        <span className="text-muted-foreground">—</span>
-      ),
-  },
-  {
     accessorKey: "status",
     meta: { label: "Status" },
     enableSorting: false,

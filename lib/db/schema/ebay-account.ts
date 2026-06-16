@@ -27,7 +27,7 @@ export const ebayAccount = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     label: text("label").notNull(),
-    ebayUsername: text("ebay_username"),
+    ebayUserId: text("ebay_user_id"),
     refreshToken: text("refresh_token"),
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
     scopes: jsonb("scopes").$type<string[]>(),
@@ -46,5 +46,8 @@ export const ebayAccount = pgTable(
       .notNull(),
     deletedAt: timestamp("deleted_at"),
   },
-  (table) => [index("ebay_account_user_id_idx").on(table.userId)],
+  (table) => [
+    index("ebay_account_user_id_idx").on(table.userId),
+    index("ebay_account_ebay_user_id_idx").on(table.userId, table.ebayUserId),
+  ],
 );

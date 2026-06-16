@@ -32,14 +32,16 @@ One row = one linked seller account.
   explicit: encryption happens in the _service_ layer, not here). Nulled on
   disconnect.
 - `refreshTokenExpiresAt`, `scopes` (what was granted), `status`.
-- `ebayUsername` — nullable (identity is best-effort, so an account can exist
-  without one).
+- `ebayUserId` — eBay's **immutable per-account user ID** (from the identity
+  call). Nullable, because identity is best-effort. This is the **dedup key**:
+  reconnecting the same account matches on it to revive the existing row instead
+  of duplicating. The user-facing name is the separate `label` column.
 - The four cached setup IDs live here: `paymentPolicyId`, `returnPolicyId`,
   `fulfillmentPolicyId`, `merchantLocationKey` — the cache `ensureSellerSetup`
   writes to.
 - `deletedAt` — **soft delete** (mark deleted, don't remove the row) so a
-  disconnected account can be revived on reconnect.
-- Indexed on `userId` (the column every query filters by).
+  disconnected account can be revived on reconnect (keyed by `ebayUserId`).
+- Indexed on `userId`, and on `(userId, ebayUserId)` for the dedup lookup.
 
 ### `validations/ebay-account.ts`
 
@@ -79,10 +81,14 @@ after consent.
    This is where the CSRF check fires.
 4. `exchangeCodeForTokens(code)` — trade the code for tokens. No refresh token →
    `?error=no_refresh_token`.
-5. `fetchEbayUsername(access_token)` — best-effort username.
-6. `linkEbayAccount(...)` — persist: userId, username, refresh token (encrypted
-   inside the service), expiry from `refresh_token_expires_in`, granted scopes.
-   Revives a soft-deleted row if the same username reconnects, else inserts.
+5. `fetchEbayIdentity(access_token)` — best-effort. Returns the account's
+   immutable `userId` (dedup key) and `username` (a friendly default label, when
+   eBay still provides it). Null on failure.
+6. `linkEbayAccount(...)` — persist: userId, `ebayUserId` (or null), `label`
+   (the username when present, else `"eBay account"`), refresh token (encrypted
+   inside the service), expiry, granted scopes. Revives a soft-deleted row when
+   the same `ebayUserId` reconnects (keeping its existing label), else inserts.
+   With no `ebayUserId` it can't dedup, so it always inserts.
 7. Redirect back with `?connected=1`.
 8. **Every path calls `withClearedState`** — deletes the state cookie. One-time
    use: consumed whether we succeed or fail, so it can't be replayed.
@@ -124,11 +130,12 @@ APIs, so they handle their own session check and return redirects, not JSON.
   `?connected` / `?error` on the accounts page, fires the matching toast, then
   `router.replace`s to strip the query params so a refresh doesn't re-fire the
   toast. Turns the callback's redirect params into user-visible feedback.
-- `components/ebay-account-columns.tsx` — Label, eBay username, Status badge,
-  Connected date, + Rename/Disconnect row actions.
-- `components/ebay-account-details.tsx` — detail-page card (status, username,
-  connected date). The account's publish history (`AccountPublicationsTable`)
-  sits alongside it.
+- `components/ebay-account-columns.tsx` — Label, Status badge, Connected date,
+  - Rename/Disconnect row actions. (No username column — the immutable
+    `ebayUserId` is internal-only and never shown.)
+- `components/ebay-account-details.tsx` — detail-page card (status, connected
+  date). The account's publish history (`AccountPublicationsTable`) sits
+  alongside it.
 - `components/disconnect-ebay-account-dialog.tsx` — confirm dialog; its copy
   tells the user reconnecting later is possible (matches revive-on-reconnect).
 - `components/rename-ebay-account-dialog.tsx` — react-hook-form + the rename
@@ -156,8 +163,8 @@ USER logs into eBay + approves the scopes  (prompt:login forces account choice)
        ├─ CSRF gate: missing or state !== expectedState → redirect ?error=consent_failed
        ├─ exchangeCodeForTokens(code)        → access token + refresh token
        │     └─ no refresh token → ?error=no_refresh_token
-       ├─ fetchEbayUsername(access token)    → best-effort label (may be null)
-       ├─ linkEbayAccount(...)               → encrypt refresh token, INSERT or revive row
+       ├─ fetchEbayIdentity(access token)    → { userId (dedup key), username } | null  [apiz host]
+       ├─ linkEbayAccount(...)               → encrypt token; revive row by ebayUserId, else INSERT
        ├─ clear state cookie  (every path)
        └─ 302 redirect → /ebay-accounts?connected=1   (or ?error=link_failed on throw)
 

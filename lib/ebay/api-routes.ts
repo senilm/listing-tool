@@ -1,6 +1,6 @@
 // Centralised eBay REST endpoint builders, mirroring lib/api-routes.ts for our
 // own API. These are paths relative to the configured eBay base URL — callers
-// (ebayRequest, oauth, identity) prefix the right base themselves.
+// (ebayRequest, oauth) prefix the right base themselves.
 
 export const ebayInventoryItemRoute = (sku: string) =>
   `/sell/inventory/v1/inventory_item/${sku}`;

@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, isNull, or } from "drizzle-orm";
+import { and, desc, eq, ilike, isNull } from "drizzle-orm";
 
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
@@ -43,20 +43,13 @@ export const globalSearch = async ({
       .orderBy(desc(product.updatedAt))
       .limit(RESULTS_PER_GROUP),
     db
-      .select({
-        id: ebayAccount.id,
-        title: ebayAccount.label,
-        subtitle: ebayAccount.ebayUsername,
-      })
+      .select({ id: ebayAccount.id, title: ebayAccount.label })
       .from(ebayAccount)
       .where(
         and(
           eq(ebayAccount.userId, userId),
           isNull(ebayAccount.deletedAt),
-          or(
-            ilike(ebayAccount.label, term),
-            ilike(ebayAccount.ebayUsername, term),
-          ),
+          ilike(ebayAccount.label, term),
         ),
       )
       .orderBy(desc(ebayAccount.createdAt))
@@ -78,7 +71,7 @@ export const globalSearch = async ({
 
   return {
     products: products.map((row) => ({ ...row, subtitle: null })),
-    accounts,
+    accounts: accounts.map((row) => ({ ...row, subtitle: null })),
     publications,
   };
 };

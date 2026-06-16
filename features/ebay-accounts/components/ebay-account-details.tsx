@@ -21,14 +21,6 @@ export const EbayAccountDetails = ({ account }: EbayAccountDetailsProps) => {
         </div>
         <div className="space-y-1.5">
           <Typography variant="muted" className="text-xs">
-            eBay username
-          </Typography>
-          <Typography variant="small" as="p">
-            {account.ebayUsername ?? "—"}
-          </Typography>
-        </div>
-        <div className="space-y-1.5">
-          <Typography variant="muted" className="text-xs">
             Connected
           </Typography>
           <Typography variant="small" as="p">

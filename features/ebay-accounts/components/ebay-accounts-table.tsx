@@ -63,7 +63,7 @@ export const EbayAccountsTable = () => {
         onGlobalFilterChange={params.onGlobalFilterChange}
         filterFields={EBAY_ACCOUNT_FILTER_FIELDS}
         enableGlobalFilter
-        searchPlaceholder="Search by label or username"
+        searchPlaceholder="Search by label"
         isLoading={isLoading || isFetching}
         emptyTitle="No eBay accounts linked"
         emptyDescription="Connect an eBay seller account to start listing."

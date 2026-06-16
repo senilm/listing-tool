@@ -1,14 +1,4 @@
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  ilike,
-  inArray,
-  isNull,
-  or,
-} from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray, isNull } from "drizzle-orm";
 
 import { decryptToken, encryptToken } from "@/lib/crypto/token-cipher";
 import { db } from "@/lib/db/client";
@@ -22,13 +12,12 @@ type EbayAccountRow = typeof ebayAccount.$inferSelect;
 
 export type EbayAccountSummary = Pick<
   EbayAccountRow,
-  "id" | "label" | "ebayUsername" | "status" | "createdAt"
+  "id" | "label" | "status" | "createdAt"
 >;
 
 // Columns the table is allowed to sort by — guards the ORDER BY clause.
 export const SORTABLE_COLUMNS = {
   label: ebayAccount.label,
-  ebayUsername: ebayAccount.ebayUsername,
   createdAt: ebayAccount.createdAt,
 } as const;
 
@@ -50,7 +39,8 @@ export type ListEbayAccountsResult = {
 
 type LinkEbayAccountInput = {
   userId: string;
-  ebayUsername: string | null;
+  ebayUserId: string | null;
+  label: string;
   refreshToken: string;
   refreshTokenExpiresAt: Date | null;
   scopes: string[];
@@ -77,13 +67,7 @@ export const listEbayAccounts = async (
   }
 
   const q = params.q?.trim();
-  if (q) {
-    const search = or(
-      ilike(ebayAccount.label, likeContains(q)),
-      ilike(ebayAccount.ebayUsername, likeContains(q)),
-    );
-    if (search) conditions.push(search);
-  }
+  if (q) conditions.push(ilike(ebayAccount.label, likeContains(q)));
 
   const where = and(...conditions);
 
@@ -96,7 +80,6 @@ export const listEbayAccounts = async (
     .select({
       id: ebayAccount.id,
       label: ebayAccount.label,
-      ebayUsername: ebayAccount.ebayUsername,
       status: ebayAccount.status,
       createdAt: ebayAccount.createdAt,
     })
@@ -124,7 +107,6 @@ export const getEbayAccount = async ({
     .select({
       id: ebayAccount.id,
       label: ebayAccount.label,
-      ebayUsername: ebayAccount.ebayUsername,
       status: ebayAccount.status,
       createdAt: ebayAccount.createdAt,
     })
@@ -140,22 +122,24 @@ export const getEbayAccount = async ({
   return row ?? null;
 };
 
-// Reconnecting a known account (same eBay username) revives the existing row
+// Reconnecting a known account (same eBay user ID) revives the existing row
 // rather than creating a duplicate — including a previously disconnected
-// (soft-deleted) one, which clears deletedAt. Username-less links always insert.
+// (soft-deleted) one, which clears deletedAt. The existing label is kept so a
+// rename survives reconnection. When the user ID is unknown (identity call
+// unavailable, e.g. sandbox) we can't dedup, so we always insert.
 export const linkEbayAccount = async (
   input: LinkEbayAccountInput,
 ): Promise<void> => {
   const refreshToken = encryptToken(input.refreshToken);
 
-  if (input.ebayUsername) {
+  if (input.ebayUserId) {
     const [existing] = await db
       .select({ id: ebayAccount.id })
       .from(ebayAccount)
       .where(
         and(
           eq(ebayAccount.userId, input.userId),
-          eq(ebayAccount.ebayUsername, input.ebayUsername),
+          eq(ebayAccount.ebayUserId, input.ebayUserId),
         ),
       )
       .limit(1);
@@ -177,8 +161,8 @@ export const linkEbayAccount = async (
 
   await db.insert(ebayAccount).values({
     userId: input.userId,
-    label: input.ebayUsername ?? "eBay account",
-    ebayUsername: input.ebayUsername,
+    label: input.label,
+    ebayUserId: input.ebayUserId,
     refreshToken,
     refreshTokenExpiresAt: input.refreshTokenExpiresAt,
     scopes: input.scopes,
@@ -186,7 +170,7 @@ export const linkEbayAccount = async (
 };
 
 // Soft disconnect: stamp deletedAt so the row drops out of every list/lookup,
-// and wipe the token. Reconnecting the same eBay username revives the row.
+// and wipe the token. Reconnecting the same eBay account revives the row.
 export const disconnectEbayAccount = async ({
   id,
   userId,

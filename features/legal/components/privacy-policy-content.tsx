@@ -35,10 +35,11 @@ export const PrivacyPolicyContent = () => {
         </Typography>
         <Typography>
           <strong>eBay account connections.</strong> When you connect an eBay
-          seller account we store your eBay username and the OAuth refresh token
-          eBay issues to us. Tokens are encrypted at rest and are used solely to
-          act on your behalf — for example creating or updating listings you ask
-          us to publish. We never see or store your eBay password.
+          seller account we store your eBay account ID and the OAuth refresh
+          token eBay issues to us. Tokens are encrypted at rest and are used
+          solely to act on your behalf — for example creating or updating
+          listings you ask us to publish. We never see or store your eBay
+          password.
         </Typography>
         <Typography>
           <strong>Listing data.</strong> Product details you create in the app

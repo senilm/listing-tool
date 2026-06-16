@@ -4,7 +4,7 @@ import { linkEbayAccount } from "@/features/ebay-accounts/services/ebay-account-
 import { auth } from "@/lib/auth/server";
 import { EBAY_OAUTH_STATE_COOKIE } from "@/lib/constants";
 import { EBAY_CONSENT_SCOPES } from "@/lib/ebay/config";
-import { fetchEbayUsername } from "@/lib/ebay/identity";
+import { fetchEbayIdentity } from "@/lib/ebay/identity";
 import { exchangeCodeForTokens } from "@/lib/ebay/oauth";
 import { ebayAccountsRoute, loginRoute } from "@/lib/routes";
 
@@ -49,11 +49,12 @@ export const GET = async (request: NextRequest) => {
       );
     }
 
-    const ebayUsername = await fetchEbayUsername(tokens.access_token);
+    const identity = await fetchEbayIdentity(tokens.access_token);
 
     await linkEbayAccount({
       userId: session.user.id,
-      ebayUsername,
+      ebayUserId: identity?.userId ?? null,
+      label: identity?.username ?? "eBay account",
       refreshToken: tokens.refresh_token,
       refreshTokenExpiresAt: tokens.refresh_token_expires_in
         ? new Date(Date.now() + tokens.refresh_token_expires_in * 1000)

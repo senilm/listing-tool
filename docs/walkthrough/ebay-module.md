@@ -25,9 +25,10 @@ eBay has two separate worlds: **sandbox** (fake, for testing) and **production**
   - `auth` (`auth.ebay.com`) → where the _seller_ logs in to approve us
   - `web` (`www.ebay.com`) → normal storefront (e.g. link to a live listing)
 - `ebayConfig` bundles the environment's URLs + app credentials (`clientId`, `clientSecret`, `ruName`). **`ruName`** = "Redirect URL Name", a nickname eBay assigns to your registered return URL (used in OAuth).
+- **`identityBase`** is a separate host: the Commerce Identity API lives on `apiz.(sandbox.)ebay.com` (note the `z`), **not** the `api` host the Sell APIs use. Calling identity on the wrong host silently fails.
 - **Scopes** = permissions we ask the seller for. Two sets, on purpose:
-  - `EBAY_SCOPES`: `sell.inventory` + `sell.account` — needed long-term to manage listings.
-  - `EBAY_CONSENT_SCOPES`: the above **+ `commerce.identity.readonly`** — added only at consent time so we can read the seller's username once after linking. The refresh path uses the narrower set (less standing access = safer).
+  - `EBAY_SCOPES`: `sell.inventory` + `sell.account` — needed long-term to manage listings; used on the refresh path.
+  - `EBAY_CONSENT_SCOPES`: the above **+ `commerce.identity.readonly`** — added only at consent time so the access token can read the seller's immutable user ID once after linking. The refresh path keeps the narrower set (less standing access = safer).
 - **Gotcha:** scope strings always literally say `api.ebay.com`, even in sandbox. They are identifiers, not URLs — don't "fix" them to sandbox or auth breaks.
 
 ### `lib/ebay/api-routes.ts` — "The list of eBay endpoints we use"
@@ -73,17 +74,20 @@ Three steps:
   - `client_id` — which app is asking.
   - `redirect_uri: ruName` — eBay quirk: this is the **RuName nickname**, not a literal URL.
   - `response_type: "code"` — auth-code grant.
-  - `scope` — `EBAY_CONSENT_SCOPES` (what the consent screen shows).
+  - `scope` — `EBAY_SCOPES` (what the consent screen shows).
   - `state` — anti-CSRF token; eBay echoes it back, we verify it matches.
   - `prompt: "login"` — forces the login screen instead of silently reusing a session. **Critical for multi-account:** lets the user pick _which_ seller account to connect.
 - **`exchangeCodeForTokens(code)` (Step 3)** — after approval eBay redirects with a short-lived `code`. POST it with `grant_type: "authorization_code"` + matching `redirect_uri` (eBay requires it to match exactly). Returns **access token** (~2h) + **refresh token** (~18mo). We encrypt and store the refresh token.
 - **`refreshAccessToken(refreshToken)`** — mint a fresh access token with `grant_type: "refresh_token"`, using the **narrower `EBAY_SCOPES`** (no identity needed on refresh).
 
-### `lib/ebay/identity.ts` — "What's this seller's username?"
+### `lib/ebay/identity.ts` — "Which account is this?"
 
-One call: `GET /commerce/identity/v1/user/`. Right after linking, uses the fresh (identity-scoped) access token to read the username so the account shows a friendly label.
+One call: `GET /commerce/identity/v1/user/` **on the `identityBase` (`apiz`) host**. Right after linking, uses the fresh (identity-scoped) access token to read the account's identity.
 
-- **Best-effort:** wrapped in try/catch, returns `null` on any failure. The username only seeds a default label the user can rename, so a flaky-sandbox failure must not blow up account linking. Only place the identity scope is used.
+- We read **`userId`** — eBay's **immutable, per-account identifier**. This is our dedup key: it never changes (unlike the username, which users can edit) and is unique per seller account, so it answers "have I linked this exact account before?". `username` is read too, only as a friendly default label when eBay still provides it.
+- **Why not username as the key:** users can change it, and as of **Sept 2025** eBay stopped returning `username` for U.S. accounts (it returns the `userId` value in that field instead). Since the app is `EBAY_US`-only, username is unreliable — `userId` is the durable identifier.
+- **Best-effort:** wrapped in try/catch, returns `null` on any failure (including the historic sandbox getUser outage). When null, the account links without a dedup key and just can't be auto-revived on reconnect — see `ebay-accounts-connect-module.md`.
+- **Host gotcha:** this is the one call that must hit `apiz`, not `api`. Calling it on the Sell API host fails silently (and was a real bug we hit).
 
 ### `lib/ebay/account-setup.ts` — "Make the account able to sell"
 
@@ -125,6 +129,6 @@ eBay won't let you publish via the Inventory API unless the account has **busine
 
 1. **config / api-routes / client / crypto** — where eBay is, its endpoints, the one request function, token safety.
 2. **oauth** — 3-step handshake → store encrypted refresh token, mint access tokens on demand.
-3. **identity** — read the username once (best-effort label).
+3. **identity** — read the account's immutable `userId` once (dedup key; on the `apiz` host; best-effort).
 4. **account-setup** — ensure business policies + warehouse exist → 4 IDs (cached per account).
 5. **listing** — 3 calls (inventory item → offer → publish) → live listing, with cleanup on failure.
