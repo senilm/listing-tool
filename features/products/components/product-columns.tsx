@@ -2,11 +2,12 @@
 
 import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Pencil, Trash2, Upload } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { DataTableRowActions } from "@/components/data-table/data-table-row-actions";
 import { TruncatedText } from "@/components/truncated-text";
+import { ProductPublishButton } from "@/features/products/components/product-publish-button";
 import { type ProductSummary } from "@/features/products/services/product-service";
 
 const formatPrice = (amount: string, currency: string): string => {
@@ -76,6 +77,14 @@ export const createProductColumns = ({
     ),
   },
   {
+    id: "publish",
+    enableHiding: false,
+    enableSorting: false,
+    cell: ({ row }) => (
+      <ProductPublishButton product={row.original} onPublish={onPublish} />
+    ),
+  },
+  {
     id: "actions",
     enableHiding: false,
     enableSorting: false,
@@ -84,7 +93,6 @@ export const createProductColumns = ({
         row={row.original}
         actions={[
           { label: "Edit", icon: Pencil, onSelect: onEdit },
-          { label: "Publish", icon: Upload, onSelect: onPublish },
           {
             label: "Delete",
             icon: Trash2,
