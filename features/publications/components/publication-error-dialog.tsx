@@ -13,7 +13,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { joinTruthy } from "@/lib/utils";
 
@@ -60,15 +59,13 @@ export const PublicationErrorDialog = ({
             <DialogDescription>{description}</DialogDescription>
           ) : null}
         </DialogHeader>
-        <ScrollArea className="max-h-72 rounded-md border bg-muted/40 p-3">
-          <Typography
-            variant="muted"
-            as="pre"
-            className="text-xs break-words whitespace-pre-wrap text-destructive"
-          >
-            {errorMessage}
-          </Typography>
-        </ScrollArea>
+        <Typography
+          variant="muted"
+          as="pre"
+          className="max-h-72 w-full min-w-0 overflow-y-auto rounded-md border bg-muted/40 p-3 text-xs break-words whitespace-pre-wrap text-destructive"
+        >
+          {errorMessage}
+        </Typography>
         <Button
           variant="outline"
           size="sm"

@@ -43,7 +43,7 @@ export const createPublicationColumns = (): ColumnDef<PublicationSummary>[] => [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => (
-      <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-x-2">
         <PublicationStatusBadge status={row.original.status} />
         {row.original.errorMessage ? (
           <PublicationErrorDialog
