@@ -20,6 +20,7 @@ import { productsRoute } from "@/lib/routes";
 import { toast } from "@/lib/toast";
 import {
   productFormSchema,
+  TITLE_MAX_LENGTH,
   toProductInput,
   type ProductFormValues,
 } from "@/validations/product";
@@ -33,7 +34,7 @@ const EMPTY_VALUES: DefaultValues<ProductFormValues> = {
   mainStone: "",
   jewelleryType: "",
   ringSize: "",
-  basePrice: undefined,
+  basePrice: "",
   quantity: 1,
   images: [],
   aspects: [],
@@ -94,7 +95,7 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
             render={(field) => (
               <Input
                 placeholder="18ct Gold Diamond Ring"
-                maxLength={200}
+                maxLength={TITLE_MAX_LENGTH}
                 {...field}
               />
             )}
@@ -180,7 +181,7 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
               label="Price (USD)"
               required
               render={(field) => (
-                <NumberInput placeholder="0.00" step="0.01" {...field} />
+                <Input placeholder="0.00" inputMode="decimal" {...field} />
               )}
             />
             <FormField

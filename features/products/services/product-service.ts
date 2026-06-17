@@ -120,7 +120,7 @@ const toRowValues = (input: ProductInput) => ({
   mainStone: input.mainStone,
   jewelleryType: input.jewelleryType,
   ringSize: input.ringSize,
-  basePrice: input.basePrice.toString(),
+  basePrice: input.basePrice,
   quantity: input.quantity,
   images: input.images,
   aspects: input.aspects,

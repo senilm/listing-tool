@@ -7,8 +7,23 @@ import { ProductCondition } from "@/lib/enums/product";
 export const DEFAULT_CURRENCY = "USD";
 export const DEFAULT_CONDITION = ProductCondition.New;
 
-const MAX_PRICE = 9_999_999.99;
-const MAX_QUANTITY = 1_000_000;
+export const TITLE_MAX_LENGTH = 80;
+export const DESCRIPTION_MAX_LENGTH = 4000;
+export const MAX_PRICE = 9_999_999.99;
+export const MIN_QUANTITY = 1;
+export const MAX_QUANTITY = 1_000_000;
+
+const PRICE_PATTERN = /^\d+(\.\d{1,2})?$/;
+
+export const priceSchema = z
+  .string()
+  .trim()
+  .regex(PRICE_PATTERN, "Enter a valid price")
+  .refine((value) => Number(value) > 0, "Price must be greater than 0")
+  .refine((value) => Number(value) <= MAX_PRICE, "Price is too large");
+
+export const isValidPriceString = (value: string): boolean =>
+  priceSchema.safeParse(value).success;
 
 // eBay's publish step rejects gallery URLs whose path lacks a file name
 // ("Gallery URL has no file name"), so the URL path must end in an image file.
@@ -48,25 +63,28 @@ export const productFormSchema = z.object({
     .string()
     .trim()
     .min(1, "Enter a title")
-    .max(200, "Keep the title under 200 characters"),
+    .max(
+      TITLE_MAX_LENGTH,
+      `Keep the title under ${TITLE_MAX_LENGTH} characters`,
+    ),
   description: z
     .string()
     .trim()
-    .max(4000, "Keep the description under 4000 characters"),
+    .max(
+      DESCRIPTION_MAX_LENGTH,
+      `Keep the description under ${DESCRIPTION_MAX_LENGTH} characters`,
+    ),
   brand: z.string().trim().min(1, "Enter a brand"),
   metal: z.string().trim().min(1, "Enter a metal"),
   metalPurity: z.string().trim().min(1, "Enter a metal purity"),
   mainStone: z.string().trim().min(1, "Enter a main stone"),
   jewelleryType: z.string().trim().min(1, "Enter a type"),
   ringSize: z.string().trim().min(1, "Enter a ring size"),
-  basePrice: z
-    .number({ message: "Enter a price" })
-    .positive("Price must be greater than 0")
-    .max(MAX_PRICE, "Price is too large"),
+  basePrice: priceSchema,
   quantity: z
     .number({ message: "Enter a quantity" })
     .int("Quantity must be a whole number")
-    .min(0, "Quantity can't be negative")
+    .min(MIN_QUANTITY, "Quantity must be at least 1")
     .max(MAX_QUANTITY, "Quantity is too large"),
   images: z.array(imageFormSchema),
   aspects: z.array(aspectFormSchema),
@@ -79,16 +97,16 @@ export type ProductFormValues = z.infer<typeof productFormSchema>;
 // form (the client is untrusted).
 
 export const productInputSchema = z.object({
-  title: z.string().trim().min(1).max(200),
-  description: z.string().trim().max(4000).nullable(),
+  title: z.string().trim().min(1).max(TITLE_MAX_LENGTH),
+  description: z.string().trim().max(DESCRIPTION_MAX_LENGTH).nullable(),
   brand: z.string().trim().min(1),
   metal: z.string().trim().min(1),
   metalPurity: z.string().trim().min(1),
   mainStone: z.string().trim().min(1),
   jewelleryType: z.string().trim().min(1),
   ringSize: z.string().trim().min(1),
-  basePrice: z.number().positive().max(MAX_PRICE),
-  quantity: z.number().int().min(0).max(MAX_QUANTITY),
+  basePrice: priceSchema,
+  quantity: z.number().int().min(MIN_QUANTITY).max(MAX_QUANTITY),
   images: z.array(z.url().refine(isImageFileUrl, IMAGE_FILE_NAME_MESSAGE)),
   aspects: z.record(z.string(), z.array(z.string())),
 });
@@ -153,7 +171,7 @@ export const toProductFormValues = (
   mainStone: product.mainStone ?? "",
   jewelleryType: product.jewelleryType ?? "",
   ringSize: product.ringSize ?? "",
-  basePrice: Number(product.basePrice),
+  basePrice: product.basePrice,
   quantity: product.quantity,
   images: (product.images ?? []).map((url) => ({ url })),
   aspects: Object.entries(product.aspects ?? {}).map(([name, values]) => ({
