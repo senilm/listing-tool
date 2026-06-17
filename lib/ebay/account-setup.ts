@@ -15,10 +15,22 @@ export type SellerSetup = {
   merchantLocationKey: string;
 };
 
-type PaymentPolicy = { paymentPolicyId: string };
-type ReturnPolicy = { returnPolicyId: string };
-type FulfillmentPolicy = { fulfillmentPolicyId: string };
-type Location = { merchantLocationKey: string };
+export type ListingOption = {
+  id: string;
+  name: string;
+};
+
+export type AccountListingOptions = {
+  paymentPolicies: ListingOption[];
+  returnPolicies: ListingOption[];
+  fulfillmentPolicies: ListingOption[];
+  locations: ListingOption[];
+};
+
+type PaymentPolicy = { paymentPolicyId: string; name?: string };
+type ReturnPolicy = { returnPolicyId: string; name?: string };
+type FulfillmentPolicy = { fulfillmentPolicyId: string; name?: string };
+type Location = { merchantLocationKey: string; name?: string };
 
 type PaymentPolicyList = { paymentPolicies?: PaymentPolicy[] };
 type ReturnPolicyList = { returnPolicies?: ReturnPolicy[] };
@@ -27,6 +39,11 @@ type LocationList = { locations?: Location[] };
 
 const CATEGORY_TYPES = [{ name: "ALL_EXCLUDING_MOTORS_VEHICLES" }];
 const DEFAULT_LOCATION_KEY = "warehouse-1";
+
+const labelled = (id: string, name: string | undefined): ListingOption => {
+  const trimmed = name?.trim();
+  return { id, name: trimmed?.length ? trimmed : id };
+};
 
 // Sellers using the Inventory API must be opted into business policies.
 // Opting in again is a no-op error we can safely ignore.
@@ -37,111 +54,133 @@ const ensureOptedIn = async (accessToken: string) => {
   }).catch(() => undefined);
 };
 
-const resolvePaymentPolicy = async (accessToken: string): Promise<string> => {
+const listPaymentPolicies = async (
+  accessToken: string,
+): Promise<ListingOption[]> => {
   const { data } = await ebayRequest<PaymentPolicyList>(
     accessToken,
     ebayPaymentPolicyRoute(),
     { query: { marketplace_id: EBAY_MARKETPLACE_ID } },
   );
-  if (data.paymentPolicies?.length)
-    return data.paymentPolicies[0].paymentPolicyId;
-
-  const created = await ebayRequest<PaymentPolicy>(
-    accessToken,
-    ebayPaymentPolicyRoute(),
-    {
-      method: "POST",
-      body: {
-        name: "Default Payment Policy",
-        marketplaceId: EBAY_MARKETPLACE_ID,
-        categoryTypes: CATEGORY_TYPES,
-      },
-    },
+  return (data.paymentPolicies ?? []).map((policy) =>
+    labelled(policy.paymentPolicyId, policy.name),
   );
-  return created.data.paymentPolicyId;
 };
 
-const resolveReturnPolicy = async (accessToken: string): Promise<string> => {
+const listReturnPolicies = async (
+  accessToken: string,
+): Promise<ListingOption[]> => {
   const { data } = await ebayRequest<ReturnPolicyList>(
     accessToken,
     ebayReturnPolicyRoute(),
     { query: { marketplace_id: EBAY_MARKETPLACE_ID } },
   );
-  if (data.returnPolicies?.length) return data.returnPolicies[0].returnPolicyId;
-
-  const created = await ebayRequest<ReturnPolicy>(
-    accessToken,
-    ebayReturnPolicyRoute(),
-    {
-      method: "POST",
-      body: {
-        name: "Default Return Policy",
-        marketplaceId: EBAY_MARKETPLACE_ID,
-        categoryTypes: CATEGORY_TYPES,
-        returnsAccepted: true,
-        returnPeriod: { value: 30, unit: "DAY" },
-        returnShippingCostPayer: "BUYER",
-      },
-    },
+  return (data.returnPolicies ?? []).map((policy) =>
+    labelled(policy.returnPolicyId, policy.name),
   );
-  return created.data.returnPolicyId;
 };
 
-const resolveFulfillmentPolicy = async (
+const listFulfillmentPolicies = async (
   accessToken: string,
-): Promise<string> => {
+): Promise<ListingOption[]> => {
   const { data } = await ebayRequest<FulfillmentPolicyList>(
     accessToken,
     ebayFulfillmentPolicyRoute(),
     { query: { marketplace_id: EBAY_MARKETPLACE_ID } },
   );
-  if (data.fulfillmentPolicies?.length) {
-    return data.fulfillmentPolicies[0].fulfillmentPolicyId;
-  }
-
-  const created = await ebayRequest<FulfillmentPolicy>(
-    accessToken,
-    ebayFulfillmentPolicyRoute(),
-    {
-      method: "POST",
-      body: {
-        name: "Default Fulfillment Policy",
-        marketplaceId: EBAY_MARKETPLACE_ID,
-        categoryTypes: CATEGORY_TYPES,
-        handlingTime: { value: 1, unit: "DAY" },
-        shippingOptions: [
-          {
-            optionType: "DOMESTIC",
-            costType: "FLAT_RATE",
-            shippingServices: [
-              {
-                sortOrder: 1,
-                shippingServiceCode: "USPSPriority",
-                freeShipping: true,
-              },
-            ],
-          },
-        ],
-      },
-    },
+  return (data.fulfillmentPolicies ?? []).map((policy) =>
+    labelled(policy.fulfillmentPolicyId, policy.name),
   );
-  return created.data.fulfillmentPolicyId;
 };
 
-const resolveLocation = async (accessToken: string): Promise<string> => {
-  // GET /location (the list endpoint) is unreliable in sandbox (errorId 25001),
-  // so try it but fall back to a keyed create, which is idempotent.
+const listLocations = async (accessToken: string): Promise<ListingOption[]> => {
+  // GET /location is unreliable in sandbox (errorId 25001); treat a failure as
+  // "no locations" so the seller can seed one with the test-policies button.
   try {
     const { data } = await ebayRequest<LocationList>(
       accessToken,
       ebayLocationsRoute(),
-      { query: { limit: "1" } },
+      { query: { limit: "100" } },
     );
-    if (data.locations?.length) return data.locations[0].merchantLocationKey;
+    return (data.locations ?? []).map((location) =>
+      labelled(location.merchantLocationKey, location.name),
+    );
   } catch {
-    // fall through to create
+    return [];
   }
+};
 
+const readListingOptions = async (
+  accessToken: string,
+): Promise<AccountListingOptions> => {
+  const [paymentPolicies, returnPolicies, fulfillmentPolicies, locations] =
+    await Promise.all([
+      listPaymentPolicies(accessToken),
+      listReturnPolicies(accessToken),
+      listFulfillmentPolicies(accessToken),
+      listLocations(accessToken),
+    ]);
+  return { paymentPolicies, returnPolicies, fulfillmentPolicies, locations };
+};
+
+export const fetchListingOptions = async (
+  accessToken: string,
+): Promise<AccountListingOptions> => {
+  await ensureOptedIn(accessToken);
+  return readListingOptions(accessToken);
+};
+
+const createDefaultPaymentPolicy = async (accessToken: string) => {
+  await ebayRequest(accessToken, ebayPaymentPolicyRoute(), {
+    method: "POST",
+    body: {
+      name: "Default Payment Policy",
+      marketplaceId: EBAY_MARKETPLACE_ID,
+      categoryTypes: CATEGORY_TYPES,
+    },
+  });
+};
+
+const createDefaultReturnPolicy = async (accessToken: string) => {
+  await ebayRequest(accessToken, ebayReturnPolicyRoute(), {
+    method: "POST",
+    body: {
+      name: "Default Return Policy",
+      marketplaceId: EBAY_MARKETPLACE_ID,
+      categoryTypes: CATEGORY_TYPES,
+      returnsAccepted: true,
+      returnPeriod: { value: 30, unit: "DAY" },
+      returnShippingCostPayer: "BUYER",
+    },
+  });
+};
+
+const createDefaultFulfillmentPolicy = async (accessToken: string) => {
+  await ebayRequest(accessToken, ebayFulfillmentPolicyRoute(), {
+    method: "POST",
+    body: {
+      name: "Default Fulfillment Policy",
+      marketplaceId: EBAY_MARKETPLACE_ID,
+      categoryTypes: CATEGORY_TYPES,
+      handlingTime: { value: 1, unit: "DAY" },
+      shippingOptions: [
+        {
+          optionType: "DOMESTIC",
+          costType: "FLAT_RATE",
+          shippingServices: [
+            {
+              sortOrder: 1,
+              shippingServiceCode: "USPSPriority",
+              freeShipping: true,
+            },
+          ],
+        },
+      ],
+    },
+  });
+};
+
+const createDefaultLocation = async (accessToken: string) => {
   try {
     // createInventoryLocation returns 204 No Content; the key is what we chose.
     await ebayRequest(accessToken, ebayLocationRoute(DEFAULT_LOCATION_KEY), {
@@ -166,31 +205,32 @@ const resolveLocation = async (accessToken: string): Promise<string> => {
     if (!(error instanceof Error && error.message.includes("25803")))
       throw error;
   }
-  return DEFAULT_LOCATION_KEY;
 };
 
-// Fetches the account's existing business policies + location, creating defaults
-// only when none exist (the sandbox case). Returns the IDs an offer needs to
-// publish. The caller caches these onto the ebay_account row.
-export const resolveSellerSetup = async (
+// Sandbox-only convenience: seeds the default business policies + an inventory
+// location so the publish flow can be exercised end-to-end on a fresh sandbox
+// account. Only creates what's missing (policy names must be unique), then
+// returns the refreshed option lists. The caller gates this to sandbox.
+export const createTestPolicies = async (
   accessToken: string,
-): Promise<SellerSetup> => {
+): Promise<AccountListingOptions> => {
   await ensureOptedIn(accessToken);
-  const [
-    paymentPolicyId,
-    returnPolicyId,
-    fulfillmentPolicyId,
-    merchantLocationKey,
-  ] = await Promise.all([
-    resolvePaymentPolicy(accessToken),
-    resolveReturnPolicy(accessToken),
-    resolveFulfillmentPolicy(accessToken),
-    resolveLocation(accessToken),
+  const current = await readListingOptions(accessToken);
+
+  await Promise.all([
+    current.paymentPolicies.length
+      ? Promise.resolve()
+      : createDefaultPaymentPolicy(accessToken),
+    current.returnPolicies.length
+      ? Promise.resolve()
+      : createDefaultReturnPolicy(accessToken),
+    current.fulfillmentPolicies.length
+      ? Promise.resolve()
+      : createDefaultFulfillmentPolicy(accessToken),
+    current.locations.length
+      ? Promise.resolve()
+      : createDefaultLocation(accessToken),
   ]);
-  return {
-    paymentPolicyId,
-    returnPolicyId,
-    fulfillmentPolicyId,
-    merchantLocationKey,
-  };
+
+  return readListingOptions(accessToken);
 };

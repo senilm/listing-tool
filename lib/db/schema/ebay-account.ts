@@ -35,10 +35,6 @@ export const ebayAccount = pgTable(
       .$type<EbayAccountStatus>()
       .notNull()
       .default(EbayAccountStatus.Active),
-    paymentPolicyId: text("payment_policy_id"),
-    returnPolicyId: text("return_policy_id"),
-    fulfillmentPolicyId: text("fulfillment_policy_id"),
-    merchantLocationKey: text("merchant_location_key"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

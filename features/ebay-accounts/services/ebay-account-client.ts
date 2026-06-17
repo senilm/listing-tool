@@ -1,5 +1,11 @@
 import { type ListEbayAccountsResult } from "@/features/ebay-accounts/services/ebay-account-service";
-import { ebayAccountApiRoute, ebayAccountsApiRoute } from "@/lib/api-routes";
+import {
+  ebayAccountApiRoute,
+  ebayAccountListingOptionsApiRoute,
+  ebayAccountsApiRoute,
+  ebayAccountTestPoliciesApiRoute,
+} from "@/lib/api-routes";
+import { type AccountListingOptions } from "@/lib/ebay/account-setup";
 
 // Client-side HTTP calls to the eBay-account API. The server service
 // (ebay-account-service.ts) is the only DB-touching code; the type import here
@@ -31,4 +37,23 @@ export const disconnectEbayAccountRequest = async (
 ): Promise<void> => {
   const res = await fetch(ebayAccountApiRoute(id), { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to disconnect eBay account");
+};
+
+export const fetchListingOptions = async (
+  id: string,
+  signal?: AbortSignal,
+): Promise<AccountListingOptions> => {
+  const res = await fetch(ebayAccountListingOptionsApiRoute(id), { signal });
+  if (!res.ok) throw new Error("Failed to load listing options");
+  return res.json() as Promise<AccountListingOptions>;
+};
+
+export const createTestPoliciesRequest = async (
+  id: string,
+): Promise<AccountListingOptions> => {
+  const res = await fetch(ebayAccountTestPoliciesApiRoute(id), {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to create test policies");
+  return res.json() as Promise<AccountListingOptions>;
 };

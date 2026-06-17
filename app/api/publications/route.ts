@@ -37,7 +37,7 @@ export const GET = withApi(async (request: NextRequest, _context, session) => {
 });
 
 export const POST = withApi(async (request: NextRequest, _context, session) => {
-  const { productId, accountIds } = await parseBody(
+  const { productId, accounts } = await parseBody(
     request,
     publishRequestSchema,
     "Invalid publish request",
@@ -46,7 +46,7 @@ export const POST = withApi(async (request: NextRequest, _context, session) => {
   const outcome = await publishProductToAccounts({
     userId: session.user.id,
     productId,
-    accountIds,
+    accounts,
   });
 
   if (!outcome.productFound) {

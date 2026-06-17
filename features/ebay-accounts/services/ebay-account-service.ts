@@ -4,7 +4,11 @@ import { decryptToken, encryptToken } from "@/lib/crypto/token-cipher";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
-import { resolveSellerSetup, type SellerSetup } from "@/lib/ebay/account-setup";
+import {
+  type AccountListingOptions,
+  createTestPolicies,
+  fetchListingOptions,
+} from "@/lib/ebay/account-setup";
 import { refreshAccessToken } from "@/lib/ebay/oauth";
 import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 
@@ -234,45 +238,24 @@ export const getAccountAccessToken = async ({
   return tokens.access_token;
 };
 
-// Returns the account's business-policy + location IDs an offer needs. Cached
-// onto the row on first publish, then reused — eBay's policy/location IDs are
-// stable per seller.
-export const ensureSellerSetup = async ({
+// Lists the account's existing eBay business policies + inventory locations so
+// the publish UI can let the seller pick which to list under. Read-only — never
+// creates anything.
+export const getAccountListingOptions = async ({
   id,
   userId,
-  accessToken,
-}: OwnedAccount & { accessToken: string }): Promise<SellerSetup> => {
-  const [row] = await db
-    .select({
-      paymentPolicyId: ebayAccount.paymentPolicyId,
-      returnPolicyId: ebayAccount.returnPolicyId,
-      fulfillmentPolicyId: ebayAccount.fulfillmentPolicyId,
-      merchantLocationKey: ebayAccount.merchantLocationKey,
-    })
-    .from(ebayAccount)
-    .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)))
-    .limit(1);
+}: OwnedAccount): Promise<AccountListingOptions> => {
+  const accessToken = await getAccountAccessToken({ id, userId });
+  return fetchListingOptions(accessToken);
+};
 
-  if (!row) throw new Error("eBay account not found");
-
-  if (
-    row.paymentPolicyId &&
-    row.returnPolicyId &&
-    row.fulfillmentPolicyId &&
-    row.merchantLocationKey
-  ) {
-    return {
-      paymentPolicyId: row.paymentPolicyId,
-      returnPolicyId: row.returnPolicyId,
-      fulfillmentPolicyId: row.fulfillmentPolicyId,
-      merchantLocationKey: row.merchantLocationKey,
-    };
-  }
-
-  const setup = await resolveSellerSetup(accessToken);
-  await db
-    .update(ebayAccount)
-    .set(setup)
-    .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)));
-  return setup;
+// Sandbox-only: seeds default business policies + a location on the account so
+// the publish flow can be tested end-to-end, then returns the refreshed lists.
+// Callers must gate this to the sandbox environment.
+export const createAccountTestPolicies = async ({
+  id,
+  userId,
+}: OwnedAccount): Promise<AccountListingOptions> => {
+  const accessToken = await getAccountAccessToken({ id, userId });
+  return createTestPolicies(accessToken);
 };

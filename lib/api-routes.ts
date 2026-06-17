@@ -4,6 +4,10 @@
 export const ebayAccountsApiRoute = () => "/api/ebay/accounts";
 export const ebayAccountConnectApiRoute = () => "/api/ebay/accounts/connect";
 export const ebayAccountApiRoute = (id: string) => `/api/ebay/accounts/${id}`;
+export const ebayAccountListingOptionsApiRoute = (id: string) =>
+  `/api/ebay/accounts/${id}/listing-options`;
+export const ebayAccountTestPoliciesApiRoute = (id: string) =>
+  `/api/ebay/accounts/${id}/test-policies`;
 
 export const productsApiRoute = () => "/api/products";
 export const productApiRoute = (id: string) => `/api/products/${id}`;

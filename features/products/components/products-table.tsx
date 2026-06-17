@@ -12,7 +12,7 @@ import { createProductColumns } from "@/features/products/components/product-col
 import { useDeleteProduct } from "@/features/products/hooks/use-product-mutations";
 import { useProductsQuery } from "@/features/products/hooks/use-products-query";
 import { type ProductSummary } from "@/features/products/services/product-service";
-import { PublishProductDialog } from "@/features/publications/components/publish-product-dialog";
+import { PublishFlowModal } from "@/features/publications/components/publish-flow-modal";
 import { useTableParams } from "@/hooks/use-table-params";
 import { productCreateRoute, productDetailRoute } from "@/lib/routes";
 import { toast } from "@/lib/toast";
@@ -97,9 +97,8 @@ export const ProductsTable = () => {
         onConfirm={() => void handleDelete()}
       />
 
-      <PublishProductDialog
-        productId={publishTarget?.id ?? ""}
-        productTitle={publishTarget?.title ?? ""}
+      <PublishFlowModal
+        product={publishTarget}
         open={publishTarget !== null}
         onOpenChange={(open) => {
           if (!open) setPublishTarget(null);

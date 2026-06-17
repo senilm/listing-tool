@@ -1,9 +1,6 @@
 import { and, asc, count, desc, eq, ilike, inArray } from "drizzle-orm";
 
-import {
-  ensureSellerSetup,
-  getAccountAccessToken,
-} from "@/features/ebay-accounts/services/ebay-account-service";
+import { getAccountAccessToken } from "@/features/ebay-accounts/services/ebay-account-service";
 import { getProduct } from "@/features/products/services/product-service";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
@@ -16,6 +13,10 @@ import {
   publishListing,
 } from "@/lib/ebay/listing";
 import { PublicationStatus } from "@/lib/enums/publication";
+import {
+  type PublishAccount,
+  type PublishOverrides,
+} from "@/validations/publication";
 
 export type PublicationSummary = {
   id: string;
@@ -154,6 +155,51 @@ export type PublishProductOutcome = {
   results: PublishResult[];
 };
 
+// The product fields a seller can override per account. Everything else in the
+// snapshot (category, images, aspects) is inherited as-is.
+type SnapshotFields = {
+  title: string;
+  description: string | null;
+  price: string;
+  quantity: number;
+};
+
+// Applies the per-account overrides over the product's values, returning the
+// effective snapshot plus the list of fields that actually differ (so the row
+// records what the seller changed, not every field they re-sent).
+const applyOverrides = (
+  base: SnapshotFields,
+  overrides: PublishOverrides | undefined,
+): { snapshot: SnapshotFields; overriddenFields: string[] } => {
+  const snapshot = { ...base };
+  const overriddenFields: string[] = [];
+
+  if (overrides?.title && overrides.title !== base.title) {
+    snapshot.title = overrides.title;
+    overriddenFields.push("title");
+  }
+  if (
+    overrides?.description !== undefined &&
+    overrides.description !== base.description
+  ) {
+    snapshot.description = overrides.description;
+    overriddenFields.push("description");
+  }
+  if (overrides?.price && overrides.price !== base.price) {
+    snapshot.price = overrides.price;
+    overriddenFields.push("price");
+  }
+  if (
+    overrides?.quantity !== undefined &&
+    overrides.quantity !== base.quantity
+  ) {
+    snapshot.quantity = overrides.quantity;
+    overriddenFields.push("quantity");
+  }
+
+  return { snapshot, overriddenFields };
+};
+
 // Publishes one product to each target account, recording a publication row per
 // account. Each account is handled sequentially (rate-limit friendly) and
 // independently — one failure is recorded and the rest still run. Pure publish
@@ -162,21 +208,32 @@ export type PublishProductOutcome = {
 export const publishProductToAccounts = async ({
   userId,
   productId,
-  accountIds,
+  accounts,
 }: {
   userId: string;
   productId: string;
-  accountIds: string[];
+  accounts: PublishAccount[];
 }): Promise<PublishProductOutcome> => {
   const source = await getProduct({ id: productId, userId });
   if (!source) return { productFound: false, results: [] };
 
-  const description = source.description ?? source.title;
   const aspects = toListingAspects(source);
+  const base: SnapshotFields = {
+    title: source.title,
+    description: source.description,
+    price: source.basePrice,
+    quantity: source.quantity,
+  };
   const results: PublishResult[] = [];
 
-  for (const accountId of accountIds) {
-    const ebaySku = buildEbaySku({ title: source.title, accountId });
+  for (const account of accounts) {
+    const { accountId } = account;
+    const { snapshot, overriddenFields } = applyOverrides(
+      base,
+      account.overrides,
+    );
+    const description = snapshot.description ?? snapshot.title;
+    const ebaySku = buildEbaySku({ title: snapshot.title, accountId });
     const [row] = await db
       .insert(publication)
       .values({
@@ -184,15 +241,19 @@ export const publishProductToAccounts = async ({
         productId,
         ebayAccountId: accountId,
         status: PublicationStatus.Publishing,
-        title: source.title,
-        description: source.description,
-        price: source.basePrice,
+        title: snapshot.title,
+        description: snapshot.description,
+        price: snapshot.price,
         currency: source.currency,
-        quantity: source.quantity,
+        quantity: snapshot.quantity,
         categoryId: source.categoryId,
         images: source.images,
         aspects,
-        overriddenFields: [],
+        overriddenFields,
+        paymentPolicyId: account.paymentPolicyId,
+        returnPolicyId: account.returnPolicyId,
+        fulfillmentPolicyId: account.fulfillmentPolicyId,
+        merchantLocationKey: account.merchantLocationKey,
         ebaySku,
       })
       .returning({ id: publication.id });
@@ -202,21 +263,21 @@ export const publishProductToAccounts = async ({
         id: accountId,
         userId,
       });
-      const setup = await ensureSellerSetup({
-        id: accountId,
-        userId,
-        accessToken,
-      });
       const result = await publishListing({
         accessToken,
-        setup,
+        setup: {
+          paymentPolicyId: account.paymentPolicyId,
+          returnPolicyId: account.returnPolicyId,
+          fulfillmentPolicyId: account.fulfillmentPolicyId,
+          merchantLocationKey: account.merchantLocationKey,
+        },
         listing: {
           sku: ebaySku,
-          title: source.title,
+          title: snapshot.title,
           description,
           categoryId: source.categoryId ?? DEFAULT_CATEGORY_ID,
-          price: source.basePrice,
-          quantity: source.quantity,
+          price: snapshot.price,
+          quantity: snapshot.quantity,
           imageUrls: source.images ?? [],
           aspects,
         },
