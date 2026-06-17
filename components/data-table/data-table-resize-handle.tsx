@@ -9,6 +9,8 @@ type DataTableResizeHandleProps<TData, TValue> = {
 };
 
 // Drag to resize; double-click to reset. Render inside a relative TableHead.
+// A thin divider stays visible at the column edge; the wider invisible zone is
+// the grab target, and the line thickens/highlights on hover and while dragging.
 export const DataTableResizeHandle = <TData, TValue>({
   header,
 }: DataTableResizeHandleProps<TData, TValue>) => (
@@ -16,9 +18,13 @@ export const DataTableResizeHandle = <TData, TValue>({
     onMouseDown={header.getResizeHandler()}
     onTouchStart={header.getResizeHandler()}
     onDoubleClick={() => header.column.resetSize()}
-    className={cn(
-      "absolute top-0 right-0 h-full w-1 cursor-col-resize touch-none bg-border opacity-0 transition-opacity select-none hover:opacity-100",
-      header.column.getIsResizing() && "bg-primary opacity-100",
-    )}
-  />
+    className="group/resize absolute top-0 -right-1 z-10 flex h-full w-2 cursor-col-resize touch-none items-center justify-center select-none"
+  >
+    <span
+      className={cn(
+        "h-1/2 w-px bg-border transition-all group-hover/resize:h-full group-hover/resize:w-0.5 group-hover/resize:bg-primary/60",
+        header.column.getIsResizing() && "h-full w-0.5 bg-primary",
+      )}
+    />
+  </div>
 );

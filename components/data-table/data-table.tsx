@@ -93,7 +93,7 @@ export const DataTable = <TData,>({
   emptyTitle,
   emptyDescription,
   onRowClick,
-  enableColumnResizing = false,
+  enableColumnResizing = true,
   enableGlobalFilter = true,
   searchPlaceholder,
   pageSizeOptions,
@@ -208,7 +208,7 @@ export const DataTable = <TData,>({
         <Table
           style={
             enableColumnResizing
-              ? { width: table.getCenterTotalSize() }
+              ? { width: "100%", minWidth: table.getCenterTotalSize() }
               : undefined
           }
         >
