@@ -7,7 +7,7 @@ import { ExternalLink } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { DataTableRowActions } from "@/components/data-table/data-table-row-actions";
 import { TruncatedText } from "@/components/truncated-text";
-import { Typography } from "@/components/typography";
+import { PublicationErrorDialog } from "@/features/publications/components/publication-error-dialog";
 import { PublicationStatusBadge } from "@/features/publications/components/publication-status-badge";
 import { type PublicationSummary } from "@/features/publications/services/publication-service";
 
@@ -38,9 +38,12 @@ export const createAccountPublicationColumns =
         <div className="flex flex-col gap-1">
           <PublicationStatusBadge status={row.original.status} />
           {row.original.errorMessage ? (
-            <Typography variant="muted" className="text-xs text-destructive">
-              <TruncatedText>{row.original.errorMessage}</TruncatedText>
-            </Typography>
+            <PublicationErrorDialog
+              errorMessage={row.original.errorMessage}
+              productTitle={row.original.productTitle}
+              accountLabel={row.original.accountLabel}
+              failedAt={row.original.publishedAt}
+            />
           ) : null}
         </div>
       ),

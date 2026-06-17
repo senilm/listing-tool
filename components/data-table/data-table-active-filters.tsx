@@ -10,6 +10,7 @@ import {
 import { TruncatedText } from "@/components/truncated-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { joinTruthy } from "@/lib/utils";
 
 type DataTableActiveFiltersProps<TData> = {
   table: Table<TData>;
@@ -25,7 +26,7 @@ const formatValue = (field: DataTableFilterField, value: unknown): string => {
     typeof value === "object"
   ) {
     const range = value as { from?: string; to?: string };
-    return [range.from, range.to].filter(Boolean).join(" – ") || "Any";
+    return joinTruthy([range.from, range.to], " – ") || "Any";
   }
 
   const labelFor = (raw: string) =>

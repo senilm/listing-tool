@@ -3,6 +3,7 @@
 import { Check, Copy } from "lucide-react";
 import * as React from "react";
 
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/lib/utils";
 
 type CopyIdProps = {
@@ -11,14 +12,12 @@ type CopyIdProps = {
 };
 
 export const CopyId = ({ value, className }: CopyIdProps) => {
-  const [copied, setCopied] = React.useState(false);
+  const { copied, copy } = useCopyToClipboard();
 
   const handleCopy = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    void navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    copy(value);
   };
 
   return (

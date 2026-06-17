@@ -6,6 +6,7 @@ import {
 } from "@/lib/ebay/api-routes";
 import { ebayRequest, EBAY_MARKETPLACE_ID } from "@/lib/ebay/client";
 import { ebayConfig } from "@/lib/ebay/config";
+import { joinTruthy } from "@/lib/utils";
 
 // Fallback leaf category when a product has none set: Jewelry & Watches >
 // Fashion Jewelry > Rings. Real per-product leaf selection comes later.
@@ -39,10 +40,7 @@ export const buildEbaySku = ({
     .slice(0, SKU_ACCOUNT_FRAGMENT_LENGTH);
   const stamp = Date.now().toString(36);
 
-  return [slug, account, stamp]
-    .filter(Boolean)
-    .join("-")
-    .slice(0, EBAY_SKU_MAX_LENGTH);
+  return joinTruthy([slug, account, stamp], "-").slice(0, EBAY_SKU_MAX_LENGTH);
 };
 
 export type ListingInput = {
