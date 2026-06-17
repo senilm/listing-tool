@@ -1,7 +1,7 @@
 "use client";
 
 import { type Table } from "@tanstack/react-table";
-import { Search } from "lucide-react";
+import { RefreshCw, Search } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { DataTableActiveFilters } from "@/components/data-table/data-table-active-filters";
@@ -12,8 +12,10 @@ import {
   type DataTableExportHandlers,
   type DataTableFilterField,
 } from "@/components/data-table/data-table.types";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
 
 type DataTableToolbarProps<TData> = {
   table: Table<TData>;
@@ -25,6 +27,8 @@ type DataTableToolbarProps<TData> = {
   toolbarActions?: ReactNode;
   exportHandlers?: DataTableExportHandlers;
   enableColumnCustomizer?: boolean;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 };
 
 export const DataTableToolbar = <TData,>({
@@ -37,6 +41,8 @@ export const DataTableToolbar = <TData,>({
   toolbarActions,
   exportHandlers,
   enableColumnCustomizer = true,
+  onRefresh,
+  isRefreshing = false,
 }: DataTableToolbarProps<TData>) => {
   const [search, setSearch] = useState(globalFilter ?? "");
   const [prevGlobalFilter, setPrevGlobalFilter] = useState(globalFilter);
@@ -78,6 +84,18 @@ export const DataTableToolbar = <TData,>({
         </div>
         <div className="flex items-center gap-2">
           {toolbarActions}
+          {!!onRefresh && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              aria-label="Refresh"
+            >
+              <RefreshCw className={cn(isRefreshing && "animate-spin")} />
+              Refresh
+            </Button>
+          )}
           {!!enableColumnCustomizer && (
             <DataTableColumnCustomizer table={table} />
           )}

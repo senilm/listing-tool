@@ -13,7 +13,7 @@ import { useTableParams } from "@/hooks/use-table-params";
 
 export const PublicationsTable = () => {
   const params = useTableParams({ filterKeys: PUBLICATION_FILTER_KEYS });
-  const { data, isLoading, isFetching } = usePublicationsQuery(
+  const { data, isLoading, isFetching, refetch } = usePublicationsQuery(
     params.apiParams,
   );
 
@@ -41,6 +41,7 @@ export const PublicationsTable = () => {
       enableGlobalFilter
       searchPlaceholder="Search by product title"
       isLoading={isLoading || isFetching}
+      onRefresh={() => void refetch()}
       emptyTitle="No publications yet"
       emptyDescription="Publish a product to an eBay account to see it here."
     />

@@ -22,7 +22,7 @@ import { ebayAccountDetailRoute } from "@/lib/routes";
 export const EbayAccountsTable = () => {
   const router = useRouter();
   const params = useTableParams({ filterKeys: EBAY_ACCOUNT_FILTER_KEYS });
-  const { data, isLoading, isFetching } = useEbayAccountsQuery(
+  const { data, isLoading, isFetching, refetch } = useEbayAccountsQuery(
     params.apiParams,
   );
 
@@ -64,6 +64,7 @@ export const EbayAccountsTable = () => {
         enableGlobalFilter
         searchPlaceholder="Search by label"
         isLoading={isLoading || isFetching}
+        onRefresh={() => void refetch()}
         emptyTitle="No eBay accounts linked"
         emptyDescription="Connect an eBay seller account to start listing."
         onRowClick={(row) => router.push(ebayAccountDetailRoute(row.id))}

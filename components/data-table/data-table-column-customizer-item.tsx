@@ -37,13 +37,16 @@ export const DataTableColumnCustomizerItem = ({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "flex items-center gap-2 rounded-md px-1 py-1.5",
+        "flex cursor-grab items-center gap-2 rounded-md px-1 py-1.5",
         isDragging && "bg-muted",
       )}
     >
       <button
         type="button"
-        className="cursor-grab text-muted-foreground hover:text-foreground"
+        className={cn(
+          "cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing",
+          isDragging && "cursor-grabbing",
+        )}
         aria-label="Drag to reorder"
         {...attributes}
         {...listeners}
@@ -56,10 +59,7 @@ export const DataTableColumnCustomizerItem = ({
         disabled={!canHide}
         onCheckedChange={(value) => onToggle(!!value)}
       />
-      <label
-        htmlFor={`col-vis-${id}`}
-        className="min-w-0 flex-1 cursor-pointer text-sm"
-      >
+      <label htmlFor={`col-vis-${id}`} className="min-w-0 flex-1 text-sm">
         <TruncatedText>{label}</TruncatedText>
       </label>
     </div>

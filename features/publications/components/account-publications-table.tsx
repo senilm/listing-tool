@@ -27,7 +27,8 @@ export const AccountPublicationsTable = ({
     return search.toString();
   }, [params.apiParams, accountId]);
 
-  const { data, isLoading, isFetching } = usePublicationsQuery(apiParams);
+  const { data, isLoading, isFetching, refetch } =
+    usePublicationsQuery(apiParams);
 
   const columns = useMemo(() => createAccountPublicationColumns(), []);
 
@@ -53,6 +54,7 @@ export const AccountPublicationsTable = ({
       enableGlobalFilter
       searchPlaceholder="Search by product title"
       isLoading={isLoading || isFetching}
+      onRefresh={() => void refetch()}
       emptyTitle="No publications yet"
       emptyDescription="Publish a product to this account to see it here."
     />

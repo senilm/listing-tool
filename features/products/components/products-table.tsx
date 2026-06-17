@@ -20,7 +20,9 @@ import { toast } from "@/lib/toast";
 export const ProductsTable = () => {
   const router = useRouter();
   const params = useTableParams();
-  const { data, isLoading, isFetching } = useProductsQuery(params.apiParams);
+  const { data, isLoading, isFetching, refetch } = useProductsQuery(
+    params.apiParams,
+  );
   const deleteProduct = useDeleteProduct();
 
   const [deleteTarget, setDeleteTarget] = useState<ProductSummary | null>(null);
@@ -69,6 +71,7 @@ export const ProductsTable = () => {
         enableGlobalFilter
         searchPlaceholder="Search by title"
         isLoading={isLoading || isFetching}
+        onRefresh={() => void refetch()}
         emptyTitle="No products yet"
         emptyDescription="Create your first master listing to get started."
         onRowClick={(row) => router.push(productDetailRoute(row.id))}

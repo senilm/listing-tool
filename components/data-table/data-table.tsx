@@ -60,6 +60,7 @@ type DataTableProps<TData> = {
   renderBulkActions?: (rows: TData[]) => React.ReactNode;
   exportHandlers?: DataTableExportHandlers;
   toolbarActions?: React.ReactNode;
+  onRefresh?: () => void;
 
   isLoading?: boolean;
   emptyTitle?: string;
@@ -89,6 +90,7 @@ export const DataTable = <TData,>({
   renderBulkActions,
   exportHandlers,
   toolbarActions,
+  onRefresh,
   isLoading = false,
   emptyTitle,
   emptyDescription,
@@ -193,6 +195,8 @@ export const DataTable = <TData,>({
         enableGlobalFilter={enableGlobalFilter}
         toolbarActions={toolbarActions}
         exportHandlers={exportHandlers}
+        onRefresh={onRefresh}
+        isRefreshing={isLoading}
       />
 
       {!!enableRowSelection && !!renderBulkActions && (
