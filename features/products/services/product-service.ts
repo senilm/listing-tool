@@ -3,6 +3,7 @@ import { and, asc, count, desc, eq, ilike, isNull } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
 import { product } from "@/lib/db/schema/product";
+import { EXPORT_ROW_LIMIT, type ExportResult } from "@/lib/export/types";
 import { DEFAULT_CONDITION, type ProductInput } from "@/validations/product";
 
 type ProductRow = typeof product.$inferSelect;
@@ -43,39 +44,45 @@ export type ListProductsResult = {
   total: number;
 };
 
+// Shared by the list and export queries so both apply identical filtering and
+// ordering — only pagination differs.
+type ProductQuery = Pick<ListProductsParams, "userId" | "q" | "sort">;
+
+const PRODUCT_SUMMARY_SELECTION = {
+  id: product.id,
+  title: product.title,
+  basePrice: product.basePrice,
+  currency: product.currency,
+  quantity: product.quantity,
+  createdAt: product.createdAt,
+  updatedAt: product.updatedAt,
+};
+
+const productWhere = ({ userId, q }: ProductQuery) => {
+  const conditions = [eq(product.userId, userId), isNull(product.deletedAt)];
+  const trimmed = q?.trim();
+  if (trimmed) conditions.push(ilike(product.title, likeContains(trimmed)));
+  return and(...conditions);
+};
+
+const productOrderBy = (sort: ProductQuery["sort"]) => {
+  const column = SORTABLE_COLUMNS[sort?.id ?? "updatedAt"];
+  return sort?.desc === false ? asc(column) : desc(column);
+};
+
 // Paginated, scoped to the user. Soft-deleted products (deletedAt set) are
 // always excluded.
 export const listProducts = async (
   params: ListProductsParams,
 ): Promise<ListProductsResult> => {
-  const conditions = [
-    eq(product.userId, params.userId),
-    isNull(product.deletedAt),
-  ];
-
-  const q = params.q?.trim();
-  if (q) conditions.push(ilike(product.title, likeContains(q)));
-
-  const where = and(...conditions);
-
-  const column = SORTABLE_COLUMNS[params.sort?.id ?? "updatedAt"];
-  const orderBy = params.sort?.desc === false ? asc(column) : desc(column);
-
+  const where = productWhere(params);
   const offset = (params.page - 1) * params.limit;
 
   const items = await db
-    .select({
-      id: product.id,
-      title: product.title,
-      basePrice: product.basePrice,
-      currency: product.currency,
-      quantity: product.quantity,
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt,
-    })
+    .select(PRODUCT_SUMMARY_SELECTION)
     .from(product)
     .where(where)
-    .orderBy(orderBy)
+    .orderBy(productOrderBy(params.sort))
     .limit(params.limit)
     .offset(offset);
 
@@ -85,6 +92,29 @@ export const listProducts = async (
     .where(where);
 
   return { items, total: Number(totals?.value ?? 0) };
+};
+
+// Every product matching the filters/sort, capped at EXPORT_ROW_LIMIT — for
+// export. `total` is the unclamped count so the client can flag truncation.
+export const listProductsForExport = async (
+  params: ProductQuery,
+): Promise<ExportResult<ProductSummary>> => {
+  const where = productWhere(params);
+
+  const items = await db
+    .select(PRODUCT_SUMMARY_SELECTION)
+    .from(product)
+    .where(where)
+    .orderBy(productOrderBy(params.sort))
+    .limit(EXPORT_ROW_LIMIT);
+
+  const [totals] = await db
+    .select({ value: count() })
+    .from(product)
+    .where(where);
+  const total = Number(totals?.value ?? 0);
+
+  return { items, total, truncated: total > EXPORT_ROW_LIMIT };
 };
 
 type OwnedProduct = {

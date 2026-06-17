@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { DisconnectEbayAccountDialog } from "@/features/ebay-accounts/components/disconnect-ebay-account-dialog";
 import { createEbayAccountColumns } from "@/features/ebay-accounts/components/ebay-account-columns";
 import { RenameEbayAccountDialog } from "@/features/ebay-accounts/components/rename-ebay-account-dialog";
+import { EBAY_ACCOUNT_EXPORT_COLUMNS } from "@/features/ebay-accounts/config/ebay-account-export-columns";
 import {
   EBAY_ACCOUNT_FILTER_FIELDS,
   EBAY_ACCOUNT_FILTER_KEYS,
@@ -16,7 +17,10 @@ import {
 import { useEbayAccountsQuery } from "@/features/ebay-accounts/hooks/use-ebay-accounts-query";
 import { type EbayAccountSummary } from "@/features/ebay-accounts/services/ebay-account-service";
 import { useTableParams } from "@/hooks/use-table-params";
-import { ebayAccountConnectApiRoute } from "@/lib/api-routes";
+import {
+  ebayAccountConnectApiRoute,
+  ebayAccountsExportApiRoute,
+} from "@/lib/api-routes";
 import { ebayAccountDetailRoute } from "@/lib/routes";
 
 export const EbayAccountsTable = () => {
@@ -65,6 +69,12 @@ export const EbayAccountsTable = () => {
         searchPlaceholder="Search by label"
         isLoading={isLoading || isFetching}
         onRefresh={() => void refetch()}
+        exportConfig={{
+          route: ebayAccountsExportApiRoute(),
+          apiParams: params.apiParams,
+          fileName: "ebay-accounts",
+          columns: EBAY_ACCOUNT_EXPORT_COLUMNS,
+        }}
         emptyTitle="No eBay accounts linked"
         emptyDescription="Connect an eBay seller account to start listing."
         onRowClick={(row) => router.push(ebayAccountDetailRoute(row.id))}

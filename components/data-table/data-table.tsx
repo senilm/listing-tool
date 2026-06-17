@@ -14,6 +14,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { Columns3 } from "lucide-react";
 import * as React from "react";
 
 import { DataTableBulkActions } from "@/components/data-table/data-table-bulk-actions";
@@ -24,7 +25,6 @@ import { createSelectionColumn } from "@/components/data-table/data-table-select
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import {
-  type DataTableExportHandlers,
   type DataTableFilterField,
   type DataTablePaginationState,
 } from "@/components/data-table/data-table.types";
@@ -37,6 +37,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  type DataTableExportConfig,
+  useDataTableExport,
+} from "@/hooks/use-data-table-export";
 import { cn } from "@/lib/utils";
 
 type DataTableProps<TData> = {
@@ -58,7 +62,7 @@ type DataTableProps<TData> = {
   filterFields?: DataTableFilterField[];
   enableRowSelection?: boolean;
   renderBulkActions?: (rows: TData[]) => React.ReactNode;
-  exportHandlers?: DataTableExportHandlers;
+  exportConfig?: DataTableExportConfig<TData>;
   toolbarActions?: React.ReactNode;
   onRefresh?: () => void;
 
@@ -88,7 +92,7 @@ export const DataTable = <TData,>({
   filterFields,
   enableRowSelection = false,
   renderBulkActions,
-  exportHandlers,
+  exportConfig,
   toolbarActions,
   onRefresh,
   isLoading = false,
@@ -178,11 +182,20 @@ export const DataTable = <TData,>({
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const exportControls = useDataTableExport(table, exportConfig);
+
   const rows = table.getRowModel().rows;
   const selectedRows = table
     .getSelectedRowModel()
     .rows.map((row) => row.original);
   const visibleColumnCount = table.getVisibleLeafColumns().length;
+  // Content columns only — the structural select/actions columns can't be
+  // hidden, so they don't count as something the user can "see".
+  const noColumnsVisible =
+    table
+      .getVisibleLeafColumns()
+      .filter((column) => column.id !== "select" && column.id !== "actions")
+      .length === 0;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
@@ -194,7 +207,7 @@ export const DataTable = <TData,>({
         searchPlaceholder={searchPlaceholder}
         enableGlobalFilter={enableGlobalFilter}
         toolbarActions={toolbarActions}
-        exportHandlers={exportHandlers}
+        exportControls={exportControls}
         onRefresh={onRefresh}
         isRefreshing={isLoading}
       />
@@ -209,81 +222,93 @@ export const DataTable = <TData,>({
       )}
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-lg border">
-        <Table
-          style={
-            enableColumnResizing
-              ? { width: "100%", minWidth: table.getCenterTotalSize() }
-              : undefined
-          }
-        >
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="relative"
-                    style={
-                      enableColumnResizing
-                        ? { width: header.getSize() }
-                        : undefined
-                    }
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                    {!!enableColumnResizing && header.column.getCanResize() && (
-                      <DataTableResizeHandle header={header} />
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-
-          {isLoading ? (
-            <DataTableSkeleton columns={visibleColumnCount} />
-          ) : (
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() ? "selected" : undefined}
-                  onClick={
-                    onRowClick ? () => onRowClick(row.original) : undefined
-                  }
-                  className={cn(onRowClick && "cursor-pointer")}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      style={
-                        enableColumnResizing
-                          ? { width: cell.column.getSize() }
-                          : undefined
-                      }
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          )}
-        </Table>
-
-        {!isLoading && !rows.length && (
+        {noColumnsVisible ? (
           <EmptyState
-            title={emptyTitle}
-            description={emptyDescription}
+            icon={Columns3}
+            title="No columns visible"
+            description="Every column is hidden. Use the View menu to show some."
             className="flex-1 py-0"
           />
+        ) : (
+          <>
+            <Table
+              style={
+                enableColumnResizing
+                  ? { width: "100%", minWidth: table.getCenterTotalSize() }
+                  : undefined
+              }
+            >
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead
+                        key={header.id}
+                        className="relative"
+                        style={
+                          enableColumnResizing
+                            ? { width: header.getSize() }
+                            : undefined
+                        }
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                        {!!enableColumnResizing &&
+                          header.column.getCanResize() && (
+                            <DataTableResizeHandle header={header} />
+                          )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+
+              {isLoading ? (
+                <DataTableSkeleton columns={visibleColumnCount} />
+              ) : (
+                <TableBody>
+                  {rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() ? "selected" : undefined}
+                      onClick={
+                        onRowClick ? () => onRowClick(row.original) : undefined
+                      }
+                      className={cn(onRowClick && "cursor-pointer")}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          style={
+                            enableColumnResizing
+                              ? { width: cell.column.getSize() }
+                              : undefined
+                          }
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              )}
+            </Table>
+
+            {!isLoading && !rows.length && (
+              <EmptyState
+                title={emptyTitle}
+                description={emptyDescription}
+                className="flex-1 py-0"
+              />
+            )}
+          </>
         )}
       </div>
 

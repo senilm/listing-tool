@@ -9,11 +9,13 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DataTable } from "@/components/data-table/data-table";
 import { Button } from "@/components/ui/button";
 import { createProductColumns } from "@/features/products/components/product-columns";
+import { PRODUCT_EXPORT_COLUMNS } from "@/features/products/config/product-export-columns";
 import { useDeleteProduct } from "@/features/products/hooks/use-product-mutations";
 import { useProductsQuery } from "@/features/products/hooks/use-products-query";
 import { type ProductSummary } from "@/features/products/services/product-service";
 import { PublishFlowModal } from "@/features/publications/components/publish-flow-modal";
 import { useTableParams } from "@/hooks/use-table-params";
+import { productsExportApiRoute } from "@/lib/api-routes";
 import { productCreateRoute, productDetailRoute } from "@/lib/routes";
 import { toast } from "@/lib/toast";
 
@@ -72,6 +74,12 @@ export const ProductsTable = () => {
         searchPlaceholder="Search by title"
         isLoading={isLoading || isFetching}
         onRefresh={() => void refetch()}
+        exportConfig={{
+          route: productsExportApiRoute(),
+          apiParams: params.apiParams,
+          fileName: "products",
+          columns: PRODUCT_EXPORT_COLUMNS,
+        }}
         emptyTitle="No products yet"
         emptyDescription="Create your first master listing to get started."
         onRowClick={(row) => router.push(productDetailRoute(row.id))}

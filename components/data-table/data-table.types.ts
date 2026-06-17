@@ -40,12 +40,6 @@ export type DataTableFilterField = {
   placeholder?: string;
 };
 
-export type DataTableExportHandlers = {
-  csv?: () => void | Promise<void>;
-  xlsx?: () => void | Promise<void>;
-  pdf?: () => void | Promise<void>;
-};
-
 export type DataTableRowAction<TData> = {
   label: string;
   icon?: LucideIcon;

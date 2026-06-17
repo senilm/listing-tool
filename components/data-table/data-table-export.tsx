@@ -1,8 +1,7 @@
 "use client";
 
-import { Download } from "lucide-react";
+import { Download, Info, Loader2 } from "lucide-react";
 
-import { type DataTableExportHandlers } from "@/components/data-table/data-table.types";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,39 +9,32 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-type DataTableExportProps = {
-  handlers: DataTableExportHandlers;
-  disabled?: boolean;
-};
+import { type DataTableExportControls } from "@/hooks/use-data-table-export";
 
 export const DataTableExport = ({
-  handlers,
+  isExporting,
   disabled,
-}: DataTableExportProps) => (
+  onExportCsv,
+  onExportXlsx,
+}: DataTableExportControls) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
-      <Button variant="outline" size="sm" disabled={disabled}>
-        <Download />
+      <Button variant="outline" size="sm" disabled={isExporting || disabled}>
+        {isExporting ? <Loader2 className="animate-spin" /> : <Download />}
         Export
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end">
-      {!!handlers.csv && (
-        <DropdownMenuItem onClick={() => void handlers.csv?.()}>
-          CSV
-        </DropdownMenuItem>
-      )}
-      {!!handlers.xlsx && (
-        <DropdownMenuItem onClick={() => void handlers.xlsx?.()}>
-          Excel (XLSX)
-        </DropdownMenuItem>
-      )}
-      {!!handlers.pdf && (
-        <DropdownMenuItem onClick={() => void handlers.pdf?.()}>
-          PDF
-        </DropdownMenuItem>
-      )}
+    <DropdownMenuContent className="w-48" align="end">
+      <DropdownMenuItem disabled={isExporting} onSelect={() => onExportCsv()}>
+        CSV
+      </DropdownMenuItem>
+      <DropdownMenuItem disabled={isExporting} onSelect={() => onExportXlsx()}>
+        Excel (XLSX)
+      </DropdownMenuItem>
+      <p className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] leading-tight text-muted-foreground">
+        <Info className="size-3 shrink-0" />
+        Reflects current filters and search.
+      </p>
     </DropdownMenuContent>
   </DropdownMenu>
 );

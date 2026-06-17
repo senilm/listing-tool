@@ -8,12 +8,10 @@ import { DataTableActiveFilters } from "@/components/data-table/data-table-activ
 import { DataTableColumnCustomizer } from "@/components/data-table/data-table-column-customizer";
 import { DataTableExport } from "@/components/data-table/data-table-export";
 import { DataTableFilterControl } from "@/components/data-table/data-table-filter-control";
-import {
-  type DataTableExportHandlers,
-  type DataTableFilterField,
-} from "@/components/data-table/data-table.types";
+import { type DataTableFilterField } from "@/components/data-table/data-table.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { type DataTableExportControls } from "@/hooks/use-data-table-export";
 import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +23,7 @@ type DataTableToolbarProps<TData> = {
   searchPlaceholder?: string;
   enableGlobalFilter?: boolean;
   toolbarActions?: ReactNode;
-  exportHandlers?: DataTableExportHandlers;
+  exportControls?: DataTableExportControls;
   enableColumnCustomizer?: boolean;
   onRefresh?: () => void;
   isRefreshing?: boolean;
@@ -39,7 +37,7 @@ export const DataTableToolbar = <TData,>({
   searchPlaceholder = "Search…",
   enableGlobalFilter = true,
   toolbarActions,
-  exportHandlers,
+  exportControls,
   enableColumnCustomizer = true,
   onRefresh,
   isRefreshing = false,
@@ -99,7 +97,7 @@ export const DataTableToolbar = <TData,>({
           {!!enableColumnCustomizer && (
             <DataTableColumnCustomizer table={table} />
           )}
-          {!!exportHandlers && <DataTableExport handlers={exportHandlers} />}
+          {!!exportControls && <DataTableExport {...exportControls} />}
         </div>
       </div>
       <DataTableActiveFilters

@@ -13,6 +13,7 @@ import {
   publishListing,
 } from "@/lib/ebay/listing";
 import { PublicationStatus } from "@/lib/enums/publication";
+import { EXPORT_ROW_LIMIT, type ExportResult } from "@/lib/export/types";
 import {
   type PublishAccount,
   type PublishOverrides,
@@ -58,69 +59,110 @@ export type ListPublicationsResult = {
 const viewUrlFor = (listingId: string | null): string | null =>
   listingId ? `${ebayConfig.webBase}/itm/${listingId}` : null;
 
+// Shared by the list and export queries so both apply identical filtering and
+// ordering — only pagination differs.
+type PublicationQuery = Pick<
+  ListPublicationsParams,
+  "userId" | "q" | "statuses" | "accountId" | "sort"
+>;
+
+const PUBLICATION_SUMMARY_SELECTION = {
+  id: publication.id,
+  productId: publication.productId,
+  productTitle: publication.title,
+  accountLabel: ebayAccount.label,
+  status: publication.status,
+  ebayListingId: publication.ebayListingId,
+  errorMessage: publication.errorMessage,
+  publishedAt: publication.publishedAt,
+  createdAt: publication.createdAt,
+};
+
+const publicationWhere = ({
+  userId,
+  q,
+  statuses,
+  accountId,
+}: PublicationQuery) => {
+  const conditions = [eq(publication.userId, userId)];
+  if (statuses && statuses.length > 0) {
+    conditions.push(inArray(publication.status, statuses));
+  }
+  if (accountId) {
+    conditions.push(eq(publication.ebayAccountId, accountId));
+  }
+  const trimmed = q?.trim();
+  if (trimmed) conditions.push(ilike(publication.title, likeContains(trimmed)));
+  return and(...conditions);
+};
+
+const publicationOrderBy = (sort: PublicationQuery["sort"]) => {
+  const column = SORTABLE_COLUMNS[sort?.id ?? "createdAt"];
+  return sort?.desc === false ? asc(column) : desc(column);
+};
+
+const selectPublications = (params: PublicationQuery) =>
+  db
+    .select(PUBLICATION_SUMMARY_SELECTION)
+    .from(publication)
+    .leftJoin(ebayAccount, eq(publication.ebayAccountId, ebayAccount.id))
+    .where(publicationWhere(params))
+    .orderBy(publicationOrderBy(params.sort));
+
+type PublicationSelectRow = Awaited<
+  ReturnType<typeof selectPublications>
+>[number];
+
+const toSummary = (row: PublicationSelectRow): PublicationSummary => ({
+  id: row.id,
+  productId: row.productId,
+  productTitle: row.productTitle,
+  accountLabel: row.accountLabel ?? "Unknown account",
+  status: row.status as PublicationStatus,
+  ebayListingId: row.ebayListingId,
+  viewUrl: viewUrlFor(row.ebayListingId),
+  errorMessage: row.errorMessage,
+  publishedAt: row.publishedAt,
+  createdAt: row.createdAt,
+});
+
 // Paginated, scoped to the user. Joins the product title and account label so
 // the table can show what was published where without extra round-trips.
 export const listPublications = async (
   params: ListPublicationsParams,
 ): Promise<ListPublicationsResult> => {
-  const conditions = [eq(publication.userId, params.userId)];
-
-  if (params.statuses && params.statuses.length > 0) {
-    conditions.push(inArray(publication.status, params.statuses));
-  }
-
-  if (params.accountId) {
-    conditions.push(eq(publication.ebayAccountId, params.accountId));
-  }
-
-  const q = params.q?.trim();
-  if (q) conditions.push(ilike(publication.title, likeContains(q)));
-
-  const where = and(...conditions);
-
-  const column = SORTABLE_COLUMNS[params.sort?.id ?? "createdAt"];
-  const orderBy = params.sort?.desc === false ? asc(column) : desc(column);
-
   const offset = (params.page - 1) * params.limit;
 
-  const rows = await db
-    .select({
-      id: publication.id,
-      productId: publication.productId,
-      productTitle: publication.title,
-      accountLabel: ebayAccount.label,
-      status: publication.status,
-      ebayListingId: publication.ebayListingId,
-      errorMessage: publication.errorMessage,
-      publishedAt: publication.publishedAt,
-      createdAt: publication.createdAt,
-    })
-    .from(publication)
-    .leftJoin(ebayAccount, eq(publication.ebayAccountId, ebayAccount.id))
-    .where(where)
-    .orderBy(orderBy)
+  const rows = await selectPublications(params)
     .limit(params.limit)
     .offset(offset);
-
-  const items: PublicationSummary[] = rows.map((row) => ({
-    id: row.id,
-    productId: row.productId,
-    productTitle: row.productTitle,
-    accountLabel: row.accountLabel ?? "Unknown account",
-    status: row.status as PublicationStatus,
-    ebayListingId: row.ebayListingId,
-    viewUrl: viewUrlFor(row.ebayListingId),
-    errorMessage: row.errorMessage,
-    publishedAt: row.publishedAt,
-    createdAt: row.createdAt,
-  }));
 
   const [totals] = await db
     .select({ value: count() })
     .from(publication)
-    .where(where);
+    .where(publicationWhere(params));
 
-  return { items, total: Number(totals?.value ?? 0) };
+  return { items: rows.map(toSummary), total: Number(totals?.value ?? 0) };
+};
+
+// Every publication matching the filters/sort, capped at EXPORT_ROW_LIMIT — for
+// export. `total` is the unclamped count so the client can flag truncation.
+export const listPublicationsForExport = async (
+  params: PublicationQuery,
+): Promise<ExportResult<PublicationSummary>> => {
+  const rows = await selectPublications(params).limit(EXPORT_ROW_LIMIT);
+
+  const [totals] = await db
+    .select({ value: count() })
+    .from(publication)
+    .where(publicationWhere(params));
+  const total = Number(totals?.value ?? 0);
+
+  return {
+    items: rows.map(toSummary),
+    total,
+    truncated: total > EXPORT_ROW_LIMIT,
+  };
 };
 
 type ProductSource = NonNullable<Awaited<ReturnType<typeof getProduct>>>;

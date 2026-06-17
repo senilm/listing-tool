@@ -4,12 +4,14 @@ import { useMemo } from "react";
 
 import { DataTable } from "@/components/data-table/data-table";
 import { createPublicationColumns } from "@/features/publications/components/publication-columns";
+import { PUBLICATION_EXPORT_COLUMNS } from "@/features/publications/config/publication-export-columns";
 import {
   PUBLICATION_FILTER_FIELDS,
   PUBLICATION_FILTER_KEYS,
 } from "@/features/publications/config/publication-filters";
 import { usePublicationsQuery } from "@/features/publications/hooks/use-publications-query";
 import { useTableParams } from "@/hooks/use-table-params";
+import { publicationsExportApiRoute } from "@/lib/api-routes";
 
 export const PublicationsTable = () => {
   const params = useTableParams({ filterKeys: PUBLICATION_FILTER_KEYS });
@@ -42,6 +44,12 @@ export const PublicationsTable = () => {
       searchPlaceholder="Search by product title"
       isLoading={isLoading || isFetching}
       onRefresh={() => void refetch()}
+      exportConfig={{
+        route: publicationsExportApiRoute(),
+        apiParams: params.apiParams,
+        fileName: "publications",
+        columns: PUBLICATION_EXPORT_COLUMNS,
+      }}
       emptyTitle="No publications yet"
       emptyDescription="Publish a product to an eBay account to see it here."
     />

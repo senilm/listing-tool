@@ -11,6 +11,7 @@ import {
 } from "@/lib/ebay/account-setup";
 import { refreshAccessToken } from "@/lib/ebay/oauth";
 import { EbayAccountStatus } from "@/lib/enums/ebay-account";
+import { EXPORT_ROW_LIMIT, type ExportResult } from "@/lib/export/types";
 
 type EbayAccountRow = typeof ebayAccount.$inferSelect;
 
@@ -55,41 +56,52 @@ type OwnedAccount = {
   userId: string;
 };
 
+// Shared by the list and export queries so both apply identical filtering and
+// ordering — only pagination differs.
+type EbayAccountQuery = Pick<
+  ListEbayAccountsParams,
+  "userId" | "q" | "statuses" | "sort"
+>;
+
+const EBAY_ACCOUNT_SUMMARY_SELECTION = {
+  id: ebayAccount.id,
+  label: ebayAccount.label,
+  status: ebayAccount.status,
+  createdAt: ebayAccount.createdAt,
+};
+
+const ebayAccountWhere = ({ userId, q, statuses }: EbayAccountQuery) => {
+  const conditions = [
+    eq(ebayAccount.userId, userId),
+    isNull(ebayAccount.deletedAt),
+  ];
+  if (statuses && statuses.length > 0) {
+    conditions.push(inArray(ebayAccount.status, statuses));
+  }
+  const trimmed = q?.trim();
+  if (trimmed) conditions.push(ilike(ebayAccount.label, likeContains(trimmed)));
+  return and(...conditions);
+};
+
+const ebayAccountOrderBy = (sort: EbayAccountQuery["sort"]) => {
+  const column = SORTABLE_COLUMNS[sort?.id ?? "createdAt"];
+  return sort?.desc === false ? asc(column) : desc(column);
+};
+
 // Paginated, scoped to the user. The token column is never selected — callers
 // only ever see metadata. Disconnected accounts (deletedAt set) are always
 // excluded.
 export const listEbayAccounts = async (
   params: ListEbayAccountsParams,
 ): Promise<ListEbayAccountsResult> => {
-  const conditions = [
-    eq(ebayAccount.userId, params.userId),
-    isNull(ebayAccount.deletedAt),
-  ];
-
-  if (params.statuses && params.statuses.length > 0) {
-    conditions.push(inArray(ebayAccount.status, params.statuses));
-  }
-
-  const q = params.q?.trim();
-  if (q) conditions.push(ilike(ebayAccount.label, likeContains(q)));
-
-  const where = and(...conditions);
-
-  const column = SORTABLE_COLUMNS[params.sort?.id ?? "createdAt"];
-  const orderBy = params.sort?.desc === false ? asc(column) : desc(column);
-
+  const where = ebayAccountWhere(params);
   const offset = (params.page - 1) * params.limit;
 
   const items = await db
-    .select({
-      id: ebayAccount.id,
-      label: ebayAccount.label,
-      status: ebayAccount.status,
-      createdAt: ebayAccount.createdAt,
-    })
+    .select(EBAY_ACCOUNT_SUMMARY_SELECTION)
     .from(ebayAccount)
     .where(where)
-    .orderBy(orderBy)
+    .orderBy(ebayAccountOrderBy(params.sort))
     .limit(params.limit)
     .offset(offset);
 
@@ -99,6 +111,29 @@ export const listEbayAccounts = async (
     .where(where);
 
   return { items, total: Number(totals?.value ?? 0) };
+};
+
+// Every account matching the filters/sort, capped at EXPORT_ROW_LIMIT — for
+// export. `total` is the unclamped count so the client can flag truncation.
+export const listEbayAccountsForExport = async (
+  params: EbayAccountQuery,
+): Promise<ExportResult<EbayAccountSummary>> => {
+  const where = ebayAccountWhere(params);
+
+  const items = await db
+    .select(EBAY_ACCOUNT_SUMMARY_SELECTION)
+    .from(ebayAccount)
+    .where(where)
+    .orderBy(ebayAccountOrderBy(params.sort))
+    .limit(EXPORT_ROW_LIMIT);
+
+  const [totals] = await db
+    .select({ value: count() })
+    .from(ebayAccount)
+    .where(where);
+  const total = Number(totals?.value ?? 0);
+
+  return { items, total, truncated: total > EXPORT_ROW_LIMIT };
 };
 
 // Single account scoped to the user — same metadata shape as the list; the
