@@ -18,4 +18,8 @@ export const QUERY_KEYS = {
   // Global (cross-module) search.
   searchRoot: ["search"] as const,
   search: (q: string) => ["search", "global", q] as const,
+
+  // Aggregate dashboard stats.
+  dashboardRoot: ["dashboard"] as const,
+  dashboardStats: ["dashboard", "stats"] as const,
 };

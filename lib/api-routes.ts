@@ -18,3 +18,5 @@ export const publicationsApiRoute = () => "/api/publications";
 export const publicationsExportApiRoute = () => "/api/publications/export";
 
 export const searchApiRoute = () => "/api/search";
+
+export const dashboardStatsApiRoute = () => "/api/dashboard/stats";

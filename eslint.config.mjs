@@ -100,6 +100,7 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/prefer-optional-chain": "off",
       "@typescript-eslint/prefer-nullish-coalescing": "off",
+      "@typescript-eslint/no-unnecessary-type-assertion": "off",
     },
   },
   // Next.js framework files require default exports.
