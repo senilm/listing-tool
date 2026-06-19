@@ -2,13 +2,16 @@
 
 import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Pencil, Unplug } from "lucide-react";
+import { Pencil, RefreshCw, Unplug } from "lucide-react";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { DataTableRowActions } from "@/components/data-table/data-table-row-actions";
+import { type DataTableRowAction } from "@/components/data-table/data-table.types";
 import { TruncatedText } from "@/components/truncated-text";
 import { EbayAccountStatusBadge } from "@/features/ebay-accounts/components/ebay-account-status-badge";
 import { type EbayAccountSummary } from "@/features/ebay-accounts/services/ebay-account-service";
+import { ebayAccountConnectApiRoute } from "@/lib/api-routes";
+import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 
 type EbayAccountColumnHandlers = {
   onRename: (account: EbayAccountSummary) => void;
@@ -56,19 +59,24 @@ export const createEbayAccountColumns = ({
     id: "actions",
     enableHiding: false,
     enableSorting: false,
-    cell: ({ row }) => (
-      <DataTableRowActions
-        row={row.original}
-        actions={[
-          { label: "Rename", icon: Pencil, onSelect: onRename },
-          {
-            label: "Disconnect",
-            icon: Unplug,
-            variant: "destructive",
-            onSelect: onDisconnect,
-          },
-        ]}
-      />
-    ),
+    cell: ({ row }) => {
+      const actions: DataTableRowAction<EbayAccountSummary>[] = [
+        { label: "Rename", icon: Pencil, onSelect: onRename },
+      ];
+      if (row.original.status === EbayAccountStatus.NeedsReconsent) {
+        actions.push({
+          label: "Reconnect",
+          icon: RefreshCw,
+          href: () => ebayAccountConnectApiRoute(),
+        });
+      }
+      actions.push({
+        label: "Disconnect",
+        icon: Unplug,
+        variant: "destructive",
+        onSelect: onDisconnect,
+      });
+      return <DataTableRowActions row={row.original} actions={actions} />;
+    },
   },
 ];

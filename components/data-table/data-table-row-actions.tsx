@@ -38,17 +38,27 @@ export const DataTableRowActions = <TData,>({
         <Fragment key={action.label}>
           {!!action.separatorBefore && index > 0 && <DropdownMenuSeparator />}
           <DropdownMenuItem
+            asChild={!!action.href}
             variant={
               action.variant === "destructive" ? "destructive" : "default"
             }
             disabled={action.disabled?.(row)}
             onClick={(event) => {
               event.stopPropagation();
-              action.onSelect(row);
+              action.onSelect?.(row);
             }}
           >
-            {!!action.icon && <action.icon />}
-            {action.label}
+            {action.href ? (
+              <a href={action.href(row)}>
+                {!!action.icon && <action.icon />}
+                {action.label}
+              </a>
+            ) : (
+              <>
+                {!!action.icon && <action.icon />}
+                {action.label}
+              </>
+            )}
           </DropdownMenuItem>
         </Fragment>
       ))}

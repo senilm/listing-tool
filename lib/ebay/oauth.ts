@@ -7,6 +7,7 @@ import {
   EBAY_CONSENT_SCOPES,
   EBAY_SCOPES,
 } from "@/lib/ebay/config";
+import { EbayTokenError } from "@/lib/ebay/errors";
 
 type TokenResponse = {
   access_token: string;
@@ -28,9 +29,15 @@ const postToken = async (body: URLSearchParams): Promise<TokenResponse> => {
     body,
   });
   if (!res.ok) {
-    throw new Error(
-      `eBay token request failed: ${res.status} ${await res.text()}`,
-    );
+    const text = await res.text();
+    let invalidGrant = false;
+    try {
+      invalidGrant =
+        (JSON.parse(text) as { error?: string }).error === "invalid_grant";
+    } catch {
+      // Non-JSON error body — treat as a transient/unknown failure.
+    }
+    throw new EbayTokenError(res.status, text, invalidGrant);
   }
   return res.json();
 };

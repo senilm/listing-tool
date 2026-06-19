@@ -43,8 +43,10 @@ export type DataTableFilterField = {
 export type DataTableRowAction<TData> = {
   label: string;
   icon?: LucideIcon;
-  onSelect: (row: TData) => void;
   variant?: "default" | "destructive";
   disabled?: (row: TData) => boolean;
   separatorBefore?: boolean;
-};
+} & (
+  | { onSelect: (row: TData) => void; href?: never }
+  | { href: (row: TData) => string; onSelect?: never }
+);

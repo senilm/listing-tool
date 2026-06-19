@@ -9,6 +9,7 @@ import {
   createTestPolicies,
   fetchListingOptions,
 } from "@/lib/ebay/account-setup";
+import { EbayTokenError } from "@/lib/ebay/errors";
 import { refreshAccessToken } from "@/lib/ebay/oauth";
 import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 import { EXPORT_ROW_LIMIT, type ExportResult } from "@/lib/export/types";
@@ -269,8 +270,19 @@ export const getAccountAccessToken = async ({
     throw new Error("eBay account is disconnected — reconnect it to publish");
   }
 
-  const tokens = await refreshAccessToken(decryptToken(row.refreshToken));
-  return tokens.access_token;
+  try {
+    const tokens = await refreshAccessToken(decryptToken(row.refreshToken));
+    return tokens.access_token;
+  } catch (error) {
+    if (error instanceof EbayTokenError && error.invalidGrant) {
+      await db
+        .update(ebayAccount)
+        .set({ status: EbayAccountStatus.NeedsReconsent })
+        .where(and(eq(ebayAccount.id, id), eq(ebayAccount.userId, userId)));
+      throw new Error("eBay account needs reconsent — reconnect it to publish");
+    }
+    throw error;
+  }
 };
 
 // Lists the account's existing eBay business policies + inventory locations so
