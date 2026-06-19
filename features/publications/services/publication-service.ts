@@ -28,6 +28,7 @@ export type PublicationSummary = {
   ebayListingId: string | null;
   viewUrl: string | null;
   errorMessage: string | null;
+  scheduledAt: Date | null;
   publishedAt: Date | null;
   createdAt: Date;
 };
@@ -74,6 +75,7 @@ const PUBLICATION_SUMMARY_SELECTION = {
   status: publication.status,
   ebayListingId: publication.ebayListingId,
   errorMessage: publication.errorMessage,
+  scheduledAt: publication.scheduledAt,
   publishedAt: publication.publishedAt,
   createdAt: publication.createdAt,
 };
@@ -122,6 +124,7 @@ const toSummary = (row: PublicationSelectRow): PublicationSummary => ({
   ebayListingId: row.ebayListingId,
   viewUrl: viewUrlFor(row.ebayListingId),
   errorMessage: row.errorMessage,
+  scheduledAt: row.scheduledAt,
   publishedAt: row.publishedAt,
   createdAt: row.createdAt,
 });
@@ -276,29 +279,26 @@ export const publishProductToAccounts = async ({
     );
     const description = snapshot.description ?? snapshot.title;
     const ebaySku = buildEbaySku({ title: snapshot.title, accountId });
-    const [row] = await db
-      .insert(publication)
-      .values({
-        userId,
-        productId,
-        ebayAccountId: accountId,
-        status: PublicationStatus.Publishing,
-        title: snapshot.title,
-        description: snapshot.description,
-        price: snapshot.price,
-        currency: source.currency,
-        quantity: snapshot.quantity,
-        categoryId: source.categoryId,
-        images: source.images,
-        aspects,
-        overriddenFields,
-        paymentPolicyId: account.paymentPolicyId,
-        returnPolicyId: account.returnPolicyId,
-        fulfillmentPolicyId: account.fulfillmentPolicyId,
-        merchantLocationKey: account.merchantLocationKey,
-        ebaySku,
-      })
-      .returning({ id: publication.id });
+    const snapshotValues = {
+      userId,
+      productId,
+      ebayAccountId: accountId,
+      title: snapshot.title,
+      description: snapshot.description,
+      price: snapshot.price,
+      currency: source.currency,
+      quantity: snapshot.quantity,
+      categoryId: source.categoryId,
+      images: source.images,
+      aspects,
+      overriddenFields,
+      paymentPolicyId: account.paymentPolicyId,
+      returnPolicyId: account.returnPolicyId,
+      fulfillmentPolicyId: account.fulfillmentPolicyId,
+      merchantLocationKey: account.merchantLocationKey,
+      ebaySku,
+      scheduledAt: account.scheduledAt ?? null,
+    };
 
     try {
       const accessToken = await getAccountAccessToken({
@@ -322,19 +322,20 @@ export const publishProductToAccounts = async ({
           quantity: snapshot.quantity,
           imageUrls: source.images ?? [],
           aspects,
+          listingStartDate: account.scheduledAt?.toISOString(),
         },
       });
 
-      await db
-        .update(publication)
-        .set({
+      const [row] = await db
+        .insert(publication)
+        .values({
+          ...snapshotValues,
           status: PublicationStatus.Published,
           ebayOfferId: result.offerId,
           ebayListingId: result.listingId,
           publishedAt: new Date(),
-          errorMessage: null,
         })
-        .where(eq(publication.id, row.id));
+        .returning({ id: publication.id });
 
       results.push({
         accountId,
@@ -343,10 +344,14 @@ export const publishProductToAccounts = async ({
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Publish failed";
-      await db
-        .update(publication)
-        .set({ status: PublicationStatus.Failed, errorMessage: message })
-        .where(eq(publication.id, row.id));
+      const [row] = await db
+        .insert(publication)
+        .values({
+          ...snapshotValues,
+          status: PublicationStatus.Failed,
+          errorMessage: message,
+        })
+        .returning({ id: publication.id });
 
       results.push({
         accountId,

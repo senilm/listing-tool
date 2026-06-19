@@ -5,11 +5,14 @@ import {
   MIN_QUANTITY,
   TITLE_MAX_LENGTH,
 } from "@/validations/product";
-import { type PublishOverrides } from "@/validations/publication";
+import {
+  isScheduleWindowValid,
+  type PublishOverrides,
+} from "@/validations/publication";
 
 // The editable state of one account's tab in the publish flow: the overridable
-// product fields (as strings, the way inputs hold them) plus the chosen
-// policy/location IDs.
+// product fields (as strings, the way inputs hold them), the chosen
+// policy/location IDs, and an optional scheduled launch time.
 export type AccountPublishForm = {
   title: string;
   description: string;
@@ -19,6 +22,8 @@ export type AccountPublishForm = {
   returnPolicyId: string;
   fulfillmentPolicyId: string;
   merchantLocationKey: string;
+  scheduleEnabled: boolean;
+  scheduledAt?: Date;
 };
 
 // Content prefilled from the product; policies left blank for a deliberate pick.
@@ -31,13 +36,26 @@ export const seedForm = (product: ProductSummary): AccountPublishForm => ({
   returnPolicyId: "",
   fulfillmentPolicyId: "",
   merchantLocationKey: "",
+  scheduleEnabled: false,
+  scheduledAt: undefined,
 });
 
+// The launch time to send, or undefined for an immediate publish. Only sent
+// when scheduling is on and a valid time is picked.
+export const scheduledAtFor = (form: AccountPublishForm): Date | undefined =>
+  form.scheduleEnabled ? form.scheduledAt : undefined;
+
 // A tab is publishable once all four policies are picked and the content fields
-// are individually valid. Mirrors the server-side publishAccountSchema.
+// are individually valid. Mirrors the server-side publishAccountSchema. When
+// scheduling is on, a launch time inside eBay's window is also required.
 export const isFormValid = (form: AccountPublishForm): boolean => {
   const title = form.title.trim();
   const quantity = Number(form.quantity);
+  if (form.scheduleEnabled) {
+    if (!form.scheduledAt || !isScheduleWindowValid(form.scheduledAt)) {
+      return false;
+    }
+  }
   return (
     form.paymentPolicyId !== "" &&
     form.returnPolicyId !== "" &&

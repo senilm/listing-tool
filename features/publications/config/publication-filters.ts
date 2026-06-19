@@ -10,12 +10,8 @@ export const PUBLICATION_FILTER_FIELDS: DataTableFilterField[] = [
     label: "Status",
     type: DataTableFilterType.MultiSelect,
     options: [
-      { label: "Publishing", value: PublicationStatus.Publishing },
       { label: "Published", value: PublicationStatus.Published },
       { label: "Failed", value: PublicationStatus.Failed },
-      { label: "Draft", value: PublicationStatus.Draft },
-      { label: "Scheduled", value: PublicationStatus.Scheduled },
-      { label: "Ended", value: PublicationStatus.Ended },
     ],
   },
 ];

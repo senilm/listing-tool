@@ -1,6 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { CalendarClock } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -22,6 +24,7 @@ import {
   type AccountPublishForm,
   buildOverrides,
   isFormValid,
+  scheduledAtFor,
   seedForm,
 } from "@/features/publications/utils/publish-form";
 import { MAX_LIMIT } from "@/lib/api/pagination-params";
@@ -111,6 +114,7 @@ export const PublishFlowModal = ({
           fulfillmentPolicyId: forms[id].fulfillmentPolicyId,
           merchantLocationKey: forms[id].merchantLocationKey,
           overrides: buildOverrides(forms[id], product),
+          scheduledAt: scheduledAtFor(forms[id]),
         })),
       });
 
@@ -165,14 +169,30 @@ export const PublishFlowModal = ({
           >
             <div className="shrink-0 border-b px-6 pt-4 pb-3">
               <TabsList className="flex-wrap">
-                {selectedAccounts.map((account) => (
-                  <TabsTrigger key={account.id} value={account.id}>
-                    {account.label}
-                    {forms[account.id] && !isFormValid(forms[account.id]) ? (
-                      <span className="ml-1.5 size-1.5 rounded-full bg-amber-500" />
-                    ) : null}
-                  </TabsTrigger>
-                ))}
+                {selectedAccounts.map((account) => {
+                  const form = forms[account.id];
+                  const scheduledAt = form?.scheduleEnabled
+                    ? form.scheduledAt
+                    : undefined;
+                  return (
+                    <TabsTrigger
+                      key={account.id}
+                      value={account.id}
+                      className="gap-1.5"
+                    >
+                      {account.label}
+                      {scheduledAt ? (
+                        <span className="inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                          <CalendarClock className="size-3" />
+                          {format(scheduledAt, "d MMM, HH:mm")}
+                        </span>
+                      ) : null}
+                      {form && !isFormValid(form) ? (
+                        <span className="size-1.5 rounded-full bg-amber-500" />
+                      ) : null}
+                    </TabsTrigger>
+                  );
+                })}
               </TabsList>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-6">

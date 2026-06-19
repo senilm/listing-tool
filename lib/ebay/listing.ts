@@ -52,6 +52,7 @@ export type ListingInput = {
   quantity: number;
   imageUrls: string[];
   aspects: Record<string, string[]>;
+  listingStartDate?: string;
 };
 
 export type ListingResult = {
@@ -114,6 +115,9 @@ export const publishListing = async ({
           pricingSummary: { price: { value: listing.price, currency: "USD" } },
           merchantLocationKey: setup.merchantLocationKey,
           listingDuration: "GTC", // Good 'Til Cancelled
+          ...(listing.listingStartDate
+            ? { listingStartDate: listing.listingStartDate }
+            : {}),
         },
       },
     );

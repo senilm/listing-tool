@@ -1,10 +1,14 @@
 "use client";
 
+import { useState } from "react";
+
+import { DateTimeInput } from "@/components/date-time-input";
 import { Typography } from "@/components/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateTestPolicies } from "@/features/ebay-accounts/hooks/use-create-test-policies";
 import { useListingOptions } from "@/features/ebay-accounts/hooks/use-listing-options";
@@ -12,8 +16,14 @@ import { PolicySelectField } from "@/features/publications/components/policy-sel
 import { type AccountPublishForm } from "@/features/publications/utils/publish-form";
 import { toast } from "@/lib/toast";
 import { TITLE_MAX_LENGTH } from "@/validations/product";
+import {
+  isScheduleWindowValid,
+  MAX_SCHEDULE_DAYS,
+} from "@/validations/publication";
 
 const IS_SANDBOX = process.env.NEXT_PUBLIC_EBAY_ENV !== "production";
+
+const SCHEDULE_WINDOW_MS = MAX_SCHEDULE_DAYS * 24 * 60 * 60 * 1000;
 
 type AccountPublishPanelProps = {
   accountId: string;
@@ -32,6 +42,11 @@ export const AccountPublishPanel = ({
 }: AccountPublishPanelProps) => {
   const optionsQuery = useListingOptions(accountId, isActive);
   const createTestPolicies = useCreateTestPolicies(accountId);
+
+  const [scheduleBounds] = useState(() => ({
+    min: new Date(),
+    max: new Date(Date.now() + SCHEDULE_WINDOW_MS),
+  }));
 
   const handleCreateTestPolicies = async () => {
     try {
@@ -166,6 +181,43 @@ export const AccountPublishPanel = ({
           options={options.locations}
           onChange={(id) => onChange({ merchantLocationKey: id })}
         />
+
+        <div className="flex flex-col gap-3 border-t pt-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-0.5">
+              <Label htmlFor={`schedule-${accountId}`}>
+                Schedule for later
+              </Label>
+              <Typography variant="muted">
+                eBay launches the listing at the chosen time (up to{" "}
+                {MAX_SCHEDULE_DAYS} days ahead).
+              </Typography>
+            </div>
+            <Switch
+              id={`schedule-${accountId}`}
+              checked={value.scheduleEnabled}
+              onCheckedChange={(checked) =>
+                onChange({
+                  scheduleEnabled: checked,
+                  scheduledAt: checked ? value.scheduledAt : undefined,
+                })
+              }
+            />
+          </div>
+          {value.scheduleEnabled ? (
+            <DateTimeInput
+              value={value.scheduledAt}
+              onChange={(date) => onChange({ scheduledAt: date })}
+              minDate={scheduleBounds.min}
+              maxDate={scheduleBounds.max}
+              error={
+                value.scheduledAt
+                  ? !isScheduleWindowValid(value.scheduledAt)
+                  : false
+              }
+            />
+          ) : null}
+        </div>
       </div>
     </div>
   );

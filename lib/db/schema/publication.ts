@@ -20,7 +20,7 @@ export const publicationStatusEnum = pgEnum(
   Object.values(PublicationStatus) as [string, ...string[]],
 );
 
-// One product published (or queued) to one eBay account. Content fields are a
+// One product published to one eBay account. Content fields are a
 // full snapshot seeded from the product and individually overridable, so past
 // publications are immune to later product edits.
 export const publication = pgTable(
@@ -36,11 +36,9 @@ export const publication = pgTable(
     ebayAccountId: uuid("ebay_account_id")
       .notNull()
       .references(() => ebayAccount.id, { onDelete: "cascade" }),
-    status: publicationStatusEnum("status")
-      .notNull()
-      .default(PublicationStatus.Draft),
-    scheduledAt: timestamp("scheduled_at"),
-    publishedAt: timestamp("published_at"),
+    status: publicationStatusEnum("status").notNull(),
+    scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
     title: text("title").notNull(),
     description: text("description"),
     price: numeric("price", { precision: 10, scale: 2 }).notNull(),

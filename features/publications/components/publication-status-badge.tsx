@@ -8,12 +8,8 @@ const STATUS_META: Record<
   PublicationStatus,
   { label: string; variant: StatusBadgeVariant }
 > = {
-  [PublicationStatus.Draft]: { label: "Draft", variant: "default" },
-  [PublicationStatus.Scheduled]: { label: "Scheduled", variant: "info" },
-  [PublicationStatus.Publishing]: { label: "Publishing", variant: "info" },
   [PublicationStatus.Published]: { label: "Published", variant: "success" },
   [PublicationStatus.Failed]: { label: "Failed", variant: "destructive" },
-  [PublicationStatus.Ended]: { label: "Ended", variant: "default" },
 };
 
 type PublicationStatusBadgeProps = {

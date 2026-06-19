@@ -17,10 +17,6 @@ import { PublicationStatus } from "@/lib/enums/publication";
 const STATUS_CHART_CONFIG = {
   [PublicationStatus.Published]: { label: "Published", color: "#10b981" },
   [PublicationStatus.Failed]: { label: "Failed", color: "#ef4444" },
-  [PublicationStatus.Publishing]: { label: "Publishing", color: "#60a5fa" },
-  [PublicationStatus.Scheduled]: { label: "Scheduled", color: "#3b82f6" },
-  [PublicationStatus.Draft]: { label: "Draft", color: "#9ca3af" },
-  [PublicationStatus.Ended]: { label: "Ended", color: "#6b7280" },
 } satisfies ChartConfig;
 
 type DashboardStatusChartProps = {
