@@ -1,68 +1,93 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
-import { useFieldArray, type Control } from "react-hook-form";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { useFieldArray, useFormState, type Control } from "react-hook-form";
 
-import { FormField } from "@/components/form-field";
 import { Typography } from "@/components/typography";
-import { Button } from "@/components/ui/button";
-import { FieldGroup } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { type ProductFormValues } from "@/validations/product";
+import { FieldError, FieldGroup } from "@/components/ui/field";
+import { ProductImageCard } from "@/features/products/components/product-image-card";
+import { ProductImageUploader } from "@/features/products/components/product-image-uploader";
+import { MAX_IMAGES, type ProductFormValues } from "@/validations/product";
 
 type ProductImagesFieldProps = {
   control: Control<ProductFormValues>;
 };
 
 export const ProductImagesField = ({ control }: ProductImagesFieldProps) => {
-  const { fields, append, remove } = useFieldArray({ control, name: "images" });
+  const { fields, append, remove, move } = useFieldArray({
+    control,
+    name: "images",
+  });
+  const { errors } = useFormState({ control, name: "images" });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const onDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = fields.findIndex((field) => field.id === active.id);
+    const to = fields.findIndex((field) => field.id === over.id);
+    if (from !== -1 && to !== -1) move(from, to);
+  };
+
+  const rootError = errors.images?.message ?? errors.images?.root?.message;
 
   return (
     <FieldGroup>
-      {fields.length === 0 ? (
-        <Typography variant="muted" className="text-sm">
-          No images yet. Add an image URL below.
-        </Typography>
+      {fields.length > 0 ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={onDragEnd}
+        >
+          <SortableContext
+            items={fields.map((field) => field.id)}
+            strategy={rectSortingStrategy}
+          >
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+              {fields.map((field, index) => (
+                <ProductImageCard
+                  key={field.id}
+                  id={field.id}
+                  url={field.url}
+                  isPrimary={index === 0}
+                  onRemove={() => remove(index)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       ) : null}
 
-      {fields.map((field, index) => (
-        <div key={field.id} className="flex items-start gap-2">
-          <FormField
-            control={control}
-            name={`images.${index}.url`}
-            className="flex-1"
-            render={(formField) => (
-              <Input
-                placeholder="https://example.com/image.jpg"
-                inputMode="url"
-                {...formField}
-              />
-            )}
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="mt-0.5"
-            onClick={() => remove(index)}
-            aria-label="Remove image"
-          >
-            <Trash2 />
-          </Button>
-        </div>
-      ))}
+      <ProductImageUploader
+        remainingSlots={MAX_IMAGES - fields.length}
+        onUploaded={(url) => append({ url })}
+      />
 
-      <div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => append({ url: "" })}
-        >
-          <Plus />
-          Add image URL
-        </Button>
-      </div>
+      <Typography variant="muted" className="text-xs">
+        The first image is your eBay gallery photo. Drag to reorder. Up to{" "}
+        {MAX_IMAGES} images.
+      </Typography>
+
+      {rootError ? <FieldError errors={[{ message: rootError }]} /> : null}
     </FieldGroup>
   );
 };

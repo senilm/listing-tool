@@ -1,5 +1,6 @@
 import { and, asc, count, desc, eq, ilike, isNull } from "drizzle-orm";
 
+import { deleteManagedBlobs } from "@/lib/blob/cleanup";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
 import { product } from "@/lib/db/schema/product";
@@ -175,6 +176,9 @@ export const updateProduct = async ({
   userId,
   input,
 }: OwnedProduct & { input: ProductInput }): Promise<boolean> => {
+  const existing = await getProduct({ id, userId });
+  if (!existing) return false;
+
   const result = await db
     .update(product)
     .set(toRowValues(input))
@@ -186,7 +190,14 @@ export const updateProduct = async ({
       ),
     )
     .returning({ id: product.id });
-  return result.length > 0;
+  if (result.length === 0) return false;
+
+  // Reclaim blobs removed from this product; the cron sweep backstops misses.
+  const removed = (existing.images ?? []).filter(
+    (url) => !input.images.includes(url),
+  );
+  await deleteManagedBlobs(removed);
+  return true;
 };
 
 // Soft delete: stamp deletedAt so the row drops out of every list/lookup. The

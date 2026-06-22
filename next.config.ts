@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
   // node_modules copy of React during SSR instead of Next's vendored React,
   // which breaks every hook call inside it ("Invalid hook call").
   serverExternalPackages: ["@better-auth/kysely-adapter", "kysely"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+    ],
+  },
 };
 
 export default nextConfig;

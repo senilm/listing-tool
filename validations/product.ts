@@ -9,6 +9,10 @@ export const DEFAULT_CONDITION = ProductCondition.New;
 
 export const TITLE_MAX_LENGTH = 80;
 export const DESCRIPTION_MAX_LENGTH = 4000;
+export const MAX_IMAGES = 24;
+const IMAGES_MAX_MESSAGE = `You can add up to ${MAX_IMAGES} images`;
+export const MAX_IMAGE_MB = 10;
+export const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 export const MAX_PRICE = 9_999_999.99;
 export const MIN_QUANTITY = 1;
 export const MAX_QUANTITY = 1_000_000;
@@ -86,7 +90,7 @@ export const productFormSchema = z.object({
     .int("Quantity must be a whole number")
     .min(MIN_QUANTITY, "Quantity must be at least 1")
     .max(MAX_QUANTITY, "Quantity is too large"),
-  images: z.array(imageFormSchema),
+  images: z.array(imageFormSchema).max(MAX_IMAGES, IMAGES_MAX_MESSAGE),
   aspects: z.array(aspectFormSchema),
 });
 
@@ -107,7 +111,9 @@ export const productInputSchema = z.object({
   ringSize: z.string().trim().min(1),
   basePrice: priceSchema,
   quantity: z.number().int().min(MIN_QUANTITY).max(MAX_QUANTITY),
-  images: z.array(z.url().refine(isImageFileUrl, IMAGE_FILE_NAME_MESSAGE)),
+  images: z
+    .array(z.url().refine(isImageFileUrl, IMAGE_FILE_NAME_MESSAGE))
+    .max(MAX_IMAGES, IMAGES_MAX_MESSAGE),
   aspects: z.record(z.string(), z.array(z.string())),
 });
 
