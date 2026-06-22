@@ -12,6 +12,7 @@ import {
   DEFAULT_CATEGORY_ID,
   publishListing,
 } from "@/lib/ebay/listing";
+import { uploadImagesToEps } from "@/lib/ebay/media";
 import { PublicationStatus } from "@/lib/enums/publication";
 import { EXPORT_ROW_LIMIT, type ExportResult } from "@/lib/export/types";
 import {
@@ -305,6 +306,14 @@ export const publishProductToAccounts = async ({
         id: accountId,
         userId,
       });
+
+      // EPS URLs (not the shared Blob URL) are what the listing and snapshot
+      // use — see uploadImagesToEps for why this keeps accounts unlinked.
+      const epsImageUrls = await uploadImagesToEps(
+        accessToken,
+        source.images ?? [],
+      );
+
       const result = await publishListing({
         accessToken,
         setup: {
@@ -320,7 +329,7 @@ export const publishProductToAccounts = async ({
           categoryId: source.categoryId ?? DEFAULT_CATEGORY_ID,
           price: snapshot.price,
           quantity: snapshot.quantity,
-          imageUrls: source.images ?? [],
+          imageUrls: epsImageUrls,
           aspects,
           listingStartDate: account.scheduledAt?.toISOString(),
         },
@@ -330,6 +339,7 @@ export const publishProductToAccounts = async ({
         .insert(publication)
         .values({
           ...snapshotValues,
+          images: epsImageUrls,
           status: PublicationStatus.Published,
           ebayOfferId: result.offerId,
           ebayListingId: result.listingId,

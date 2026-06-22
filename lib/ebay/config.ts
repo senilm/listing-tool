@@ -8,12 +8,14 @@ const HOSTS = {
     identity: "https://apiz.sandbox.ebay.com",
     auth: "https://auth.sandbox.ebay.com",
     web: "https://sandbox.ebay.com",
+    media: "https://apim.sandbox.ebay.com",
   },
   production: {
     api: "https://api.ebay.com",
     identity: "https://apiz.ebay.com",
     auth: "https://auth.ebay.com",
     web: "https://www.ebay.com",
+    media: "https://apim.ebay.com",
   },
 } as const;
 
@@ -23,6 +25,7 @@ export const ebayConfig = {
   identityBase: HOSTS[ENV].identity,
   authBase: HOSTS[ENV].auth,
   webBase: HOSTS[ENV].web,
+  mediaBase: HOSTS[ENV].media,
   clientId: process.env.EBAY_CLIENT_ID ?? "",
   clientSecret: process.env.EBAY_CLIENT_SECRET ?? "",
   ruName: process.env.EBAY_RU_NAME ?? "",
