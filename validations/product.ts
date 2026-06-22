@@ -1,6 +1,19 @@
 import { z } from "zod";
 
 import { ProductCondition } from "@/lib/enums/product";
+import {
+  Certification,
+  Department,
+  MainStoneCreation,
+  Metal,
+  MetalPurity,
+  RingStyle,
+  SettingStyle,
+  Sizable,
+  Stone,
+  StoneColor,
+  StoneShape,
+} from "@/lib/enums/product-aspects";
 
 // Listings are USD-only and always brand new — the columns carry these for
 // future flexibility, but we never surface a picker for either.
@@ -44,6 +57,18 @@ const isImageFileUrl = (value: string): boolean => {
 const IMAGE_FILE_NAME_MESSAGE =
   "URL must end in an image file name (e.g. .jpg)";
 
+// --- Dropdown helpers ---------------------------------------------------------
+// RHF holds "" for an unselected dropdown. A required dropdown rejects "";
+// an optional one allows it and the mapper turns it into null on persist.
+
+const requiredDropdown = <T extends Record<string, string>>(
+  values: T,
+  message: string,
+) => z.union([z.enum(values), z.literal("")]).refine((v) => v !== "", message);
+
+const optionalDropdown = <T extends Record<string, string>>(values: T) =>
+  z.union([z.enum(values), z.literal("")]);
+
 // --- Form shape ---------------------------------------------------------------
 // What react-hook-form holds. Images and aspects are wrapped in objects so
 // useFieldArray gets stable keys; the mappers below flatten them for the API.
@@ -79,9 +104,21 @@ export const productFormSchema = z.object({
       `Keep the description under ${DESCRIPTION_MAX_LENGTH} characters`,
     ),
   brand: z.string().trim().min(1, "Enter a brand"),
-  metal: z.string().trim().min(1, "Enter a metal"),
-  metalPurity: z.string().trim().min(1, "Enter a metal purity"),
-  mainStone: z.string().trim().min(1, "Enter a main stone"),
+  metal: requiredDropdown(Metal, "Select a metal"),
+  metalPurity: requiredDropdown(MetalPurity, "Select a metal purity"),
+  mainStone: requiredDropdown(Stone, "Select a main stone"),
+  mainStoneCreation: optionalDropdown(MainStoneCreation),
+  mainStoneColor: optionalDropdown(StoneColor),
+  mainStoneShape: optionalDropdown(StoneShape),
+  totalCaratWeight: z.string().trim(),
+  secondaryStone: optionalDropdown(Stone),
+  settingStyle: optionalDropdown(SettingStyle),
+  style: optionalDropdown(RingStyle),
+  department: optionalDropdown(Department),
+  sizable: optionalDropdown(Sizable),
+  countryRegionOfManufacture: z.string().trim(),
+  certification: optionalDropdown(Certification),
+  certificationNumber: z.string().trim(),
   jewelleryType: z.string().trim().min(1, "Enter a type"),
   ringSize: z.string().trim().min(1, "Enter a ring size"),
   basePrice: priceSchema,
@@ -104,9 +141,21 @@ export const productInputSchema = z.object({
   title: z.string().trim().min(1).max(TITLE_MAX_LENGTH),
   description: z.string().trim().max(DESCRIPTION_MAX_LENGTH).nullable(),
   brand: z.string().trim().min(1),
-  metal: z.string().trim().min(1),
-  metalPurity: z.string().trim().min(1),
-  mainStone: z.string().trim().min(1),
+  metal: z.enum(Metal),
+  metalPurity: z.enum(MetalPurity),
+  mainStone: z.enum(Stone),
+  mainStoneCreation: z.enum(MainStoneCreation).nullable(),
+  mainStoneColor: z.enum(StoneColor).nullable(),
+  mainStoneShape: z.enum(StoneShape).nullable(),
+  totalCaratWeight: z.string().trim().nullable(),
+  secondaryStone: z.enum(Stone).nullable(),
+  settingStyle: z.enum(SettingStyle).nullable(),
+  style: z.enum(RingStyle).nullable(),
+  department: z.enum(Department).nullable(),
+  sizable: z.enum(Sizable).nullable(),
+  countryRegionOfManufacture: z.string().trim().nullable(),
+  certification: z.enum(Certification).nullable(),
+  certificationNumber: z.string().trim().nullable(),
   jewelleryType: z.string().trim().min(1),
   ringSize: z.string().trim().min(1),
   basePrice: priceSchema,
@@ -121,13 +170,31 @@ export type ProductInput = z.infer<typeof productInputSchema>;
 
 // --- Mappers ------------------------------------------------------------------
 
+const nullIfEmpty = <T extends string>(value: T | ""): T | null =>
+  value === "" ? null : value;
+
+const textOrNull = (value: string): string | null =>
+  value.trim() ? value.trim() : null;
+
 export const toProductInput = (values: ProductFormValues): ProductInput => ({
   title: values.title.trim(),
   description: values.description.trim() ? values.description.trim() : null,
   brand: values.brand.trim(),
-  metal: values.metal.trim(),
-  metalPurity: values.metalPurity.trim(),
-  mainStone: values.mainStone.trim(),
+  metal: values.metal as Metal,
+  metalPurity: values.metalPurity as MetalPurity,
+  mainStone: values.mainStone as Stone,
+  mainStoneCreation: nullIfEmpty(values.mainStoneCreation),
+  mainStoneColor: nullIfEmpty(values.mainStoneColor),
+  mainStoneShape: nullIfEmpty(values.mainStoneShape),
+  totalCaratWeight: textOrNull(values.totalCaratWeight),
+  secondaryStone: nullIfEmpty(values.secondaryStone),
+  settingStyle: nullIfEmpty(values.settingStyle),
+  style: nullIfEmpty(values.style),
+  department: nullIfEmpty(values.department),
+  sizable: nullIfEmpty(values.sizable),
+  countryRegionOfManufacture: textOrNull(values.countryRegionOfManufacture),
+  certification: nullIfEmpty(values.certification),
+  certificationNumber: textOrNull(values.certificationNumber),
   jewelleryType: values.jewelleryType.trim(),
   ringSize: values.ringSize.trim(),
   basePrice: values.basePrice,
@@ -158,6 +225,18 @@ export type ProductFormSource = {
   metal: string | null;
   metalPurity: string | null;
   mainStone: string | null;
+  mainStoneCreation: string | null;
+  mainStoneColor: string | null;
+  mainStoneShape: string | null;
+  totalCaratWeight: string | null;
+  secondaryStone: string | null;
+  settingStyle: string | null;
+  style: string | null;
+  department: string | null;
+  sizable: string | null;
+  countryRegionOfManufacture: string | null;
+  certification: string | null;
+  certificationNumber: string | null;
   jewelleryType: string | null;
   ringSize: string | null;
   basePrice: string;
@@ -172,9 +251,23 @@ export const toProductFormValues = (
   title: product.title,
   description: product.description ?? "",
   brand: product.brand ?? "",
-  metal: product.metal ?? "",
-  metalPurity: product.metalPurity ?? "",
-  mainStone: product.mainStone ?? "",
+  metal: (product.metal ?? "") as Metal | "",
+  metalPurity: (product.metalPurity ?? "") as MetalPurity | "",
+  mainStone: (product.mainStone ?? "") as Stone | "",
+  mainStoneCreation: (product.mainStoneCreation ?? "") as
+    | MainStoneCreation
+    | "",
+  mainStoneColor: (product.mainStoneColor ?? "") as StoneColor | "",
+  mainStoneShape: (product.mainStoneShape ?? "") as StoneShape | "",
+  totalCaratWeight: product.totalCaratWeight ?? "",
+  secondaryStone: (product.secondaryStone ?? "") as Stone | "",
+  settingStyle: (product.settingStyle ?? "") as SettingStyle | "",
+  style: (product.style ?? "") as RingStyle | "",
+  department: (product.department ?? "") as Department | "",
+  sizable: (product.sizable ?? "") as Sizable | "",
+  countryRegionOfManufacture: product.countryRegionOfManufacture ?? "",
+  certification: (product.certification ?? "") as Certification | "",
+  certificationNumber: product.certificationNumber ?? "",
   jewelleryType: product.jewelleryType ?? "",
   ringSize: product.ringSize ?? "",
   basePrice: product.basePrice,

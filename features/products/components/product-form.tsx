@@ -10,12 +10,26 @@ import { Button } from "@/components/ui/button";
 import { FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { EnumSelectField } from "@/features/products/components/enum-select-field";
 import { ProductAspectsField } from "@/features/products/components/product-aspects-field";
 import { ProductImagesField } from "@/features/products/components/product-images-field";
 import {
   useCreateProduct,
   useUpdateProduct,
 } from "@/features/products/hooks/use-product-mutations";
+import {
+  Certification,
+  Department,
+  MainStoneCreation,
+  Metal,
+  MetalPurity,
+  RingStyle,
+  SettingStyle,
+  Sizable,
+  Stone,
+  StoneColor,
+  StoneShape,
+} from "@/lib/enums/product-aspects";
 import { productsRoute } from "@/lib/routes";
 import { toast } from "@/lib/toast";
 import {
@@ -32,6 +46,18 @@ const EMPTY_VALUES: DefaultValues<ProductFormValues> = {
   metal: "",
   metalPurity: "",
   mainStone: "",
+  mainStoneCreation: "",
+  mainStoneColor: "",
+  mainStoneShape: "",
+  totalCaratWeight: "",
+  secondaryStone: "",
+  settingStyle: "",
+  style: "",
+  department: "",
+  sizable: "",
+  countryRegionOfManufacture: "",
+  certification: "",
+  certificationNumber: "",
   jewelleryType: "",
   ringSize: "",
   basePrice: "",
@@ -82,43 +108,40 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
   return (
     <form
       onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-      className="flex max-w-2xl flex-col gap-8"
+      className="flex w-full flex-col gap-8"
     >
       <FieldSet>
-        <FieldLegend>Details</FieldLegend>
-        <FieldGroup>
-          <FormField
-            control={form.control}
-            name="title"
-            label="Title"
-            required
-            render={(field) => (
-              <Input
-                placeholder="18ct Gold Diamond Ring"
-                maxLength={TITLE_MAX_LENGTH}
-                {...field}
-              />
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            label="Description"
-            render={(field) => (
-              <Textarea
-                placeholder="Describe the piece — materials, dimensions, hallmarks…"
-                rows={5}
-                {...field}
-              />
-            )}
-          />
-        </FieldGroup>
+        <FieldLegend>Photos</FieldLegend>
+        <ProductImagesField control={form.control} />
       </FieldSet>
 
       <FieldSet>
-        <FieldLegend>Jewellery details</FieldLegend>
+        <FormField
+          control={form.control}
+          name="title"
+          label="Title"
+          required
+          description="Up to 80 characters — lead with the details buyers search for."
+          render={(field) => (
+            <Input
+              placeholder="18ct Gold Diamond Ring"
+              maxLength={TITLE_MAX_LENGTH}
+              {...field}
+            />
+          )}
+        />
+      </FieldSet>
+
+      <FieldSet>
+        <FieldLegend>Item specifics</FieldLegend>
         <FieldGroup>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <EnumSelectField
+              control={form.control}
+              name="department"
+              label="Department"
+              options={Object.values(Department)}
+            />
             <FormField
               control={form.control}
               name="brand"
@@ -135,30 +158,38 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
                 <Input placeholder="Statement Ring" {...field} />
               )}
             />
-            <FormField
+            <EnumSelectField
               control={form.control}
               name="metal"
               label="Metal"
               required
-              render={(field) => (
-                <Input placeholder="Sterling Silver" {...field} />
-              )}
+              options={Object.values(Metal)}
             />
-            <FormField
+            <EnumSelectField
               control={form.control}
               name="metalPurity"
               label="Metal purity"
               required
-              render={(field) => <Input placeholder="925" {...field} />}
+              options={Object.values(MetalPurity)}
             />
-            <FormField
+            <EnumSelectField
               control={form.control}
               name="mainStone"
               label="Main stone"
               required
-              render={(field) => (
-                <Input placeholder="Cubic Zirconia" {...field} />
-              )}
+              options={Object.values(Stone)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="mainStoneColor"
+              label="Main stone colour"
+              options={Object.values(StoneColor)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="mainStoneCreation"
+              label="Main stone creation"
+              options={Object.values(MainStoneCreation)}
             />
             <FormField
               control={form.control}
@@ -167,8 +198,79 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
               required
               render={(field) => <Input placeholder="7" {...field} />}
             />
+            <EnumSelectField
+              control={form.control}
+              name="mainStoneShape"
+              label="Main stone shape"
+              options={Object.values(StoneShape)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="settingStyle"
+              label="Setting style"
+              options={Object.values(SettingStyle)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="style"
+              label="Style"
+              options={Object.values(RingStyle)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="sizable"
+              label="Sizable"
+              options={Object.values(Sizable)}
+            />
+            <FormField
+              control={form.control}
+              name="totalCaratWeight"
+              label="Total carat weight"
+              render={(field) => <Input placeholder="1.25" {...field} />}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="secondaryStone"
+              label="Secondary stone"
+              options={Object.values(Stone)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="certification"
+              label="Certification"
+              options={Object.values(Certification)}
+            />
+            <FormField
+              control={form.control}
+              name="certificationNumber"
+              label="Certification number"
+              render={(field) => <Input placeholder="2141438171" {...field} />}
+            />
+            <FormField
+              control={form.control}
+              name="countryRegionOfManufacture"
+              label="Country/region of manufacture"
+              render={(field) => (
+                <Input placeholder="United Kingdom" {...field} />
+              )}
+            />
           </div>
         </FieldGroup>
+      </FieldSet>
+
+      <FieldSet>
+        <FormField
+          control={form.control}
+          name="description"
+          label="Description"
+          render={(field) => (
+            <Textarea
+              placeholder="Describe the piece — materials, dimensions, hallmarks…"
+              rows={5}
+              {...field}
+            />
+          )}
+        />
       </FieldSet>
 
       <FieldSet>
@@ -196,12 +298,7 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
       </FieldSet>
 
       <FieldSet>
-        <FieldLegend>Images</FieldLegend>
-        <ProductImagesField control={form.control} />
-      </FieldSet>
-
-      <FieldSet>
-        <FieldLegend>Item specifics</FieldLegend>
+        <FieldLegend>Additional item specifics</FieldLegend>
         <ProductAspectsField control={form.control} />
       </FieldSet>
 
