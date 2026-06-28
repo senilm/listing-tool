@@ -7,11 +7,7 @@ import { likeContains } from "@/lib/db/like";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
 import { publication } from "@/lib/db/schema/publication";
 import { ebayConfig } from "@/lib/ebay/config";
-import {
-  buildEbaySku,
-  DEFAULT_CATEGORY_ID,
-  publishListing,
-} from "@/lib/ebay/listing";
+import { buildEbaySku, publishListing } from "@/lib/ebay/listing";
 import { uploadImagesToEps } from "@/lib/ebay/media";
 import { PublicationStatus } from "@/lib/enums/publication";
 import { EXPORT_ROW_LIMIT, type ExportResult } from "@/lib/export/types";
@@ -314,7 +310,7 @@ export const publishProductToAccounts = async ({
           sku: ebaySku,
           title: snapshot.title,
           description,
-          categoryId: source.categoryId ?? DEFAULT_CATEGORY_ID,
+          categoryId: source.categoryId,
           price: snapshot.price,
           quantity: snapshot.quantity,
           imageUrls: epsImageUrls,

@@ -8,10 +8,6 @@ import { ebayRequest, EBAY_MARKETPLACE_ID } from "@/lib/ebay/client";
 import { ebayConfig } from "@/lib/ebay/config";
 import { joinTruthy } from "@/lib/utils";
 
-// Fallback leaf category when a product has none set: Jewelry & Watches >
-// Fashion Jewelry > Rings. Real per-product leaf selection comes later.
-export const DEFAULT_CATEGORY_ID = "67681";
-
 // eBay caps SKUs at 50 characters.
 const EBAY_SKU_MAX_LENGTH = 50;
 const SKU_TITLE_SLUG_LENGTH = 24;
