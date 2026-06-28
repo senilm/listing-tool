@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -40,29 +41,38 @@ export const HeaderBreadcrumb = () => {
       aria-label="Breadcrumb"
       className="flex min-w-0 items-center gap-1.5 overflow-hidden whitespace-nowrap"
     >
-      {crumbs.map((crumb, index) => {
-        const isLast = index === crumbs.length - 1;
+      <AnimatePresence mode="popLayout" initial={false}>
+        {crumbs.map((crumb, index) => {
+          const isLast = index === crumbs.length - 1;
 
-        return (
-          <span key={crumb.path} className="flex items-center gap-1.5">
-            {index > 0 && (
-              <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/60" />
-            )}
-            {isLast ? (
-              <Typography variant="small" as="span" aria-current="page">
-                {crumb.label}
-              </Typography>
-            ) : (
-              <Link
-                href={crumb.path}
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {crumb.label}
-              </Link>
-            )}
-          </span>
-        );
-      })}
+          return (
+            <motion.span
+              key={crumb.path}
+              className="flex items-center gap-1.5"
+              initial={{ opacity: 0, x: -4 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -4 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              {index > 0 && (
+                <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/60" />
+              )}
+              {isLast ? (
+                <Typography variant="small" as="span" aria-current="page">
+                  {crumb.label}
+                </Typography>
+              ) : (
+                <Link
+                  href={crumb.path}
+                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {crumb.label}
+                </Link>
+              )}
+            </motion.span>
+          );
+        })}
+      </AnimatePresence>
     </nav>
   );
 };
