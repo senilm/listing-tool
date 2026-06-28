@@ -13,6 +13,7 @@ export type ProductSummary = Pick<
   ProductRow,
   | "id"
   | "title"
+  | "categoryId"
   | "basePrice"
   | "currency"
   | "quantity"
@@ -52,6 +53,7 @@ type ProductQuery = Pick<ListProductsParams, "userId" | "q" | "sort">;
 const PRODUCT_SUMMARY_SELECTION = {
   id: product.id,
   title: product.title,
+  categoryId: product.categoryId,
   basePrice: product.basePrice,
   currency: product.currency,
   quantity: product.quantity,

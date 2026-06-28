@@ -9,6 +9,11 @@ import { DataTableRowActions } from "@/components/data-table/data-table-row-acti
 import { TruncatedText } from "@/components/truncated-text";
 import { ProductPublishButton } from "@/features/products/components/product-publish-button";
 import { type ProductSummary } from "@/features/products/services/product-service";
+import { type CategoryId } from "@/lib/categories/category-id";
+import { CATEGORY_REGISTRY } from "@/lib/categories/registry";
+
+const categoryLabel = (categoryId: string): string =>
+  CATEGORY_REGISTRY[categoryId as CategoryId]?.label ?? categoryId;
 
 const formatPrice = (amount: string, currency: string): string => {
   const value = Number(amount);
@@ -41,6 +46,19 @@ export const createProductColumns = ({
     cell: ({ row }) => (
       <TruncatedText className="font-medium">
         {row.original.title}
+      </TruncatedText>
+    ),
+  },
+  {
+    accessorKey: "categoryId",
+    enableSorting: false,
+    meta: { label: "Category" },
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Category" />
+    ),
+    cell: ({ row }) => (
+      <TruncatedText className="text-muted-foreground">
+        {categoryLabel(row.original.categoryId)}
       </TruncatedText>
     ),
   },
