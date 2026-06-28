@@ -1,16 +1,16 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { TableCell, TableRow } from "@/components/ui/table";
 
 type DataTableSkeletonProps = {
   columns: number;
   rows?: number;
 };
 
-export const DataTableSkeleton = ({
+export const DataTableSkeletonRows = ({
   columns,
   rows = 11,
 }: DataTableSkeletonProps) => (
-  <TableBody>
+  <>
     {Array.from({ length: rows }).map((_, rowIndex) => (
       <TableRow key={rowIndex}>
         {Array.from({ length: columns }).map((_, cellIndex) => (
@@ -20,5 +20,5 @@ export const DataTableSkeleton = ({
         ))}
       </TableRow>
     ))}
-  </TableBody>
+  </>
 );

@@ -22,16 +22,16 @@ import { DataTableDefaultCell } from "@/components/data-table/data-table-default
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableResizeHandle } from "@/components/data-table/data-table-resize-handle";
 import { createSelectionColumn } from "@/components/data-table/data-table-select-column";
-import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
+import { DataTableSkeletonRows } from "@/components/data-table/data-table-skeleton";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import {
   type DataTableFilterField,
   type DataTablePaginationState,
 } from "@/components/data-table/data-table.types";
 import { EmptyState } from "@/components/empty-state";
+import { TableLoadingTransition } from "@/components/loading-transition";
 import {
   Table,
-  TableBody,
   TableCell,
   TableHead,
   TableHeader,
@@ -221,7 +221,7 @@ export const DataTable = <TData,>({
         </DataTableBulkActions>
       )}
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-lg border">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-lg border has-[[data-empty-row]]:[&>[data-slot=table-container]]:flex-1">
         {noColumnsVisible ? (
           <EmptyState
             icon={Columns3}
@@ -230,85 +230,86 @@ export const DataTable = <TData,>({
             className="flex-1 py-0"
           />
         ) : (
-          <>
-            <Table
-              style={
-                enableColumnResizing
-                  ? { width: "100%", minWidth: table.getCenterTotalSize() }
-                  : undefined
-              }
+          <Table
+            className="has-[[data-empty-row]]:h-full"
+            style={
+              enableColumnResizing
+                ? { width: "100%", minWidth: table.getCenterTotalSize() }
+                : undefined
+            }
+          >
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      className="relative"
+                      style={
+                        enableColumnResizing
+                          ? { width: header.getSize() }
+                          : undefined
+                      }
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                      {!!enableColumnResizing &&
+                        header.column.getCanResize() && (
+                          <DataTableResizeHandle header={header} />
+                        )}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+
+            <TableLoadingTransition
+              isLoading={isLoading}
+              loader={<DataTableSkeletonRows columns={visibleColumnCount} />}
             >
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead
-                        key={header.id}
-                        className="relative"
+              {rows.length ? (
+                rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() ? "selected" : undefined}
+                    onClick={
+                      onRowClick ? () => onRowClick(row.original) : undefined
+                    }
+                    className={cn(onRowClick && "cursor-pointer")}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
                         style={
                           enableColumnResizing
-                            ? { width: header.getSize() }
+                            ? { width: cell.column.getSize() }
                             : undefined
                         }
                       >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                        {!!enableColumnResizing &&
-                          header.column.getCanResize() && (
-                            <DataTableResizeHandle header={header} />
-                          )}
-                      </TableHead>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
                     ))}
                   </TableRow>
-                ))}
-              </TableHeader>
-
-              {isLoading ? (
-                <DataTableSkeleton columns={visibleColumnCount} />
+                ))
               ) : (
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() ? "selected" : undefined}
-                      onClick={
-                        onRowClick ? () => onRowClick(row.original) : undefined
-                      }
-                      className={cn(onRowClick && "cursor-pointer")}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          key={cell.id}
-                          style={
-                            enableColumnResizing
-                              ? { width: cell.column.getSize() }
-                              : undefined
-                          }
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
+                <TableRow data-empty-row className="hover:bg-transparent">
+                  <TableCell colSpan={visibleColumnCount} className="h-full">
+                    <EmptyState
+                      title={emptyTitle}
+                      description={emptyDescription}
+                    />
+                  </TableCell>
+                </TableRow>
               )}
-            </Table>
-
-            {!isLoading && !rows.length && (
-              <EmptyState
-                title={emptyTitle}
-                description={emptyDescription}
-                className="flex-1 py-0"
-              />
-            )}
-          </>
+            </TableLoadingTransition>
+          </Table>
         )}
       </div>
 
