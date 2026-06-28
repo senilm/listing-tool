@@ -1,5 +1,6 @@
 "use client";
 
+import { LoadingTransition } from "@/components/loading-transition";
 import { Typography } from "@/components/typography";
 import { DashboardAccountSummary } from "@/features/dashboard/components/dashboard-account-summary";
 import { DashboardOverviewSkeleton } from "@/features/dashboard/components/dashboard-overview-skeleton";
@@ -11,26 +12,25 @@ import { useDashboardStatsQuery } from "@/features/dashboard/hooks/use-dashboard
 export const DashboardOverview = () => {
   const { data, isLoading, isError } = useDashboardStatsQuery();
 
-  if (isLoading) {
-    return <DashboardOverviewSkeleton />;
-  }
-
-  if (isError || !data) {
-    return (
-      <Typography variant="muted">
-        Couldn&apos;t load your dashboard. Please try again.
-      </Typography>
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-6">
-      <DashboardStatCards stats={data} />
-      <div className="grid gap-6 lg:grid-cols-2">
-        <DashboardStatusChart publications={data.publications} />
-        <DashboardAccountSummary accounts={data.accountsSummary} />
-      </div>
-      <DashboardRecentActivity items={data.recent} />
-    </div>
+    <LoadingTransition
+      isLoading={isLoading}
+      loader={<DashboardOverviewSkeleton />}
+    >
+      {isError || !data ? (
+        <Typography variant="muted">
+          Couldn&apos;t load your dashboard. Please try again.
+        </Typography>
+      ) : (
+        <div className="flex flex-col gap-6">
+          <DashboardStatCards stats={data} />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <DashboardStatusChart publications={data.publications} />
+            <DashboardAccountSummary accounts={data.accountsSummary} />
+          </div>
+          <DashboardRecentActivity items={data.recent} />
+        </div>
+      )}
+    </LoadingTransition>
   );
 };

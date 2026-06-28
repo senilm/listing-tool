@@ -4,6 +4,7 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 
+import { ConditionalTransition } from "@/components/conditional-transition";
 import {
   Card,
   CardContent,
@@ -42,34 +43,39 @@ export const AppearanceSettingsCard = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {isMounted ? (
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            value={theme}
-            onValueChange={(value) => {
-              if (value) setTheme(value);
-            }}
-          >
-            <ToggleGroupItem value={ThemeOption.Light} aria-label="Light theme">
-              <Sun />
-              Light
-            </ToggleGroupItem>
-            <ToggleGroupItem value={ThemeOption.Dark} aria-label="Dark theme">
-              <Moon />
-              Dark
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value={ThemeOption.System}
-              aria-label="System theme"
+        <ConditionalTransition
+          condition={isMounted}
+          whenTrue={
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={theme}
+              onValueChange={(value) => {
+                if (value) setTheme(value);
+              }}
             >
-              <Monitor />
-              System
-            </ToggleGroupItem>
-          </ToggleGroup>
-        ) : (
-          <Skeleton className="h-9 w-64" />
-        )}
+              <ToggleGroupItem
+                value={ThemeOption.Light}
+                aria-label="Light theme"
+              >
+                <Sun />
+                Light
+              </ToggleGroupItem>
+              <ToggleGroupItem value={ThemeOption.Dark} aria-label="Dark theme">
+                <Moon />
+                Dark
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value={ThemeOption.System}
+                aria-label="System theme"
+              >
+                <Monitor />
+                System
+              </ToggleGroupItem>
+            </ToggleGroup>
+          }
+          whenFalse={<Skeleton className="h-9 w-64" />}
+        />
       </CardContent>
     </Card>
   );
