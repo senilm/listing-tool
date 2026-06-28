@@ -127,3 +127,119 @@ export enum Sizable {
   Yes = "Yes",
   No = "No",
 }
+
+export enum MainStoneTreatment {
+  NotEnhanced = "Not Enhanced",
+  Heated = "Heated",
+  HeatedPressureTreated = "Heated & Pressure Treated",
+  Irradiated = "Irradiated",
+  Diffusion = "Diffusion",
+  Dyed = "Dyed",
+  Filled = "Filled",
+  ClarityEnhanced = "Clarity Enhanced",
+  Coated = "Coated",
+  Bleached = "Bleached",
+  Stabilized = "Stabilized",
+}
+
+export enum CutGrade {
+  Ideal = "Ideal",
+  Excellent = "Excellent",
+  VeryGood = "Very Good",
+  Good = "Good",
+  Fair = "Fair",
+  Poor = "Poor",
+}
+
+export enum ColorGrade {
+  D = "D",
+  E = "E",
+  F = "F",
+  G = "G",
+  H = "H",
+  I = "I",
+  J = "J",
+  K = "K",
+  L = "L",
+  M = "M",
+  N = "N",
+  OP = "O-P",
+  QR = "Q-R",
+  ST = "S-T",
+  UV = "U-V",
+  WX = "W-X",
+  YZ = "Y-Z",
+  Fancy = "Fancy",
+}
+
+export enum ClarityGrade {
+  FL = "FL",
+  IF = "IF",
+  VVS1 = "VVS1",
+  VVS2 = "VVS2",
+  VS1 = "VS1",
+  VS2 = "VS2",
+  SI1 = "SI1",
+  SI2 = "SI2",
+  I1 = "I1",
+  I2 = "I2",
+  I3 = "I3",
+}
+
+export enum Theme {
+  LoveAndHearts = "Love & Hearts",
+  WeddingAndEngagement = "Wedding & Engagement",
+  Anniversary = "Anniversary",
+  Birthstone = "Birthstone",
+  Religious = "Religious",
+  Nature = "Nature",
+  Animal = "Animal",
+  Celestial = "Celestial",
+  Floral = "Floral",
+  Friendship = "Friendship",
+  Family = "Family",
+  Beauty = "Beauty",
+}
+
+export enum Occasion {
+  Engagement = "Engagement",
+  Wedding = "Wedding",
+  Anniversary = "Anniversary",
+  Birthday = "Birthday",
+  ValentinesDay = "Valentine's Day",
+  MothersDay = "Mother's Day",
+  Christmas = "Christmas",
+  Graduation = "Graduation",
+  Everyday = "Everyday",
+}
+
+export enum Color {
+  Yellow = "Yellow",
+  White = "White",
+  Rose = "Rose",
+  Gold = "Gold",
+  Silver = "Silver",
+  Black = "Black",
+  Blue = "Blue",
+  Green = "Green",
+  Red = "Red",
+  Pink = "Pink",
+  Purple = "Purple",
+  Multicolour = "Multicolour",
+}
+
+export enum Features {
+  Adjustable = "Adjustable",
+  Stackable = "Stackable",
+  Engraved = "Engraved",
+  ComfortFit = "Comfort Fit",
+  Hypoallergenic = "Hypoallergenic",
+  NickelFree = "Nickel Free",
+  Handmade = "Handmade",
+  Resizable = "Resizable",
+}
+
+export enum YesNo {
+  Yes = "Yes",
+  No = "No",
+}
