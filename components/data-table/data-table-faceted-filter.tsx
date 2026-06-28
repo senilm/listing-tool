@@ -1,12 +1,13 @@
 "use client";
 
 import { type Column } from "@tanstack/react-table";
-import { Check, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 
 import { type FacetedFilterOption } from "@/components/data-table/data-table.types";
 import { TruncatedText } from "@/components/truncated-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
   CommandEmpty,
@@ -22,7 +23,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
 
 type DataTableFacetedFilterProps<TData, TValue> = {
   column: Column<TData, TValue>;
@@ -116,16 +116,12 @@ export const DataTableFacetedFilter = <TData, TValue>({
                     key={option.value}
                     onSelect={() => toggle(option.value)}
                   >
-                    <div
-                      className={cn(
-                        "flex size-4 items-center justify-center rounded-[4px] border",
-                        isSelected
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-input [&_svg]:invisible",
-                      )}
-                    >
-                      <Check className="size-3" />
-                    </div>
+                    <Checkbox
+                      checked={isSelected}
+                      className="pointer-events-none"
+                      tabIndex={-1}
+                      aria-hidden
+                    />
                     <TruncatedText>{option.label}</TruncatedText>
                   </CommandItem>
                 );
