@@ -19,16 +19,25 @@ import {
 } from "@/features/products/hooks/use-product-mutations";
 import {
   Certification,
+  ClarityGrade,
+  Color,
+  ColorGrade,
+  CutGrade,
   Department,
+  Features,
   MainStoneCreation,
+  MainStoneTreatment,
   Metal,
   MetalPurity,
+  Occasion,
   RingStyle,
   SettingStyle,
   Sizable,
   Stone,
   StoneColor,
   StoneShape,
+  Theme,
+  YesNo,
 } from "@/lib/enums/product-aspects";
 import { productsRoute } from "@/lib/routes";
 import { toast } from "@/lib/toast";
@@ -47,17 +56,32 @@ const EMPTY_VALUES: DefaultValues<ProductFormValues> = {
   metalPurity: "",
   mainStone: "",
   mainStoneCreation: "",
+  mainStoneTreatment: "",
   mainStoneColor: "",
   mainStoneShape: "",
   totalCaratWeight: "",
+  numberOfGemstones: "",
+  cutGrade: "",
+  colorGrade: "",
+  clarityGrade: "",
   secondaryStone: "",
   settingStyle: "",
   style: "",
+  theme: "",
+  occasion: "",
+  color: "",
+  features: "",
+  bandWidth: "",
+  vintage: "",
+  personalized: "",
   department: "",
   sizable: "",
   countryRegionOfManufacture: "",
   certification: "",
   certificationNumber: "",
+  mpn: "",
+  upc: "",
+  californiaProp65Warning: "",
   jewelleryType: "",
   ringSize: "",
   basePrice: "",
@@ -191,6 +215,12 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
               label="Main stone creation"
               options={Object.values(MainStoneCreation)}
             />
+            <EnumSelectField
+              control={form.control}
+              name="mainStoneTreatment"
+              label="Main stone treatment"
+              options={Object.values(MainStoneTreatment)}
+            />
             <FormField
               control={form.control}
               name="ringSize"
@@ -206,6 +236,24 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
             />
             <EnumSelectField
               control={form.control}
+              name="cutGrade"
+              label="Cut grade"
+              options={Object.values(CutGrade)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="colorGrade"
+              label="Colour grade"
+              options={Object.values(ColorGrade)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="clarityGrade"
+              label="Clarity grade"
+              options={Object.values(ClarityGrade)}
+            />
+            <EnumSelectField
+              control={form.control}
               name="settingStyle"
               label="Setting style"
               options={Object.values(SettingStyle)}
@@ -218,15 +266,63 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
             />
             <EnumSelectField
               control={form.control}
+              name="theme"
+              label="Theme"
+              options={Object.values(Theme)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="occasion"
+              label="Occasion"
+              options={Object.values(Occasion)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="color"
+              label="Colour"
+              options={Object.values(Color)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="features"
+              label="Features"
+              options={Object.values(Features)}
+            />
+            <EnumSelectField
+              control={form.control}
               name="sizable"
               label="Sizable"
               options={Object.values(Sizable)}
             />
             <FormField
               control={form.control}
+              name="bandWidth"
+              label="Band width"
+              render={(field) => <Input placeholder="2 mm" {...field} />}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="vintage"
+              label="Vintage"
+              options={Object.values(YesNo)}
+            />
+            <EnumSelectField
+              control={form.control}
+              name="personalized"
+              label="Personalized"
+              options={Object.values(YesNo)}
+            />
+            <FormField
+              control={form.control}
               name="totalCaratWeight"
               label="Total carat weight"
               render={(field) => <Input placeholder="1.25" {...field} />}
+            />
+            <FormField
+              control={form.control}
+              name="numberOfGemstones"
+              label="Number of gemstones"
+              render={(field) => <Input placeholder="3" {...field} />}
             />
             <EnumSelectField
               control={form.control}
@@ -248,10 +344,34 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
             />
             <FormField
               control={form.control}
+              name="mpn"
+              label="MPN"
+              render={(field) => (
+                <Input placeholder="Does not apply" {...field} />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="upc"
+              label="UPC"
+              render={(field) => (
+                <Input placeholder="Does not apply" {...field} />
+              )}
+            />
+            <FormField
+              control={form.control}
               name="countryRegionOfManufacture"
               label="Country/region of manufacture"
               render={(field) => (
                 <Input placeholder="United Kingdom" {...field} />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="californiaProp65Warning"
+              label="California Prop 65 warning"
+              render={(field) => (
+                <Input placeholder="Cancer and reproductive harm" {...field} />
               )}
             />
           </div>

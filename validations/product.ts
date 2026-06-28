@@ -3,16 +3,25 @@ import { z } from "zod";
 import { ProductCondition } from "@/lib/enums/product";
 import {
   Certification,
+  ClarityGrade,
+  Color,
+  ColorGrade,
+  CutGrade,
   Department,
+  Features,
   MainStoneCreation,
+  MainStoneTreatment,
   Metal,
   MetalPurity,
+  Occasion,
   RingStyle,
   SettingStyle,
   Sizable,
   Stone,
   StoneColor,
   StoneShape,
+  Theme,
+  YesNo,
 } from "@/lib/enums/product-aspects";
 
 // Listings are USD-only and always brand new — the columns carry these for
@@ -108,17 +117,32 @@ export const productFormSchema = z.object({
   metalPurity: requiredDropdown(MetalPurity, "Select a metal purity"),
   mainStone: requiredDropdown(Stone, "Select a main stone"),
   mainStoneCreation: optionalDropdown(MainStoneCreation),
+  mainStoneTreatment: optionalDropdown(MainStoneTreatment),
   mainStoneColor: optionalDropdown(StoneColor),
   mainStoneShape: optionalDropdown(StoneShape),
   totalCaratWeight: z.string().trim(),
+  numberOfGemstones: z.string().trim(),
+  cutGrade: optionalDropdown(CutGrade),
+  colorGrade: optionalDropdown(ColorGrade),
+  clarityGrade: optionalDropdown(ClarityGrade),
   secondaryStone: optionalDropdown(Stone),
   settingStyle: optionalDropdown(SettingStyle),
   style: optionalDropdown(RingStyle),
+  theme: optionalDropdown(Theme),
+  occasion: optionalDropdown(Occasion),
+  color: optionalDropdown(Color),
+  features: optionalDropdown(Features),
+  bandWidth: z.string().trim(),
+  vintage: optionalDropdown(YesNo),
+  personalized: optionalDropdown(YesNo),
   department: optionalDropdown(Department),
   sizable: optionalDropdown(Sizable),
   countryRegionOfManufacture: z.string().trim(),
   certification: optionalDropdown(Certification),
   certificationNumber: z.string().trim(),
+  mpn: z.string().trim(),
+  upc: z.string().trim(),
+  californiaProp65Warning: z.string().trim(),
   jewelleryType: z.string().trim().min(1, "Enter a type"),
   ringSize: z.string().trim().min(1, "Enter a ring size"),
   basePrice: priceSchema,
@@ -145,17 +169,32 @@ export const productInputSchema = z.object({
   metalPurity: z.enum(MetalPurity),
   mainStone: z.enum(Stone),
   mainStoneCreation: z.enum(MainStoneCreation).nullable(),
+  mainStoneTreatment: z.enum(MainStoneTreatment).nullable(),
   mainStoneColor: z.enum(StoneColor).nullable(),
   mainStoneShape: z.enum(StoneShape).nullable(),
   totalCaratWeight: z.string().trim().nullable(),
+  numberOfGemstones: z.string().trim().nullable(),
+  cutGrade: z.enum(CutGrade).nullable(),
+  colorGrade: z.enum(ColorGrade).nullable(),
+  clarityGrade: z.enum(ClarityGrade).nullable(),
   secondaryStone: z.enum(Stone).nullable(),
   settingStyle: z.enum(SettingStyle).nullable(),
   style: z.enum(RingStyle).nullable(),
+  theme: z.enum(Theme).nullable(),
+  occasion: z.enum(Occasion).nullable(),
+  color: z.enum(Color).nullable(),
+  features: z.enum(Features).nullable(),
+  bandWidth: z.string().trim().nullable(),
+  vintage: z.enum(YesNo).nullable(),
+  personalized: z.enum(YesNo).nullable(),
   department: z.enum(Department).nullable(),
   sizable: z.enum(Sizable).nullable(),
   countryRegionOfManufacture: z.string().trim().nullable(),
   certification: z.enum(Certification).nullable(),
   certificationNumber: z.string().trim().nullable(),
+  mpn: z.string().trim().nullable(),
+  upc: z.string().trim().nullable(),
+  californiaProp65Warning: z.string().trim().nullable(),
   jewelleryType: z.string().trim().min(1),
   ringSize: z.string().trim().min(1),
   basePrice: priceSchema,
@@ -184,17 +223,32 @@ export const toProductInput = (values: ProductFormValues): ProductInput => ({
   metalPurity: values.metalPurity as MetalPurity,
   mainStone: values.mainStone as Stone,
   mainStoneCreation: nullIfEmpty(values.mainStoneCreation),
+  mainStoneTreatment: nullIfEmpty(values.mainStoneTreatment),
   mainStoneColor: nullIfEmpty(values.mainStoneColor),
   mainStoneShape: nullIfEmpty(values.mainStoneShape),
   totalCaratWeight: textOrNull(values.totalCaratWeight),
+  numberOfGemstones: textOrNull(values.numberOfGemstones),
+  cutGrade: nullIfEmpty(values.cutGrade),
+  colorGrade: nullIfEmpty(values.colorGrade),
+  clarityGrade: nullIfEmpty(values.clarityGrade),
   secondaryStone: nullIfEmpty(values.secondaryStone),
   settingStyle: nullIfEmpty(values.settingStyle),
   style: nullIfEmpty(values.style),
+  theme: nullIfEmpty(values.theme),
+  occasion: nullIfEmpty(values.occasion),
+  color: nullIfEmpty(values.color),
+  features: nullIfEmpty(values.features),
+  bandWidth: textOrNull(values.bandWidth),
+  vintage: nullIfEmpty(values.vintage),
+  personalized: nullIfEmpty(values.personalized),
   department: nullIfEmpty(values.department),
   sizable: nullIfEmpty(values.sizable),
   countryRegionOfManufacture: textOrNull(values.countryRegionOfManufacture),
   certification: nullIfEmpty(values.certification),
   certificationNumber: textOrNull(values.certificationNumber),
+  mpn: textOrNull(values.mpn),
+  upc: textOrNull(values.upc),
+  californiaProp65Warning: textOrNull(values.californiaProp65Warning),
   jewelleryType: values.jewelleryType.trim(),
   ringSize: values.ringSize.trim(),
   basePrice: values.basePrice,
@@ -226,17 +280,32 @@ export type ProductFormSource = {
   metalPurity: string | null;
   mainStone: string | null;
   mainStoneCreation: string | null;
+  mainStoneTreatment: string | null;
   mainStoneColor: string | null;
   mainStoneShape: string | null;
   totalCaratWeight: string | null;
+  numberOfGemstones: string | null;
+  cutGrade: string | null;
+  colorGrade: string | null;
+  clarityGrade: string | null;
   secondaryStone: string | null;
   settingStyle: string | null;
   style: string | null;
+  theme: string | null;
+  occasion: string | null;
+  color: string | null;
+  features: string | null;
+  bandWidth: string | null;
+  vintage: string | null;
+  personalized: string | null;
   department: string | null;
   sizable: string | null;
   countryRegionOfManufacture: string | null;
   certification: string | null;
   certificationNumber: string | null;
+  mpn: string | null;
+  upc: string | null;
+  californiaProp65Warning: string | null;
   jewelleryType: string | null;
   ringSize: string | null;
   basePrice: string;
@@ -257,17 +326,34 @@ export const toProductFormValues = (
   mainStoneCreation: (product.mainStoneCreation ?? "") as
     | MainStoneCreation
     | "",
+  mainStoneTreatment: (product.mainStoneTreatment ?? "") as
+    | MainStoneTreatment
+    | "",
   mainStoneColor: (product.mainStoneColor ?? "") as StoneColor | "",
   mainStoneShape: (product.mainStoneShape ?? "") as StoneShape | "",
   totalCaratWeight: product.totalCaratWeight ?? "",
+  numberOfGemstones: product.numberOfGemstones ?? "",
+  cutGrade: (product.cutGrade ?? "") as CutGrade | "",
+  colorGrade: (product.colorGrade ?? "") as ColorGrade | "",
+  clarityGrade: (product.clarityGrade ?? "") as ClarityGrade | "",
   secondaryStone: (product.secondaryStone ?? "") as Stone | "",
   settingStyle: (product.settingStyle ?? "") as SettingStyle | "",
   style: (product.style ?? "") as RingStyle | "",
+  theme: (product.theme ?? "") as Theme | "",
+  occasion: (product.occasion ?? "") as Occasion | "",
+  color: (product.color ?? "") as Color | "",
+  features: (product.features ?? "") as Features | "",
+  bandWidth: product.bandWidth ?? "",
+  vintage: (product.vintage ?? "") as YesNo | "",
+  personalized: (product.personalized ?? "") as YesNo | "",
   department: (product.department ?? "") as Department | "",
   sizable: (product.sizable ?? "") as Sizable | "",
   countryRegionOfManufacture: product.countryRegionOfManufacture ?? "",
   certification: (product.certification ?? "") as Certification | "",
   certificationNumber: product.certificationNumber ?? "",
+  mpn: product.mpn ?? "",
+  upc: product.upc ?? "",
+  californiaProp65Warning: product.californiaProp65Warning ?? "",
   jewelleryType: product.jewelleryType ?? "",
   ringSize: product.ringSize ?? "",
   basePrice: product.basePrice,
