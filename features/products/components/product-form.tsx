@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useForm, type DefaultValues } from "react-hook-form";
 
 import { FormField } from "@/components/form-field";
+import { FormSection } from "@/components/form-section";
 import { NumberInput } from "@/components/number-input";
 import { Button } from "@/components/ui/button";
-import { FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CategoryAspectFields } from "@/features/products/components/category-aspect-fields";
@@ -99,57 +99,43 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
       onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
       className="flex w-full flex-col gap-8"
     >
-      <FieldSet>
-        <FieldLegend>Photos</FieldLegend>
+      <FormSection title="Photos">
         <ProductImagesField control={form.control} />
-      </FieldSet>
+      </FormSection>
 
-      <FieldSet>
-        <FormField
-          control={form.control}
-          name="title"
-          label="Title"
-          required
-          description="Up to 80 characters — lead with the details buyers search for."
-          render={(field) => (
-            <Input
-              placeholder="18ct Gold Diamond Ring"
-              maxLength={TITLE_MAX_LENGTH}
-              {...field}
-            />
-          )}
-        />
-      </FieldSet>
-
-      <FieldSet>
-        <FieldLegend>Category</FieldLegend>
-        <FieldGroup>
+      <FormSection title="Basics">
+        <div className="flex flex-col gap-5">
+          <FormField
+            control={form.control}
+            name="title"
+            label="Title"
+            required
+            description="Up to 80 characters — lead with the details buyers search for."
+            render={(field) => (
+              <Input
+                placeholder="18ct Gold Diamond Ring"
+                maxLength={TITLE_MAX_LENGTH}
+                {...field}
+              />
+            )}
+          />
           <CategorySelectField
             control={form.control}
             name="categoryId"
             label="eBay category"
             required
           />
-        </FieldGroup>
-      </FieldSet>
+        </div>
+      </FormSection>
 
       {categoryId !== "" ? (
-        <FieldSet>
-          <FieldLegend>Item specifics</FieldLegend>
-          <FieldGroup>
-            <CategoryAspectFields
-              control={form.control}
-              categoryId={categoryId}
-            />
-          </FieldGroup>
-        </FieldSet>
+        <CategoryAspectFields control={form.control} categoryId={categoryId} />
       ) : null}
 
-      <FieldSet>
+      <FormSection title="Description">
         <FormField
           control={form.control}
           name="description"
-          label="Description"
           render={(field) => (
             <Textarea
               placeholder="Describe the piece — materials, dimensions, hallmarks…"
@@ -158,36 +144,35 @@ export const ProductForm = ({ productId, initialValues }: ProductFormProps) => {
             />
           )}
         />
-      </FieldSet>
+      </FormSection>
 
-      <FieldSet>
-        <FieldLegend>Pricing & stock</FieldLegend>
-        <FieldGroup>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="basePrice"
-              label="Price (USD)"
-              required
-              render={(field) => (
-                <Input placeholder="0.00" inputMode="decimal" {...field} />
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="quantity"
-              label="Quantity"
-              required
-              render={(field) => <NumberInput placeholder="1" {...field} />}
-            />
-          </div>
-        </FieldGroup>
-      </FieldSet>
+      <FormSection title="Pricing & stock">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="basePrice"
+            label="Price (USD)"
+            required
+            render={(field) => (
+              <Input placeholder="0.00" inputMode="decimal" {...field} />
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="quantity"
+            label="Quantity"
+            required
+            render={(field) => <NumberInput placeholder="1" {...field} />}
+          />
+        </div>
+      </FormSection>
 
-      <FieldSet>
-        <FieldLegend>Additional item specifics</FieldLegend>
+      <FormSection
+        title="Additional item specifics"
+        description="Add any extra aspects beyond the ones above."
+      >
         <ProductAspectsField control={form.control} />
-      </FieldSet>
+      </FormSection>
 
       <div className="flex items-center justify-end gap-2">
         <Button

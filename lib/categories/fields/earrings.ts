@@ -1,3 +1,4 @@
+import { AspectGroup } from "@/lib/categories/aspect-group";
 import { type FieldDef, FieldInput } from "@/lib/categories/field-def";
 import {
   Certification,
@@ -22,108 +23,165 @@ import {
 } from "@/lib/enums/product-aspects";
 
 export const earringsFields: FieldDef[] = [
-  { aspect: "Brand", input: FieldInput.Text },
+  {
+    aspect: "Brand",
+    input: FieldInput.Text,
+    group: AspectGroup.Identification,
+  },
   {
     aspect: "Department",
     input: FieldInput.Enum,
+    group: AspectGroup.Identification,
     options: Object.values(Department),
   },
   {
     aspect: "Metal",
     input: FieldInput.Enum,
+    group: AspectGroup.Materials,
     options: Object.values(Metal),
     required: true,
   },
   {
     aspect: "Metal Purity",
     input: FieldInput.Enum,
+    group: AspectGroup.Materials,
     options: Object.values(MetalPurity),
   },
   {
     aspect: "Main Stone",
     input: FieldInput.Enum,
+    group: AspectGroup.Gemstones,
     options: Object.values(Stone),
     required: true,
   },
   {
     aspect: "Main Stone Creation",
     input: FieldInput.Enum,
+    group: AspectGroup.Gemstones,
     options: Object.values(MainStoneCreation),
   },
   {
     aspect: "Main Stone Treatment",
     input: FieldInput.Enum,
+    group: AspectGroup.Gemstones,
     options: Object.values(MainStoneTreatment),
   },
   {
     aspect: "Main Stone Color",
     input: FieldInput.Enum,
+    group: AspectGroup.Gemstones,
     options: Object.values(StoneColor),
   },
   {
     aspect: "Main Stone Shape",
     input: FieldInput.Enum,
+    group: AspectGroup.Gemstones,
     options: Object.values(StoneShape),
   },
-  { aspect: "Total Carat Weight", input: FieldInput.Text },
-  { aspect: "Number of Gemstones", input: FieldInput.Text },
+  {
+    aspect: "Total Carat Weight",
+    input: FieldInput.Text,
+    group: AspectGroup.Gemstones,
+  },
+  {
+    aspect: "Number of Gemstones",
+    input: FieldInput.Text,
+    group: AspectGroup.Gemstones,
+  },
   {
     aspect: "Cut Grade",
     input: FieldInput.Enum,
+    group: AspectGroup.Gemstones,
     options: Object.values(CutGrade),
   },
   {
     aspect: "Color Grade",
     input: FieldInput.Enum,
+    group: AspectGroup.Gemstones,
     options: Object.values(ColorGrade),
   },
   {
     aspect: "Clarity Grade",
     input: FieldInput.Enum,
+    group: AspectGroup.Gemstones,
     options: Object.values(ClarityGrade),
   },
   {
     aspect: "Secondary Stone",
     input: FieldInput.Enum,
+    group: AspectGroup.Gemstones,
     options: Object.values(Stone),
   },
   {
     aspect: "Certification",
     input: FieldInput.Enum,
+    group: AspectGroup.Certification,
     options: Object.values(Certification),
   },
-  { aspect: "Certification Number", input: FieldInput.Text },
-  { aspect: "Theme", input: FieldInput.Enum, options: Object.values(Theme) },
+  {
+    aspect: "Certification Number",
+    input: FieldInput.Text,
+    group: AspectGroup.Certification,
+  },
+  {
+    aspect: "Theme",
+    input: FieldInput.Enum,
+    group: AspectGroup.StyleDesign,
+    options: Object.values(Theme),
+  },
   {
     aspect: "Occasion",
     input: FieldInput.Enum,
+    group: AspectGroup.StyleDesign,
     options: Object.values(Occasion),
   },
-  { aspect: "Color", input: FieldInput.Enum, options: Object.values(Color) },
+  {
+    aspect: "Color",
+    input: FieldInput.Enum,
+    group: AspectGroup.StyleDesign,
+    options: Object.values(Color),
+  },
   {
     aspect: "Features",
     input: FieldInput.Enum,
+    group: AspectGroup.StyleDesign,
     options: Object.values(Features),
   },
-  { aspect: "Vintage", input: FieldInput.Enum, options: Object.values(YesNo) },
+  {
+    aspect: "Vintage",
+    input: FieldInput.Enum,
+    group: AspectGroup.StyleDesign,
+    options: Object.values(YesNo),
+  },
   {
     aspect: "Personalized",
     input: FieldInput.Enum,
+    group: AspectGroup.StyleDesign,
     options: Object.values(YesNo),
   },
-  { aspect: "Country/Region of Manufacture", input: FieldInput.Text },
-  { aspect: "MPN", input: FieldInput.Text },
-  { aspect: "UPC", input: FieldInput.Text },
-  { aspect: "California Prop 65 Warning", input: FieldInput.Text },
+  {
+    aspect: "Country/Region of Manufacture",
+    input: FieldInput.Text,
+    group: AspectGroup.Identification,
+  },
+  { aspect: "MPN", input: FieldInput.Text, group: AspectGroup.Identification },
+  { aspect: "UPC", input: FieldInput.Text, group: AspectGroup.Identification },
+  {
+    aspect: "California Prop 65 Warning",
+    input: FieldInput.Text,
+    group: AspectGroup.Identification,
+  },
   {
     aspect: "Earring Type",
     input: FieldInput.Enum,
+    group: AspectGroup.StyleDesign,
     options: Object.values(EarringType),
     required: true,
   },
   {
     aspect: "Fastening",
     input: FieldInput.Enum,
+    group: AspectGroup.StyleDesign,
     options: Object.values(Fastening),
   },
 ];
