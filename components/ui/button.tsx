@@ -1,6 +1,9 @@
+"use client"
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Loader2 } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
 import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
@@ -72,7 +75,20 @@ function Button({
         children
       ) : (
         <>
-          {loading && <Loader2 className="animate-spin" />}
+          <AnimatePresence mode="popLayout" initial={false}>
+            {loading ? (
+              <motion.span
+                key="spinner"
+                initial={{ opacity: 0, scale: 0, width: 0 }}
+                animate={{ opacity: 1, scale: 1, width: "auto" }}
+                exit={{ opacity: 0, scale: 0, width: 0 }}
+                transition={{ duration: 0.15, ease: "easeInOut" }}
+                className="inline-flex items-center justify-center overflow-hidden"
+              >
+                <Loader2 className="animate-spin" />
+              </motion.span>
+            ) : null}
+          </AnimatePresence>
           {children}
         </>
       )}
