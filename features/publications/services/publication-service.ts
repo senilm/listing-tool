@@ -2,6 +2,7 @@ import { and, asc, count, desc, eq, ilike, inArray } from "drizzle-orm";
 
 import { getAccountAccessToken } from "@/features/ebay-accounts/services/ebay-account-service";
 import { getProduct } from "@/features/products/services/product-service";
+import { recordAuditEvent } from "@/lib/audit/record-audit-event";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
@@ -9,6 +10,7 @@ import { publication } from "@/lib/db/schema/publication";
 import { ebayConfig } from "@/lib/ebay/config";
 import { buildEbaySku, publishListing } from "@/lib/ebay/listing";
 import { uploadImagesToEps } from "@/lib/ebay/media";
+import { AuditAction, AuditEntityType } from "@/lib/enums/audit-log";
 import { PublicationStatus } from "@/lib/enums/publication";
 import { EXPORT_ROW_LIMIT, type ExportResult } from "@/lib/export/types";
 import {
@@ -256,6 +258,17 @@ export const publishProductToAccounts = async ({
   };
   const results: PublishResult[] = [];
 
+  const accountIds = accounts.map((account) => account.accountId);
+  const accountLabelRows = accountIds.length
+    ? await db
+        .select({ id: ebayAccount.id, label: ebayAccount.label })
+        .from(ebayAccount)
+        .where(inArray(ebayAccount.id, accountIds))
+    : [];
+  const accountLabels = new Map(
+    accountLabelRows.map((row) => [row.id, row.label]),
+  );
+
   for (const account of accounts) {
     const { accountId } = account;
     const { snapshot, overriddenFields } = applyOverrides(
@@ -336,6 +349,20 @@ export const publishProductToAccounts = async ({
         publicationId: row.id,
         status: PublicationStatus.Published,
       });
+
+      await recordAuditEvent({
+        userId,
+        action: AuditAction.PublicationPublished,
+        entityType: AuditEntityType.Publication,
+        entityId: row.id,
+        summary: `Published “${snapshot.title}” to ${accountLabels.get(accountId) ?? "eBay account"}`,
+        metadata: {
+          productId,
+          accountId,
+          accountLabel: accountLabels.get(accountId) ?? null,
+          ebayListingId: result.listingId,
+        },
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Publish failed";
       const [row] = await db
@@ -352,6 +379,20 @@ export const publishProductToAccounts = async ({
         publicationId: row.id,
         status: PublicationStatus.Failed,
         error: message,
+      });
+
+      await recordAuditEvent({
+        userId,
+        action: AuditAction.PublicationFailed,
+        entityType: AuditEntityType.Publication,
+        entityId: row.id,
+        summary: `Failed to publish “${snapshot.title}” to ${accountLabels.get(accountId) ?? "eBay account"}`,
+        metadata: {
+          productId,
+          accountId,
+          accountLabel: accountLabels.get(accountId) ?? null,
+          error: message,
+        },
       });
     }
   }

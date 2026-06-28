@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 
+import * as auditLogSchema from "@/lib/db/schema/audit-log";
 import * as authSchema from "@/lib/db/schema/auth";
 import * as ebayAccountSchema from "@/lib/db/schema/ebay-account";
 import * as productSchema from "@/lib/db/schema/product";
@@ -19,6 +20,7 @@ const sql = neon(connectionString);
 export const db = drizzle({
   client: sql,
   schema: {
+    ...auditLogSchema,
     ...authSchema,
     ...ebayAccountSchema,
     ...productSchema,

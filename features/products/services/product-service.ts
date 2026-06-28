@@ -1,9 +1,12 @@
 import { and, asc, count, desc, eq, ilike, isNull } from "drizzle-orm";
 
+import { recordAuditEvent } from "@/lib/audit/record-audit-event";
 import { deleteManagedBlobs } from "@/lib/blob/cleanup";
+import { getChangedFields } from "@/lib/changed-fields";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
 import { product } from "@/lib/db/schema/product";
+import { AuditAction, AuditEntityType } from "@/lib/enums/audit-log";
 import { EXPORT_ROW_LIMIT, type ExportResult } from "@/lib/export/types";
 import { DEFAULT_CONDITION, type ProductInput } from "@/validations/product";
 
@@ -165,6 +168,16 @@ export const createProduct = async ({
     .insert(product)
     .values({ userId, ...toRowValues(input) })
     .returning({ id: product.id });
+
+  await recordAuditEvent({
+    userId,
+    action: AuditAction.ProductCreated,
+    entityType: AuditEntityType.Product,
+    entityId: row.id,
+    summary: `Created product “${input.title}”`,
+    metadata: { title: input.title },
+  });
+
   return row.id;
 };
 
@@ -189,6 +202,17 @@ export const updateProduct = async ({
     .returning({ id: product.id });
   if (result.length === 0) return false;
 
+  const changedFields = getChangedFields(existing, toRowValues(input));
+
+  await recordAuditEvent({
+    userId,
+    action: AuditAction.ProductUpdated,
+    entityType: AuditEntityType.Product,
+    entityId: id,
+    summary: `Updated product “${input.title}”`,
+    metadata: { title: input.title, changedFields },
+  });
+
   // Reclaim blobs removed from this product; the cron sweep backstops misses.
   const removed = (existing.images ?? []).filter(
     (url) => !input.images.includes(url),
@@ -203,6 +227,9 @@ export const deleteProduct = async ({
   id,
   userId,
 }: OwnedProduct): Promise<boolean> => {
+  const existing = await getProduct({ id, userId });
+  if (!existing) return false;
+
   const result = await db
     .update(product)
     .set({ deletedAt: new Date() })
@@ -214,5 +241,16 @@ export const deleteProduct = async ({
       ),
     )
     .returning({ id: product.id });
-  return result.length > 0;
+  if (result.length === 0) return false;
+
+  await recordAuditEvent({
+    userId,
+    action: AuditAction.ProductDeleted,
+    entityType: AuditEntityType.Product,
+    entityId: id,
+    summary: `Deleted product “${existing.title}”`,
+    metadata: { title: existing.title },
+  });
+
+  return true;
 };

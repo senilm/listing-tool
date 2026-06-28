@@ -1,9 +1,9 @@
 import { and, count, desc, eq, isNull, max, notExists } from "drizzle-orm";
 
 import {
-  listPublications,
-  type PublicationSummary,
-} from "@/features/publications/services/publication-service";
+  type AuditEventSummary,
+  listAuditEvents,
+} from "@/features/audit-log/services/audit-log-service";
 import { db } from "@/lib/db/client";
 import { ebayAccount } from "@/lib/db/schema/ebay-account";
 import { product } from "@/lib/db/schema/product";
@@ -27,7 +27,7 @@ export type DashboardStats = {
   accounts: { total: number; active: number; needsReconsent: number };
   publications: Record<PublicationStatus, number>;
   accountsSummary: AccountSummary[];
-  recent: PublicationSummary[];
+  recent: AuditEventSummary[];
 };
 
 const emptyPublicationCounts = (): Record<PublicationStatus, number> =>
@@ -102,7 +102,7 @@ export const getDashboardStats = async ({
       .where(and(eq(ebayAccount.userId, userId), isNull(ebayAccount.deletedAt)))
       .groupBy(ebayAccount.id, ebayAccount.label, ebayAccount.status)
       .orderBy(desc(count(publication.id))),
-    listPublications({ userId, page: 1, limit: RECENT_LIMIT }),
+    listAuditEvents({ userId, limit: RECENT_LIMIT }),
   ]);
 
   const accounts = { total: 0, active: 0, needsReconsent: 0 };
@@ -134,6 +134,6 @@ export const getDashboardStats = async ({
     accounts,
     publications,
     accountsSummary,
-    recent: recent.items,
+    recent,
   };
 };

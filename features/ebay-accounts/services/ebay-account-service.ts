@@ -1,5 +1,6 @@
 import { and, asc, count, desc, eq, ilike, inArray, isNull } from "drizzle-orm";
 
+import { recordAuditEvent } from "@/lib/audit/record-audit-event";
 import { decryptToken, encryptToken } from "@/lib/crypto/token-cipher";
 import { db } from "@/lib/db/client";
 import { likeContains } from "@/lib/db/like";
@@ -11,6 +12,7 @@ import {
 } from "@/lib/ebay/account-setup";
 import { EbayTokenError } from "@/lib/ebay/errors";
 import { refreshAccessToken } from "@/lib/ebay/oauth";
+import { AuditAction, AuditEntityType } from "@/lib/enums/audit-log";
 import { EbayAccountStatus } from "@/lib/enums/ebay-account";
 import { EXPORT_ROW_LIMIT, type ExportResult } from "@/lib/export/types";
 
@@ -195,17 +197,38 @@ export const linkEbayAccount = async (
           deletedAt: null,
         })
         .where(eq(ebayAccount.id, existing.id));
+
+      await recordAuditEvent({
+        userId: input.userId,
+        action: AuditAction.EbayAccountLinked,
+        entityType: AuditEntityType.EbayAccount,
+        entityId: existing.id,
+        summary: `Reconnected eBay account “${input.label}”`,
+        metadata: { label: input.label, reconnected: true },
+      });
       return;
     }
   }
 
-  await db.insert(ebayAccount).values({
+  const [row] = await db
+    .insert(ebayAccount)
+    .values({
+      userId: input.userId,
+      label: input.label,
+      ebayUserId: input.ebayUserId,
+      refreshToken,
+      refreshTokenExpiresAt: input.refreshTokenExpiresAt,
+      scopes: input.scopes,
+    })
+    .returning({ id: ebayAccount.id });
+
+  await recordAuditEvent({
     userId: input.userId,
-    label: input.label,
-    ebayUserId: input.ebayUserId,
-    refreshToken,
-    refreshTokenExpiresAt: input.refreshTokenExpiresAt,
-    scopes: input.scopes,
+    action: AuditAction.EbayAccountLinked,
+    entityType: AuditEntityType.EbayAccount,
+    entityId: row.id,
+    summary: `Connected eBay account “${input.label}”`,
+    metadata: { label: input.label, reconnected: false },
   });
 };
 
@@ -215,7 +238,7 @@ export const disconnectEbayAccount = async ({
   id,
   userId,
 }: OwnedAccount): Promise<boolean> => {
-  const result = await db
+  const [row] = await db
     .update(ebayAccount)
     .set({ deletedAt: new Date(), refreshToken: null })
     .where(
@@ -225,8 +248,19 @@ export const disconnectEbayAccount = async ({
         isNull(ebayAccount.deletedAt),
       ),
     )
-    .returning({ id: ebayAccount.id });
-  return result.length > 0;
+    .returning({ id: ebayAccount.id, label: ebayAccount.label });
+  if (!row) return false;
+
+  await recordAuditEvent({
+    userId,
+    action: AuditAction.EbayAccountDisconnected,
+    entityType: AuditEntityType.EbayAccount,
+    entityId: id,
+    summary: `Disconnected eBay account “${row.label}”`,
+    metadata: { label: row.label },
+  });
+
+  return true;
 };
 
 export const renameEbayAccount = async ({
@@ -234,7 +268,7 @@ export const renameEbayAccount = async ({
   userId,
   label,
 }: OwnedAccount & { label: string }): Promise<boolean> => {
-  const result = await db
+  const [row] = await db
     .update(ebayAccount)
     .set({ label })
     .where(
@@ -245,7 +279,18 @@ export const renameEbayAccount = async ({
       ),
     )
     .returning({ id: ebayAccount.id });
-  return result.length > 0;
+  if (!row) return false;
+
+  await recordAuditEvent({
+    userId,
+    action: AuditAction.EbayAccountRenamed,
+    entityType: AuditEntityType.EbayAccount,
+    entityId: id,
+    summary: `Renamed eBay account to “${label}”`,
+    metadata: { label },
+  });
+
+  return true;
 };
 
 // Mints a fresh, short-lived access token for one owned account. This is the

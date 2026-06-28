@@ -4,12 +4,12 @@ import Link from "next/link";
 import { TruncatedText } from "@/components/truncated-text";
 import { Typography } from "@/components/typography";
 import { Card, CardContent } from "@/components/ui/card";
-import { PublicationStatusBadge } from "@/features/publications/components/publication-status-badge";
-import { type PublicationSummary } from "@/features/publications/services/publication-service";
+import { AuditActionBadge } from "@/features/audit-log/components/audit-action-badge";
+import { type AuditEventSummary } from "@/features/audit-log/services/audit-log-service";
 import { publicationsRoute } from "@/lib/routes";
 
 type DashboardRecentActivityProps = {
-  items: PublicationSummary[];
+  items: AuditEventSummary[];
 };
 
 export const DashboardRecentActivity = ({
@@ -28,7 +28,7 @@ export const DashboardRecentActivity = ({
     <CardContent className="px-0 py-0">
       {items.length === 0 ? (
         <Typography variant="muted" className="px-4 py-6">
-          No publications yet. Publish a product to an eBay account to see it
+          No activity yet. Create a product or connect an account to see it
           here.
         </Typography>
       ) : (
@@ -40,14 +40,11 @@ export const DashboardRecentActivity = ({
             >
               <div className="flex min-w-0 flex-col gap-0.5">
                 <TruncatedText className="text-sm font-medium">
-                  {item.productTitle}
+                  {item.summary}
                 </TruncatedText>
-                <Typography variant="muted" className="truncate text-xs">
-                  {item.accountLabel}
-                </Typography>
               </div>
               <div className="flex shrink-0 items-center gap-3">
-                <PublicationStatusBadge status={item.status} />
+                <AuditActionBadge action={item.action} />
                 <span className="hidden w-30 text-right text-xs text-muted-foreground sm:inline">
                   {formatDistanceToNow(new Date(item.createdAt), {
                     addSuffix: true,
