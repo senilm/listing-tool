@@ -171,50 +171,11 @@ export const listPublicationsForExport = async (
 
 type ProductSource = NonNullable<Awaited<ReturnType<typeof getProduct>>>;
 
-const toListingAspects = (source: ProductSource): Record<string, string[]> => {
-  const dedicated: Record<string, string | null> = {
-    Brand: source.brand,
-    Metal: source.metal,
-    "Metal Purity": source.metalPurity,
-    "Main Stone": source.mainStone,
-    "Main Stone Creation": source.mainStoneCreation,
-    "Main Stone Treatment": source.mainStoneTreatment,
-    "Main Stone Color": source.mainStoneColor,
-    "Main Stone Shape": source.mainStoneShape,
-    "Total Carat Weight": source.totalCaratWeight,
-    "Number of Gemstones": source.numberOfGemstones,
-    "Cut Grade": source.cutGrade,
-    "Color Grade": source.colorGrade,
-    "Clarity Grade": source.clarityGrade,
-    "Secondary Stone": source.secondaryStone,
-    "Setting Style": source.settingStyle,
-    Style: source.style,
-    Theme: source.theme,
-    Occasion: source.occasion,
-    Color: source.color,
-    Features: source.features,
-    "Band Width": source.bandWidth,
-    Vintage: source.vintage,
-    Personalized: source.personalized,
-    Department: source.department,
-    Sizable: source.sizable,
-    "Country/Region of Manufacture": source.countryRegionOfManufacture,
-    Certification: source.certification,
-    "Certification Number": source.certificationNumber,
-    MPN: source.mpn,
-    UPC: source.upc,
-    "California Prop 65 Warning": source.californiaProp65Warning,
-    Type: source.jewelleryType,
-    "Ring Size": source.ringSize,
-  };
-
-  const aspects: Record<string, string[]> = { ...(source.aspects ?? {}) };
-  for (const [name, value] of Object.entries(dedicated)) {
-    const trimmed = value?.trim();
-    if (trimmed) aspects[name] = [trimmed];
-  }
-  return aspects;
-};
+// Item specifics already live in the aspects bag (keyed by eBay aspect name),
+// so publishing is a straight pass-through — no dedicated-column mapping.
+const toListingAspects = (source: ProductSource): Record<string, string[]> => ({
+  ...(source.aspects ?? {}),
+});
 
 export type PublishResult = {
   accountId: string;

@@ -13,6 +13,11 @@ import { user } from "@/lib/db/schema/auth";
 
 // The master listing. Stored once, then fanned out to many eBay accounts as
 // publications (each a full snapshot of these fields at publish time).
+//
+// Item-specific fields are NOT columns — they live in the `aspects` bag keyed by
+// eBay aspect name. Which fields a category exposes is defined by the category
+// registry (lib/categories), not the table. Only cross-cutting listing fields
+// are columns here.
 export const product = pgTable(
   "product",
   {
@@ -23,42 +28,9 @@ export const product = pgTable(
     title: text("title").notNull(),
     description: text("description"),
     condition: text("condition"),
-    brand: text("brand"),
-    metal: text("metal"),
-    metalPurity: text("metal_purity"),
-    mainStone: text("main_stone"),
-    mainStoneCreation: text("main_stone_creation"),
-    mainStoneTreatment: text("main_stone_treatment"),
-    mainStoneColor: text("main_stone_color"),
-    mainStoneShape: text("main_stone_shape"),
-    totalCaratWeight: text("total_carat_weight"),
-    numberOfGemstones: text("number_of_gemstones"),
-    cutGrade: text("cut_grade"),
-    colorGrade: text("color_grade"),
-    clarityGrade: text("clarity_grade"),
-    secondaryStone: text("secondary_stone"),
-    settingStyle: text("setting_style"),
-    style: text("style"),
-    theme: text("theme"),
-    occasion: text("occasion"),
-    color: text("color"),
-    features: text("features"),
-    bandWidth: text("band_width"),
-    vintage: text("vintage"),
-    personalized: text("personalized"),
-    department: text("department"),
-    sizable: text("sizable"),
-    countryRegionOfManufacture: text("country_region_of_manufacture"),
-    certification: text("certification"),
-    certificationNumber: text("certification_number"),
-    mpn: text("mpn"),
-    upc: text("upc"),
-    californiaProp65Warning: text("california_prop_65_warning"),
-    jewelleryType: text("jewellery_type"),
-    ringSize: text("ring_size"),
+    categoryId: text("category_id").notNull(),
     basePrice: numeric("base_price", { precision: 10, scale: 2 }).notNull(),
     currency: text("currency").notNull().default("USD"),
-    categoryId: text("category_id"),
     quantity: integer("quantity").notNull().default(1),
     images: jsonb("images").$type<string[]>(),
     aspects: jsonb("aspects").$type<Record<string, string[]>>(),

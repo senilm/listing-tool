@@ -14,12 +14,13 @@ type ProductAspectsFieldProps = {
   control: Control<ProductFormValues>;
 };
 
-// Item specifics (Metal → "Gold", Gemstone → "Diamond, Ruby"). Values are
-// entered comma-separated; the form mapper splits them into a string[].
+// Free-form item specifics beyond the category's registered fields (e.g. a
+// niche aspect eBay accepts). Values are entered comma-separated; the form
+// mapper splits them into a string[].
 export const ProductAspectsField = ({ control }: ProductAspectsFieldProps) => {
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "aspects",
+    name: "customAspects",
   });
 
   return (
@@ -35,13 +36,13 @@ export const ProductAspectsField = ({ control }: ProductAspectsFieldProps) => {
         <div key={field.id} className="flex items-start gap-2">
           <FormField
             control={control}
-            name={`aspects.${index}.name`}
+            name={`customAspects.${index}.name`}
             className="w-40 shrink-0"
             render={(formField) => <Input placeholder="Metal" {...formField} />}
           />
           <FormField
             control={control}
-            name={`aspects.${index}.values`}
+            name={`customAspects.${index}.values`}
             className="flex-1"
             render={(formField) => (
               <Input placeholder="Gold, White Gold" {...formField} />
