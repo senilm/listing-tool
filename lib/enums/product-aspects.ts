@@ -243,3 +243,56 @@ export enum YesNo {
   Yes = "Yes",
   No = "No",
 }
+
+export enum NecklaceType {
+  Chain = "Chain",
+  Pendant = "Pendant",
+  Choker = "Choker",
+  Collar = "Collar",
+  Lariat = "Lariat/Y-Necklace",
+  Beaded = "Beaded",
+  Statement = "Statement",
+  Locket = "Locket",
+  Charm = "Charm",
+  Pearl = "Pearl",
+  Station = "Station",
+}
+
+export enum ClaspType {
+  LobsterClaw = "Lobster Claw",
+  SpringRing = "Spring Ring",
+  Toggle = "Toggle",
+  Magnetic = "Magnetic",
+  Box = "Box",
+  HookAndEye = "Hook & Eye",
+  Barrel = "Barrel",
+  Fishhook = "Fishhook",
+  SHook = "S-Hook",
+  Slide = "Slide",
+}
+
+export enum EarringType {
+  Stud = "Stud",
+  Drop = "Drop",
+  Dangle = "Dangle",
+  Hoop = "Hoop",
+  Huggie = "Huggie",
+  Chandelier = "Chandelier",
+  EarClimber = "Ear Climber",
+  Threader = "Threader",
+  Cluster = "Cluster",
+  Jacket = "Jacket",
+}
+
+export enum Fastening {
+  PushBack = "Push Back",
+  ButterflyBack = "Butterfly Back",
+  LeverBack = "Lever Back",
+  ScrewBack = "Screw Back",
+  Hook = "Hook",
+  Hinged = "Hinged",
+  LatchBack = "Latch Back",
+  FishHook = "Fish Hook",
+  ClipOn = "Clip-On",
+  EarWire = "Ear Wire",
+}
