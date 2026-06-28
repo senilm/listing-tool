@@ -106,8 +106,10 @@ export const productFormSchema = z.object({
     .min(MIN_QUANTITY, "Quantity must be at least 1")
     .max(MAX_QUANTITY, "Quantity is too large"),
   images: z.array(imageFormSchema).max(MAX_IMAGES, IMAGES_MAX_MESSAGE),
-  // aspectName -> raw input value ("" when unset).
-  aspects: z.record(z.string(), z.string()),
+  // aspectName -> raw input value. Optional because dynamically-rendered fields
+  // start absent from the record (undefined) until first edited; the mappers and
+  // required-aspect check treat absent/empty the same.
+  aspects: z.record(z.string(), z.string().optional()),
   customAspects: z.array(customAspectFormSchema),
 });
 
@@ -118,7 +120,7 @@ export type ProductFormValues = z.infer<typeof productFormSchema>;
 // kept out of the Zod schema so it stays a plain object (clean resolver types).
 export const missingRequiredAspects = (
   categoryId: CategoryId,
-  aspects: Record<string, string>,
+  aspects: Record<string, string | undefined>,
 ): string[] =>
   CATEGORY_REGISTRY[categoryId].fields
     .filter((field) => field.required && !aspects[field.aspect]?.trim())
