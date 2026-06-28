@@ -8,14 +8,16 @@ type DataTableSkeletonProps = {
 
 export const DataTableSkeletonRows = ({
   columns,
-  rows = 11,
+  rows = 8,
 }: DataTableSkeletonProps) => (
   <>
     {Array.from({ length: rows }).map((_, rowIndex) => (
       <TableRow key={rowIndex}>
         {Array.from({ length: columns }).map((_, cellIndex) => (
           <TableCell key={cellIndex}>
-            <Skeleton className="h-5 w-full" />
+            <div className="flex h-8 items-center">
+              <Skeleton className="h-5 w-full" />
+            </div>
           </TableCell>
         ))}
       </TableRow>
