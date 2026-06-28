@@ -2,7 +2,7 @@
 
 import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Pencil, Trash2 } from "lucide-react";
+import { CopyPlus, Pencil, Trash2 } from "lucide-react";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { DataTableRowActions } from "@/components/data-table/data-table-row-actions";
@@ -21,12 +21,14 @@ const formatPrice = (amount: string, currency: string): string => {
 
 type ProductColumnHandlers = {
   onEdit: (product: ProductSummary) => void;
+  onSellSimilar: (product: ProductSummary) => void;
   onDelete: (product: ProductSummary) => void;
   onPublish: (product: ProductSummary) => void;
 };
 
 export const createProductColumns = ({
   onEdit,
+  onSellSimilar,
   onDelete,
   onPublish,
 }: ProductColumnHandlers): ColumnDef<ProductSummary>[] => [
@@ -93,6 +95,7 @@ export const createProductColumns = ({
         row={row.original}
         actions={[
           { label: "Edit", icon: Pencil, onSelect: onEdit },
+          { label: "Sell similar", icon: CopyPlus, onSelect: onSellSimilar },
           {
             label: "Delete",
             icon: Trash2,

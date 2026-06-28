@@ -9,7 +9,8 @@ export const registerRoute = () => "/register";
 export const dashboardRoute = () => "/dashboard";
 
 export const productsRoute = () => "/products";
-export const productCreateRoute = () => "/products/create";
+export const productCreateRoute = (fromId?: string) =>
+  fromId ? `/products/create?from=${fromId}` : "/products/create";
 export const productDetailRoute = (id: string) => `/products/${id}`;
 
 export const ebayAccountsRoute = () => "/ebay-accounts";

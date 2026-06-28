@@ -36,6 +36,7 @@ export const ProductsTable = () => {
     () =>
       createProductColumns({
         onEdit: (product) => router.push(productDetailRoute(product.id)),
+        onSellSimilar: (product) => router.push(productCreateRoute(product.id)),
         onDelete: (product) => setDeleteTarget(product),
         onPublish: (product) => setPublishTarget(product),
       }),
