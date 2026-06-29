@@ -29,6 +29,8 @@ export const ebayConfig = {
   clientId: process.env.EBAY_CLIENT_ID ?? "",
   clientSecret: process.env.EBAY_CLIENT_SECRET ?? "",
   ruName: process.env.EBAY_RU_NAME ?? "",
+  deletionVerificationToken: process.env.EBAY_DELETION_VERIFICATION_TOKEN ?? "",
+  deletionEndpointUrl: process.env.EBAY_DELETION_ENDPOINT_URL ?? "",
 };
 
 // Scope identifiers always use the api.ebay.com literal, even in sandbox.
